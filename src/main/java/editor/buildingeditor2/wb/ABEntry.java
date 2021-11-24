@@ -23,7 +23,7 @@ public class ABEntry {
         int fileSize = 0;
         for (ModelAnimation ma : files)
             fileSize += ma.getData().length;
-        return fileSize > 0 ? 0x20 + fileSize : 0x24;
+        return 0x24 + fileSize;
     }
 
     public int numFiles() {
@@ -46,5 +46,12 @@ public class ABEntry {
         if (index > 4 || index < 0)
             throw new Exception("Not a valid index.");
         files.remove(index);
+    }
+
+    public void replaceFile(int selectedIndex, ModelAnimation modelAnimation) throws Exception {
+        if (selectedIndex > numFiles()) {
+            throw new Exception("Invalid index.");
+        }
+        files.set(selectedIndex, modelAnimation);
     }
 }

@@ -3,12 +3,11 @@ package formats.imd.nodes;
 
 import formats.imd.ImdAttribute;
 import formats.imd.ImdNode;
-
-import java.util.ArrayList;
-
 import formats.imd.ImdTextureIndexed;
 import formats.nsbtx2.Nsbtx2;
 import formats.nsbtx2.NsbtxTexture;
+
+import java.util.ArrayList;
 
 /**
  * @author Trifindo

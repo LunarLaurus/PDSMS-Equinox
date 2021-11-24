@@ -1,7 +1,11 @@
 package editor.buildingeditor2.wb;
+
 import utils.BinaryWriter;
+
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class AB {
@@ -99,7 +103,7 @@ public class AB {
         }
 
         // Write fileSize
-        b.writeUInt32(base - 0x4);
+        b.writeUInt32(base);
 
         // Write AB entries.
         for (int i = 0; i < ABEntries.size(); ++i) {

@@ -17,7 +17,6 @@ import static com.jogamp.opengl.GL.*;
 import static com.jogamp.opengl.GL2ES1.GL_ALPHA_TEST;
 import static com.jogamp.opengl.GL2ES3.GL_QUADS;
 import static com.jogamp.opengl.GL2GL3.*;
-import static com.jogamp.opengl.GL2GL3.GL_FILL;
 
 public class CTileDisplay3D extends GLJPanel implements GLEventListener, MouseListener, MouseMotionListener, KeyListener, MouseWheelListener {
 

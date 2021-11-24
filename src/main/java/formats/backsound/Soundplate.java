@@ -3,7 +3,7 @@ package formats.backsound;
 
 import editor.grid.MapGrid;
 
-import java.awt.Rectangle;
+import java.awt.*;
 
 /**
  * @author Trifindo

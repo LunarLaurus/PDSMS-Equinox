@@ -1,18 +1,16 @@
 package formats.collisions;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-
-import editor.game.Game;
 import editor.handler.MapEditorHandler;
 import editor.state.CollisionLayerState;
-
-import java.awt.image.BufferedImage;
-import javax.swing.SwingUtilities;
-
 import utils.Utils;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseWheelEvent;
+import java.awt.image.BufferedImage;
 
 /**
  * @author Trifindo, JackHack96

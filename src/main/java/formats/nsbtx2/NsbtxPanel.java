@@ -1,18 +1,15 @@
 package formats.nsbtx2;
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.border.*;
-import javax.swing.event.*;
-
-import editor.buildingeditor2.tileset.*;
-
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import javax.swing.DefaultListModel;
-
+import editor.buildingeditor2.tileset.PaletteDisplay;
+import editor.buildingeditor2.tileset.TextureDisplay;
 import utils.Utils;
+
+import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 
 /**
  * @author Trifindo, JackHack96

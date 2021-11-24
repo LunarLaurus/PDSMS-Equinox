@@ -1,13 +1,13 @@
 
 package editor.buildingeditor2.animations;
 
+import utils.BinaryReader;
+import utils.BinaryWriter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import utils.BinaryReader;
-import utils.BinaryWriter;
 
 /**
  * @author Trifindo

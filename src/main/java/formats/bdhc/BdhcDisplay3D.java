@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static com.jogamp.opengl.GL.*;
-import static com.jogamp.opengl.GL.GL_GREATER;
 import static com.jogamp.opengl.GL2ES1.GL_ALPHA_TEST;
 import static com.jogamp.opengl.GL2ES3.GL_QUADS;
 import static com.jogamp.opengl.GL2GL3.GL_FILL;

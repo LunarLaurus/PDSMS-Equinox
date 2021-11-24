@@ -2,20 +2,24 @@ package formats.bdhc;
 
 import editor.game.Game;
 import editor.handler.MapEditorHandler;
-import net.miginfocom.swing.*;
+import net.miginfocom.swing.MigLayout;
 import utils.Utils;
 
+import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.SoftBevelBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.border.*;
-import javax.swing.event.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * @author Trifindo, JackHack96

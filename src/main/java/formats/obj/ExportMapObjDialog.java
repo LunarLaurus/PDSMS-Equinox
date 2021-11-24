@@ -1,12 +1,11 @@
 package formats.obj;
 
-import java.awt.*;
-import java.awt.event.*;
+import net.miginfocom.swing.MigLayout;
+
 import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
-import javax.swing.border.*;
-import net.miginfocom.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 
 /**
  * @author Trifindo, JackHack96

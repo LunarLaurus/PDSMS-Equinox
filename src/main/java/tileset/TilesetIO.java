@@ -3,22 +3,13 @@ package tileset;
 
 import editor.MainFrame;
 import editor.smartdrawing.SmartGrid;
+import utils.Utils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.imageio.ImageIO;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
-import javax.swing.*;
-
-import utils.Utils;
 
 /**
  * @author Trifindo

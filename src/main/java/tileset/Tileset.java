@@ -6,19 +6,15 @@ import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.util.awt.ImageUtil;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
-import editor.MainFrame;
 import editor.smartdrawing.SmartGrid;
+import utils.Utils;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import javax.imageio.ImageIO;
-import javax.swing.*;
-
-import utils.Utils;
 
 /**
  * @author Trifindo

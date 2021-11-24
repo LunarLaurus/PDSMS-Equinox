@@ -1,49 +1,36 @@
 package editor.tileseteditor;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.border.*;
-import javax.swing.event.*;
-
-import editor.smartdrawing.*;
-import editor.tileselector.*;
 import com.jogamp.opengl.GLContext;
-import tileset.TilesetRenderer;
 import editor.handler.MapEditorHandler;
-import formats.obj.ObjWriter;
 import editor.smartdrawing.SmartGrid;
 import editor.smartdrawing.SmartGridEditable;
+import editor.smartdrawing.SmartGridEditableDisplay;
+import editor.tileselector.TileSelector;
 import editor.vertexcolors.VColorEditorDialog;
+import formats.obj.ObjWriter;
+import net.miginfocom.swing.MigLayout;
+import tileset.*;
+import utils.Utils;
+import utils.swing.ThumbnailFileChooser;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Image;
+import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import net.miginfocom.swing.*;
-
-import tileset.*;
-import utils.swing.ThumbnailFileChooser;
-import utils.Utils;
 
 /**
  * @author Trifindo, JackHack96

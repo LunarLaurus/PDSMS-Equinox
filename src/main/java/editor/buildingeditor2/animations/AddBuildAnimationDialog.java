@@ -1,16 +1,16 @@
 package editor.buildingeditor2.animations;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.ArrayList;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
-import javax.swing.border.*;
-import javax.swing.event.*;
+import net.miginfocom.swing.MigLayout;
+import renderer.NitroDisplayGL;
+import renderer.ObjectGL;
 
-import net.miginfocom.swing.*;
-import renderer.*;
+import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 
 /**
  * @author Trifindo, JackHack96

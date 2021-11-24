@@ -1,12 +1,7 @@
 
 package utils.swing;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JCheckBox;
-import javax.swing.JScrollPane;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
-import java.awt.*;
+import javax.swing.*;
 
 /**
  * @author Trifindo

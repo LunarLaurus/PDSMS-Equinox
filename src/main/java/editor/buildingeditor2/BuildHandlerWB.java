@@ -106,6 +106,7 @@ public class BuildHandlerWB {
             ArrayList<Integer> fileOffsets = new ArrayList<>();
             int startABEntrySection = offsets.get(i) + 0x14;
             reader.jumpAbs(offsets.get(i));
+            System.out.println(offsets.get(i));
             ABEntry e = new ABEntry() {{
                     ID = (short) reader.readUInt16();
                     Count = (short) reader.readUInt16();

@@ -5,12 +5,11 @@ import com.jogamp.opengl.GL2;
 import graphicslib3D.Matrix3D;
 import graphicslib3D.Vector3D;
 
-import java.awt.Graphics;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import javax.swing.SwingUtilities;
 
 /**
  * @author Trifindo

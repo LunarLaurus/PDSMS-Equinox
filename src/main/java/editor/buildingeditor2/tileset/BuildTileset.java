@@ -1,11 +1,10 @@
 
 package editor.buildingeditor2.tileset;
 
-import java.io.FileNotFoundException;
+import utils.Utils;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import utils.Utils;
 
 /**
  * @author Trifindo

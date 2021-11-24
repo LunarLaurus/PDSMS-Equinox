@@ -1,22 +1,22 @@
 
 package editor.converter;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
-
 import editor.handler.MapData;
 import editor.handler.MapEditorHandler;
-import formats.nsbtx2.*;
 import formats.nsbtx2.Nsbtx2;
 import formats.nsbtx2.NsbtxImd;
+import formats.nsbtx2.NsbtxPanel;
+import tileset.TilesetMaterial;
+import utils.Utils;
 
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.font.TextAttribute;
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,15 +28,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-
-import tileset.TilesetMaterial;
-import utils.Utils;
 
 /**
  * @author Trifindo

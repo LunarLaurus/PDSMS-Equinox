@@ -1,13 +1,13 @@
 
 package formats.animationeditor;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-
 import utils.BinaryReader;
 import utils.BinaryWriter;
 import utils.Utils;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * @author Trifindo

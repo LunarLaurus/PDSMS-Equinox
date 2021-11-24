@@ -1,14 +1,5 @@
 package editor.buildingeditor2;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.border.*;
-import javax.swing.event.*;
-
-import formats.nsbtx2.*;
-import net.miginfocom.swing.*;
 import editor.buildingeditor2.animations.AddBuildAnimationDialog;
 import editor.buildingeditor2.animations.BuildAnimInfoHGSS;
 import editor.buildingeditor2.animations.ModelAnimation;
@@ -18,40 +9,8 @@ import editor.buildingeditor2.areadata.AreaDataHGSS;
 import editor.buildingeditor2.buildfile.Build;
 import editor.buildingeditor2.buildfile.BuildFile;
 import editor.handler.MapEditorHandler;
-import formats.nsbtx2.Nsbtx2;
-import formats.nsbtx2.NsbtxLoader2;
-import formats.nsbtx2.NsbtxPalette;
-import formats.nsbtx2.NsbtxTexture;
-import formats.nsbtx2.NsbtxWriter;
-
-import java.awt.Color;
-
-import utils.Utils.MutableBoolean;
-
-import java.awt.Component;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
+import formats.nsbtx2.*;
+import net.miginfocom.swing.MigLayout;
 import nitroreader.nsbca.NSBCA;
 import nitroreader.nsbca.NSBCAreader;
 import nitroreader.nsbta.NSBTA;
@@ -63,6 +22,25 @@ import nitroreader.shared.G3Dheader;
 import renderer.NitroDisplayGL;
 import renderer.ObjectGL;
 import utils.Utils;
+import utils.Utils.MutableBoolean;
+
+import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Trifindo, JackHack96

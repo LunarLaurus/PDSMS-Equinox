@@ -1,13 +1,7 @@
 package formats.nsbtx2;
 
 import javax.swing.*;
-import javax.swing.GroupLayout;
-
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 

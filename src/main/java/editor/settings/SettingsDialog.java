@@ -1,12 +1,12 @@
 package editor.settings;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.Objects;
-import javax.swing.*;
-
 import editor.MainFrame;
-import net.miginfocom.swing.*;
+import net.miginfocom.swing.MigLayout;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.Objects;
 
 /**
  * @author Trifindo, JackHack96

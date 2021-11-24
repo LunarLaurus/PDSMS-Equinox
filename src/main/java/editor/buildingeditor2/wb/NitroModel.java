@@ -2,7 +2,6 @@ package editor.buildingeditor2.wb;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
 
 public class NitroModel {
     private ByteBuffer buf;

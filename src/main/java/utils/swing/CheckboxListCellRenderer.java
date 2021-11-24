@@ -1,10 +1,8 @@
 
 package utils.swing;
 
-import java.awt.Component;
-import javax.swing.JCheckBox;
-import javax.swing.JList;
-import javax.swing.ListCellRenderer;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Trifindo

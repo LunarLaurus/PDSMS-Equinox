@@ -4,9 +4,10 @@
 
 package formats.bdhcam;
 
-import java.awt.*;
+import net.miginfocom.swing.MigLayout;
+
 import javax.swing.*;
-import net.miginfocom.swing.*;
+import java.awt.*;
 
 /**
  * @author Truck

@@ -1,41 +1,27 @@
 
 package formats.imd;
 
-import formats.imd.nodes.Body;
-import formats.imd.nodes.BoxTest;
-import formats.imd.nodes.Head;
-import formats.imd.nodes.Material;
-import formats.imd.nodes.ModelInfo;
-import formats.imd.nodes.Node;
 import formats.imd.nodes.Polygon;
-import formats.imd.nodes.Primitive;
-import formats.imd.nodes.TexImage;
-import formats.imd.nodes.TexPalette;
-
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import javax.imageio.ImageIO;
-
+import formats.imd.nodes.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import tileset.Face;
 import tileset.NormalsNotFoundException;
 import tileset.TextureNotFoundException;
+import tileset.TilesetMaterial;
 import utils.Utils;
 
-import javax.xml.parsers.*;
+import javax.imageio.ImageIO;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
-
-import org.w3c.dom.*;
-import tileset.TilesetMaterial;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.ArrayList;
 
 /**
  * @author Trifindo

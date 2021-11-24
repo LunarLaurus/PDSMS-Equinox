@@ -3,8 +3,6 @@ package geometry;
 
 import java.util.ArrayList;
 
-import tileset.Tile;
-
 /**
  * @author Trifindo
  */

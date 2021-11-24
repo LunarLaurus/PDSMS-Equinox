@@ -1,19 +1,14 @@
 package editor.mapmatrix;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
-import javax.swing.border.*;
-
 import editor.handler.MapData;
 import editor.handler.MapEditorHandler;
 
-import java.awt.Point;
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.HashMap;
-import javax.swing.JOptionPane;
 
 /**
  * @author Trifindo, JackHack96

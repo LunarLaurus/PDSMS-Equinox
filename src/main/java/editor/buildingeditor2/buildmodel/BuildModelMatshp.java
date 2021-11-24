@@ -1,13 +1,13 @@
 
 package editor.buildingeditor2.buildmodel;
 
+import utils.BinaryReader;
+import utils.BinaryWriter;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-
-import utils.BinaryReader;
-import utils.BinaryWriter;
 
 /**
  * @author Trifindo

@@ -1,20 +1,17 @@
 package editor.tileseteditor;
 
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import java.awt.Color;
-import java.awt.Desktop;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import javax.swing.JOptionPane;
-
 import tileset.Tile;
 import tileset.Tileset;
 import utils.Utils;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author Trifindo, JackHack96

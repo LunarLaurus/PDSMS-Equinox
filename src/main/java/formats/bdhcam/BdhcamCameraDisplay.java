@@ -6,12 +6,12 @@ import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.awt.ImageUtil;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
-import formats.bdhcam.camplate.CameraSettings;
 import editor.grid.GeometryGL;
 import editor.grid.MapGrid;
 import editor.grid.MapLayerGL;
 import editor.handler.MapData;
 import editor.handler.MapEditorHandler;
+import formats.bdhcam.camplate.CameraSettings;
 import utils.Utils;
 
 import java.awt.*;
@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static com.jogamp.opengl.GL.*;
-import static com.jogamp.opengl.GL.GL_NOTEQUAL;
 import static com.jogamp.opengl.GL2ES1.GL_ALPHA_TEST;
 import static com.jogamp.opengl.GL2ES3.GL_QUADS;
 

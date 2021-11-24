@@ -1,7 +1,7 @@
 
 package utils.image;
 
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * @author Trifindo

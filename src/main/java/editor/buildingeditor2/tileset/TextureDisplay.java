@@ -1,7 +1,6 @@
 package editor.buildingeditor2.tileset;
 
 import javax.swing.*;
-import javax.swing.GroupLayout;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 

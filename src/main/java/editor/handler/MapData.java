@@ -1,15 +1,14 @@
 
 package editor.handler;
 
+import editor.buildingeditor2.buildfile.BuildFile;
+import editor.grid.MapGrid;
 import formats.backsound.Backsound;
 import formats.bdhc.Bdhc;
-import editor.buildingeditor2.buildfile.BuildFile;
 import formats.bdhcam.Bdhcam;
 import formats.collisions.Collisions;
-import editor.grid.MapGrid;
 
-import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /**

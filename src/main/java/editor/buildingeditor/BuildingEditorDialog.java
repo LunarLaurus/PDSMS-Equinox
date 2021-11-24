@@ -1,19 +1,17 @@
 package editor.buildingeditor;
 
 import editor.handler.MapEditorHandler;
-import net.miginfocom.swing.*;
+import net.miginfocom.swing.MigLayout;
 import utils.Utils;
 
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
-import javax.swing.border.*;
-import javax.swing.event.*;
 
 /**
  * @author Trifindo, JackHack96

@@ -1,16 +1,15 @@
 
 package formats.imd;
 
+import tileset.TilesetMaterial;
+import utils.image.Clusterer;
 import utils.image.FastColor;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.TreeSet;
-
-import tileset.TilesetMaterial;
-import utils.image.Clusterer;
 
 /**
  * @author Trifindo

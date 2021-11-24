@@ -1,14 +1,10 @@
 package editor.tileseteditor;
 
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-
-import tileset.Tile;
 import tileset.TilesetMaterial;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 
 /**
  * @author Trifindo, JackHack96

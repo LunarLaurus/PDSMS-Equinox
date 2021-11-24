@@ -2,11 +2,13 @@ package formats.bdhc;
 
 import editor.handler.MapEditorHandler;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import javax.swing.*;
-import javax.swing.GroupLayout;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseWheelEvent;
+import java.awt.image.BufferedImage;
 
 /**
  * @author Trifindo, JackHack96

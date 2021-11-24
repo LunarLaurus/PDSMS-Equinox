@@ -1,7 +1,7 @@
 package formats.bdhcam.animation;
 
-import formats.bdhcam.BdhcamHandler;
 import editor.handler.MapEditorHandler;
+import formats.bdhcam.BdhcamHandler;
 
 public abstract class CamAnimator extends Thread{
 

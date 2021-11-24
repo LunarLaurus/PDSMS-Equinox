@@ -4,11 +4,10 @@ package editor.tileseteditor;
 import editor.handler.MapData;
 import editor.handler.MapEditorHandler;
 import editor.smartdrawing.SmartGrid;
-
-import java.awt.Color;
-
 import tileset.Tileset;
 import tileset.TilesetMaterial;
+
+import java.awt.*;
 
 /**
  * @author Trifindo

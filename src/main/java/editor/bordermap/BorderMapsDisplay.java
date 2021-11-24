@@ -5,13 +5,14 @@ import tileset.NormalsNotFoundException;
 import tileset.TextureNotFoundException;
 import tileset.Tile;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.io.File;
 import java.io.IOException;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * @author Trifindo, JackHack96

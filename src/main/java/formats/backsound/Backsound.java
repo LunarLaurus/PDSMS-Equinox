@@ -1,14 +1,13 @@
 
 package formats.backsound;
 
+import utils.BinaryReader;
+import utils.BinaryWriter;
 import utils.exceptions.WrongFormatException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-
-import utils.BinaryReader;
-import utils.BinaryWriter;
 
 /**
  * @author Trifindo

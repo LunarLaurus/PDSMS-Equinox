@@ -1,25 +1,20 @@
 package editor.gameselector;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
-import javax.swing.border.*;
-
-import tileset.TilesetRenderer;
 import editor.game.Game;
 import editor.handler.MapEditorHandler;
 import editor.smartdrawing.SmartGrid;
-
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import javax.swing.ImageIcon;
-
 import tileset.TextureNotFoundException;
 import tileset.Tileset;
 import tileset.TilesetIO;
+import tileset.TilesetRenderer;
 import utils.Utils;
+
+import javax.swing.*;
+import javax.swing.border.SoftBevelBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 
 /**

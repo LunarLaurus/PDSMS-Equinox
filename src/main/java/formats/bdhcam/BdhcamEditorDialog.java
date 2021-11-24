@@ -4,24 +4,23 @@
 
 package formats.bdhcam;
 
-import java.awt.event.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
-
-import formats.bdhcam.camplate.*;
 import editor.handler.MapEditorHandler;
+import formats.bdhcam.camplate.*;
+import net.miginfocom.swing.MigLayout;
 
+import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
-
-import net.miginfocom.swing.*;
 
 /**
  * @author Trifindo

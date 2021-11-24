@@ -1,10 +1,10 @@
 
 package formats.narc2;
 
+import utils.Utils.MutableInt;
+
 import java.io.File;
 import java.util.ArrayList;
-
-import utils.Utils.MutableInt;
 
 public class Narc {
 

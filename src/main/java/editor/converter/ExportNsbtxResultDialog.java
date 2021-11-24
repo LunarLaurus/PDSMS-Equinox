@@ -1,13 +1,11 @@
 
 package editor.converter;
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
-
-import formats.nsbtx2.*;
 import formats.nsbtx2.Nsbtx2;
+import formats.nsbtx2.NsbtxPanel;
+
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Trifindo

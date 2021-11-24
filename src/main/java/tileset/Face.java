@@ -1,9 +1,9 @@
 
 package tileset;
 
-import java.util.ArrayList;
-
 import utils.Utils;
+
+import java.util.ArrayList;
 
 /**
  * @author Trifindo

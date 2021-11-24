@@ -2,51 +2,33 @@
 package editor.mapmatrix;
 
 import com.jogamp.common.nio.Buffers;
-import formats.backsound.Backsound;
-import formats.bdhc.Bdhc;
-import formats.bdhc.BdhcLoaderDP;
-import formats.bdhc.BdhcLoaderHGSS;
-import formats.bdhc.BdhcWriterDP;
-import formats.bdhc.BdhcWriterHGSS;
 import editor.buildingeditor2.buildfile.BuildFile;
-import formats.bdhcam.Bdhcam;
-import formats.bdhcam.BdhcamLoader;
-import formats.bdhcam.BdhcamWriter;
-import formats.collisions.Collisions;
 import editor.game.Game;
 import editor.grid.MapGrid;
 import editor.handler.MapData;
 import editor.handler.MapEditorHandler;
+import formats.backsound.Backsound;
+import formats.bdhc.*;
+import formats.bdhcam.Bdhcam;
+import formats.bdhcam.BdhcamLoader;
+import formats.bdhcam.BdhcamWriter;
+import formats.collisions.Collisions;
 import formats.obj.ObjWriter;
+import tileset.TextureNotFoundException;
+import tileset.Tile;
+import tileset.Tileset;
+import tileset.TilesetIO;
+import utils.Utils;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-
-import tileset.TextureNotFoundException;
-import tileset.Tile;
-import tileset.Tileset;
-import tileset.TilesetIO;
-import utils.Utils;
 
 /**
  * @author Trifindo

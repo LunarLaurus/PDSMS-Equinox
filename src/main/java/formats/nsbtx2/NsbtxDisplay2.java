@@ -1,11 +1,7 @@
 package formats.nsbtx2;
 
 import javax.swing.*;
-import javax.swing.GroupLayout;
-
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /**

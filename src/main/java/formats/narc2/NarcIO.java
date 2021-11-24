@@ -1,17 +1,16 @@
 
 package formats.narc2;
 
+import utils.BinaryReader;
+import utils.BinaryWriter;
+import utils.Utils.MutableInt;
+import utils.Utils.MutableLong;
 import utils.exceptions.WrongFormatException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import utils.BinaryReader;
-import utils.BinaryWriter;
-import utils.Utils.MutableInt;
-import utils.Utils.MutableLong;
 
 public class NarcIO {
 

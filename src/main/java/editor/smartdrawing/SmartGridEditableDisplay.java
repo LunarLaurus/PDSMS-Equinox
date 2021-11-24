@@ -1,25 +1,16 @@
 package editor.smartdrawing;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-
 import editor.grid.MapGrid;
 import editor.handler.MapEditorHandler;
+import tileset.Tile;
+import utils.Utils;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
-
-import tileset.Tile;
-import utils.Utils;
 
 /**
  * @author Trifindo, JackHack96

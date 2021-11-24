@@ -1,27 +1,22 @@
 package formats.collisions;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.border.*;
-import javax.swing.event.*;
-
 import editor.game.Game;
 import editor.handler.MapEditorHandler;
 import editor.state.CollisionLayerState;
 import editor.state.StateHandler;
+import net.miginfocom.swing.MigLayout;
+import utils.Utils;
 
+import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import net.miginfocom.swing.*;
-import utils.Utils;
 
 /**
  * @author Trifindo, JackHack96

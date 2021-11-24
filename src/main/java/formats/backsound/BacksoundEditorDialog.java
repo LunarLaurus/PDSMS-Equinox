@@ -1,10 +1,10 @@
 package formats.backsound;
 
-import utils.exceptions.WrongFormatException;
 import editor.handler.MapEditorHandler;
-import utils.sound.SoundPlayer;
 import net.miginfocom.swing.MigLayout;
 import utils.Utils;
+import utils.exceptions.WrongFormatException;
+import utils.sound.SoundPlayer;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;

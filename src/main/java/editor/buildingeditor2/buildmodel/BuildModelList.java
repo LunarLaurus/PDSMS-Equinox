@@ -4,15 +4,14 @@ package editor.buildingeditor2.buildmodel;
 import formats.narc2.Narc;
 import formats.narc2.NarcFile;
 import formats.narc2.NarcFolder;
+import utils.BinaryReader;
+import utils.Utils;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-
-import utils.BinaryReader;
-import utils.Utils;
 
 /**
  * @author Trifindo

@@ -1,29 +1,28 @@
 
 package editor.buildingeditor2;
 
-import editor.buildingeditor2.buildmodel.BuildModelMatshp;
-import editor.buildingeditor2.buildmodel.BuildModelList;
 import editor.buildingeditor2.animations.BuildAnimations;
 import editor.buildingeditor2.animations.BuildAnimeListDPPt;
 import editor.buildingeditor2.areabuild.AreaBuild;
 import editor.buildingeditor2.areabuild.AreaBuildList;
 import editor.buildingeditor2.areadata.AreaDataListDPPt;
+import editor.buildingeditor2.buildmodel.BuildModelList;
+import editor.buildingeditor2.buildmodel.BuildModelMatshp;
 import editor.buildingeditor2.tileset.BuildTileset;
 import editor.buildingeditor2.tileset.BuildTilesetList;
 import editor.game.GameFileSystemDPPt;
 import formats.narc2.Narc;
 import formats.narc2.NarcIO;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import nitroreader.nsbmd.NSBMD;
 import nitroreader.nsbmd.sbccommands.MAT;
 import nitroreader.nsbmd.sbccommands.SBCCommand;
 import nitroreader.nsbmd.sbccommands.SHP;
 import utils.Utils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Trifindo

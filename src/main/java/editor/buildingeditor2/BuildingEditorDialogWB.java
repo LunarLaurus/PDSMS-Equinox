@@ -308,7 +308,7 @@ public class BuildingEditorDialogWB extends JDialog {
     }
 
     private void jlBuildFileValueChanged(ListSelectionEvent e) {
-        if (jlBuildFile.getSelectedIndex() != -1) {
+        if (jlBuildFile.getSelectedIndex() > -1) {
             buildPropertiesEnabled.value = false;
             currEntry = jlBuildFile.getSelectedIndex();
             WBBuildingEntry entry = buildHandler.getBuildingList().get(currEntry);
@@ -325,28 +325,27 @@ public class BuildingEditorDialogWB extends JDialog {
 
     private void jlBuildModelValueChanged(ListSelectionEvent e) {
         if (jlBuildModelEnabled.value) {
-            updateViewSelectedBuildAnimationsList(jlBuildModel.getSelectedIndex());
             loadCurrentNsbmd();
+            updateViewSelectedBuildAnimationsList(jlBuildModel.getSelectedIndex());
             nitroDisplayGL.fitCameraToModel(0);
             nitroDisplayGL.requestUpdate();
         }
     }
 
     public void loadCurrentNsbmd() {
-        try {
+        if (jlBuildModel.getSelectedIndex() > -1) {
             byte[] data = currAB.getModel(jlBuildModel.getSelectedIndex()).getData();
             nitroDisplayGL.getObjectGL(0).setNsbmdData(data);
             nitroDisplayGL.getObjectGL(0).setNsbca(null);
             nitroDisplayGL.getObjectGL(0).setNsbtp(null);
             nitroDisplayGL.getObjectGL(0).setNsbta(null);
             nitroDisplayGL.getObjectGL(0).setNsbva(null);
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
     }
 
     private void updateViewSelectedBuildAnimationsList(int indexSelected) {
         jcbAnimationTypeEnabled.value = false;
+        animationList.clear();
         ABEntry entry = currAB.getABEntryByID(currAB.getModelToID(indexSelected));
         DefaultListModel m = new DefaultListModel();
         for (int i = 0; i < entry.numFiles(); ++i) {
@@ -445,9 +444,56 @@ public class BuildingEditorDialogWB extends JDialog {
     }
 
     private void jbReplaceAnimToBuildActionPerformed(ActionEvent e) {
-        // TODO add your code here
+        if (jlSelectedAnimationsList.getSelectedIndex() > -1) {
+            final JFileChooser fc = new JFileChooser();
+            if (handler.getLastMapDirectoryUsed() != null) {
+                fc.setCurrentDirectory(new File(handler.getLastMapDirectoryUsed()));
+            }
+            fc.setFileFilter(new FileNameExtensionFilter("Animation File (*.nsbta, *.nsbtp, *.nsbca)", "nsbta, nsbtp, nsbca"));
+            fc.setApproveButtonText("Open");
+            fc.setDialogTitle("Load model");
+            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    handler.setLastMapDirectoryUsed(fc.getSelectedFile().getParent());
+                    currAB.getABEntry(jlBuildModel.getSelectedIndex()).replaceFile(jlSelectedAnimationsList.getSelectedIndex(), new ModelAnimation(Files.readAllBytes(fc.getSelectedFile().toPath()), jlSelectedAnimationsList.getSelectedIndex()));
+                    loadCurrentNsbmd();
+                    updateViewSelectedBuildAnimationsList(jlBuildModel.getSelectedIndex());
+                    updateBuildingPack();
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this,
+                            "There was an issue while replacing the model.",
+                            "Cannot import model", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                }
+            }
+        }
     }
 
+    private void jbExportAnim(ActionEvent e) {
+        if (jlSelectedAnimationsList.getSelectedIndex() > -1) {
+            final JFileChooser fc = new JFileChooser();
+            if (handler.getLastMapDirectoryUsed() != null) {
+                fc.setCurrentDirectory(new File(handler.getLastMapDirectoryUsed()));
+            }
+            fc.setFileFilter(new FileNameExtensionFilter("NSBMD (*.nsbmd)", "nsbmd"));
+            fc.setApproveButtonText("Save");
+            fc.setDialogTitle("Save Model");
+            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    handler.setLastMapDirectoryUsed(fc.getSelectedFile().getParent());
+                    byte[] buf = currAB.getABEntry(jlBuildModel.getSelectedIndex()).getFile(jlSelectedAnimationsList.getSelectedIndex()).getData();
+                    try (FileOutputStream fos = new FileOutputStream(fc.getSelectedFile())) {
+                        fos.write(buf);
+                    } catch (Exception ex) {
+                        throw new IOException();
+                    }
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(this, "There was a problem writing to the BLD file.",
+                            "Error writing model.", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+    }
     private void jbRemoveAnimToBuildActionPerformed(ActionEvent e) {
         // TODO add your code here
     }
