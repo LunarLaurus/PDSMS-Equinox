@@ -4,27 +4,13 @@
 
 package editor.buildingeditor2;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import editor.buildingeditor2.animations.ModelAnimation;
 import editor.buildingeditor2.buildfile.BuildFile;
 import editor.buildingeditor2.wb.*;
 import editor.handler.MapEditorHandler;
-import net.miginfocom.swing.*;
+import net.miginfocom.swing.MigLayout;
 import nitroreader.nsbca.NSBCA;
 import nitroreader.nsbca.NSBCAreader;
-import nitroreader.nsbmd.NSBMD;
-import nitroreader.nsbmd.NSBMDreader;
 import nitroreader.nsbta.NSBTA;
 import nitroreader.nsbta.NSBTAreader;
 import nitroreader.nsbtp.NSBTP;
@@ -32,6 +18,20 @@ import nitroreader.nsbtp.NSBTPreader;
 import nitroreader.shared.ByteReader;
 import renderer.*;
 import utils.Utils;
+
+import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
 
 /**
  * @author PlatinumMaster
@@ -559,7 +559,7 @@ public class BuildingEditorDialogWB extends JDialog {
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Building Editor for Generation V (Experimental)");
         setModal(true);
-        var contentPane = getContentPane();
+        Container contentPane = getContentPane();
         contentPane.setLayout(new MigLayout(
             "insets 0,hidemode 3,gap 5 5",
             // columns
