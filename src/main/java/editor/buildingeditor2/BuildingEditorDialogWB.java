@@ -9,14 +9,14 @@ import editor.buildingeditor2.buildfile.BuildFile;
 import editor.buildingeditor2.wb.*;
 import editor.handler.MapEditorHandler;
 import net.miginfocom.swing.MigLayout;
-import nitroreader.nsbca.NSBCA;
 import nitroreader.nsbca.NSBCAreader;
 import nitroreader.nsbta.NSBTA;
 import nitroreader.nsbta.NSBTAreader;
 import nitroreader.nsbtp.NSBTP;
 import nitroreader.nsbtp.NSBTPreader;
 import nitroreader.shared.ByteReader;
-import renderer.*;
+import renderer.NitroDisplayGL;
+import renderer.ObjectGL;
 import utils.Utils;
 
 import javax.swing.*;
@@ -479,9 +479,10 @@ public class BuildingEditorDialogWB extends JDialog {
     }
 
     private void loadAnimationInNitroDisplay(NitroDisplayGL display, int objectIndex, ModelAnimation anim) {
+        System.out.println(anim.getName());
         if (anim.getAnimationType() == ModelAnimation.TYPE_NSBCA) {
             NSBCAreader reader = new NSBCAreader(new ByteReader(anim.getData()));
-            display.getObjectGL(objectIndex).setNsbca((NSBCA) reader.readFile());
+            display.getObjectGL(objectIndex).setNsbca(reader.readFile());
             display.requestUpdate();
         } else if (anim.getAnimationType() == ModelAnimation.TYPE_NSBTA) {
             NSBTAreader reader = new NSBTAreader(new ByteReader(anim.getData()));

@@ -5,12 +5,7 @@ import editor.buildingeditor2.wb.*;
 import editor.game.GameFileSystemB2W2;
 import formats.narc2.Narc;
 import formats.narc2.NarcFile;
-import formats.nsbtx2.Nsbtx2;
-import formats.nsbtx2.NsbtxLoader2;
 import formats.narc2.NarcIO;
-import nitroreader.nsbtx.NSBTX;
-import nitroreader.nsbtx.NSBTXreader;
-import nitroreader.shared.ByteReader;
 import utils.BinaryArrayReader;
 import utils.BinaryReader;
 
@@ -18,7 +13,9 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author PlatinumMaster

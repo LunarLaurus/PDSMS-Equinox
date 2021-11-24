@@ -2,15 +2,14 @@
 package editor.buildingeditor2.animations;
 
 import editor.buildingeditor2.NamedFile;
+import utils.BinaryReader;
+import utils.Utils;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-
-import utils.BinaryReader;
-import utils.Utils;
 
 /**
  * @author Trifindo

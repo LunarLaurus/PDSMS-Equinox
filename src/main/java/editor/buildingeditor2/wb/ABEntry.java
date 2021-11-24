@@ -1,7 +1,6 @@
 package editor.buildingeditor2.wb;
 
 import editor.buildingeditor2.animations.ModelAnimation;
-import nitroreader.nsbmd.NSBMD;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,7 @@ public class ABEntry {
         int fileSize = 0;
         for (ModelAnimation ma : files)
             fileSize += ma.getData().length;
-        return 0x24 + fileSize;
+        return fileSize > 0 ? 0x20 + fileSize : 0x24;
     }
 
     public int numFiles() {

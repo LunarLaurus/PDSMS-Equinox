@@ -83,23 +83,23 @@ public class AB {
 
     public void Serialize(String output) throws IOException {
         BinaryWriter b = new BinaryWriter(output);
-        int base = (ABEntries.size() * 4) + (Models.size() * 4) + 4;
+        int base = 0x8 + 0x4 * (ABEntries.size() + Models.size());
         b.writeUInt16(0x4241); // Magic
         b.writeUInt16(ABEntries.size() + Models.size());
 
         // Determine the offsets.
         for (int i = 0; i < ABEntries.size(); ++i) {
-            b.writeUInt32(base + 4);
+            b.writeUInt32(base);
             base += ABEntries.get(i).size();
         }
 
         for (int i = 0; i < Models.size(); ++i) {
-            b.writeUInt32(base + 4);
+            b.writeUInt32(base);
             base += Models.get(i).getData().length;
         }
 
         // Write fileSize
-        b.writeUInt32(base + 4);
+        b.writeUInt32(base - 0x4);
 
         // Write AB entries.
         for (int i = 0; i < ABEntries.size(); ++i) {
@@ -124,7 +124,7 @@ public class AB {
                 ABFileBase += entry.getFile(j).getData().length;
             }
             for (int j = 4 - entry.numFiles(); j > 0; j--)
-                b.writeUInt32(0xFFFFFFFF);
+                b.writeUInt32(-1);
 
             // Write the files.
             for (int j = 0; j < entry.numFiles(); j++) {
