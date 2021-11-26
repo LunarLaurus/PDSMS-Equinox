@@ -479,7 +479,7 @@ public class BuildingEditorDialogWB extends JDialog {
         }
     }
 
-    private void jbPlayActionPerformed(ActionEvent e) {
+    private void jbPlayAnim(ActionEvent e) {
         if (jlSelectedAnimationsList.getSelectedIndex() != -1) {
             LoadAnimation(nitroDisplayBuildingEditor, 0, animationList.get(jlSelectedAnimationsList.getSelectedIndex()));
         }
@@ -576,6 +576,7 @@ public class BuildingEditorDialogWB extends JDialog {
     private void jsCurrABStateChanged(ChangeEvent e) {
         LoadAB();
     }
+
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
@@ -686,13 +687,12 @@ public class BuildingEditorDialogWB extends JDialog {
 
             //======== jPanel3 ========
             {
-                jPanel3.setBorder ( new javax . swing. border .CompoundBorder ( new javax . swing. border .TitledBorder ( new
-                javax . swing. border .EmptyBorder ( 0, 0 ,0 , 0) ,  "JF\u006frmDes\u0069gner \u0045valua\u0074ion" , javax
-                . swing .border . TitledBorder. CENTER ,javax . swing. border .TitledBorder . BOTTOM, new java
-                . awt .Font ( "D\u0069alog", java .awt . Font. BOLD ,12 ) ,java . awt
-                . Color .red ) ,jPanel3. getBorder () ) ); jPanel3. addPropertyChangeListener( new java. beans .
-                PropertyChangeListener ( ){ @Override public void propertyChange (java . beans. PropertyChangeEvent e) { if( "\u0062order" .
-                equals ( e. getPropertyName () ) )throw new RuntimeException( ) ;} } );
+                jPanel3.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax.swing.border.
+                EmptyBorder(0,0,0,0), "JF\u006frmDesi\u0067ner Ev\u0061luatio\u006e",javax.swing.border.TitledBorder.CENTER,javax.swing
+                .border.TitledBorder.BOTTOM,new java.awt.Font("Dialo\u0067",java.awt.Font.BOLD,12),
+                java.awt.Color.red),jPanel3. getBorder()));jPanel3. addPropertyChangeListener(new java.beans.PropertyChangeListener()
+                {@Override public void propertyChange(java.beans.PropertyChangeEvent e){if("borde\u0072".equals(e.getPropertyName()))
+                throw new RuntimeException();}});
                 jPanel3.setLayout(new MigLayout(
                     "insets 5,hidemode 3,gap 5 5",
                     // columns
@@ -884,7 +884,7 @@ public class BuildingEditorDialogWB extends JDialog {
                             jbPlay.setIcon(new ImageIcon(getClass().getResource("/icons/AnimationIcon.png")));
                             jbPlay.setText("Play Animation");
                             jbPlay.setHorizontalAlignment(SwingConstants.LEFT);
-                            jbPlay.addActionListener(e -> jbPlayActionPerformed(e));
+                            jbPlay.addActionListener(e -> jbPlayAnim(e));
                             panel5.add(jbPlay, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
                                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                                 new Insets(0, 0, 5, 0), 0, 0));
@@ -920,7 +920,7 @@ public class BuildingEditorDialogWB extends JDialog {
                             jbPlay2.setIcon(new ImageIcon(getClass().getResource("/icons/ExportIcon.png")));
                             jbPlay2.setText("Export Animation");
                             jbPlay2.setHorizontalAlignment(SwingConstants.LEFT);
-                            jbPlay2.addActionListener(e -> jbPlayActionPerformed(e));
+                            jbPlay2.addActionListener(e -> jbExportAnim(e));
                             panel5.add(jbPlay2, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0,
                                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                                 new Insets(0, 0, 5, 0), 0, 0));

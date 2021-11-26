@@ -176,7 +176,7 @@ new FormModel {
 									"icon": new com.jformdesigner.model.SwingIcon( 0, "/icons/AnimationIcon.png" )
 									"text": "Play Animation"
 									"horizontalAlignment": 2
-									addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "jbPlayActionPerformed", true ) )
+									addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "jbPlayAnim", true ) )
 								}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) )
 								add( new FormComponent( "javax.swing.JButton" ) {
 									name: "jbAddAnimToBuild"
@@ -210,7 +210,7 @@ new FormModel {
 									"icon": new com.jformdesigner.model.SwingIcon( 0, "/icons/ExportIcon.png" )
 									"text": "Export Animation"
 									"horizontalAlignment": 2
-									addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "jbPlayActionPerformed", true ) )
+									addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "jbExportAnim", true ) )
 								}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
 									"gridy": 4
 								} )
