@@ -57,7 +57,7 @@ public class AB {
                 Unused2 = (short) reader.readUInt16();
                 ControllerFunc = (short) reader.readUInt16();
                 AnimCountPerAnimSet = (byte) reader.readUInt8();
-                AnimCount = (byte) reader.readUInt8();
+                ItemCount = (byte) reader.readUInt8();
             }};
             IDs.add(e.ID);
 
@@ -181,7 +181,7 @@ public class AB {
             b.writeUInt16(entry.Unused2);
             b.writeUInt16(entry.ControllerFunc);
             b.writeUInt8(entry.AnimCountPerAnimSet);
-            b.writeUInt8(entry.AnimCount);
+            b.writeUInt8(entry.numFiles());
 
             // Write the file header.
             int ABFileBase = 0x14;

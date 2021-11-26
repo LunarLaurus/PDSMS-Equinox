@@ -16,7 +16,7 @@ public class ABEntry {
     public short Unused2;
     public short ControllerFunc;
     public byte AnimCountPerAnimSet;
-    public byte AnimCount;
+    public byte ItemCount;
     private List<ModelAnimation> files = new ArrayList<>();
 
     public long size() {

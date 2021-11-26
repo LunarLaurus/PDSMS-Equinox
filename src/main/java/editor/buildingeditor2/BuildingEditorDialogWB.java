@@ -315,9 +315,18 @@ public class BuildingEditorDialogWB extends JDialog {
             UpdateAnimationList(jlBuildModel.getSelectedIndex());
             nitroDisplayBuildingEditor.fitCameraToModel(0);
             nitroDisplayBuildingEditor.requestUpdate();
-            jsControllerFunc.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).ControllerFunc);
-            jsAnimPerSet.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).AnimCountPerAnimSet);
-            jsAnimType.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).AnimCount);
+            if (!e.getValueIsAdjusting()) {
+                jsBuildID.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).ID);
+                jsBuildType.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).Type);
+                jsBuildDoorID.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).DoorID);
+                jsBuildDoorX.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).X);
+                jsBuildDoorY.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).Y);
+                jsBuildDoorZ.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).Z);
+                jsBuildUnknown.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).Unused);
+                jsBuildUnknown2.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).Unused2);
+                jsBuildAnimationType.setSelectedIndex(currAB.getABEntry(jlBuildModel.getSelectedIndex()).ControllerFunc);
+                jsAnimPerSet.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).AnimCountPerAnimSet);
+            }
         }
     }
 
@@ -575,8 +584,7 @@ public class BuildingEditorDialogWB extends JDialog {
 
     private void jsControllerFuncStateChanged(ChangeEvent e) {
         if (jlBuildModel.getSelectedIndex() > -1) {
-            SpinnerNumberModel V = (SpinnerNumberModel) jsControllerFunc.getModel();
-            currAB.getABEntry(jlBuildModel.getSelectedIndex()).ControllerFunc = V.getNumber().shortValue();
+            currAB.getABEntry(jlBuildModel.getSelectedIndex()).ControllerFunc = (short) jsBuildAnimationType.getSelectedIndex();
         }
     }
 
@@ -587,10 +595,67 @@ public class BuildingEditorDialogWB extends JDialog {
         }
     }
 
-    private void jsAnimTypeStateChanged(ChangeEvent e) {
+    private void jsBuildIDStateChanged(ChangeEvent e) {
         if (jlBuildModel.getSelectedIndex() > -1) {
-            SpinnerNumberModel V = (SpinnerNumberModel) jsAnimType.getModel();
-            currAB.getABEntry(jlBuildModel.getSelectedIndex()).AnimCount = V.getNumber().byteValue();
+            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildID.getModel();
+            currAB.getABEntry(jlBuildModel.getSelectedIndex()).ID = V.getNumber().shortValue();
+            RefreshBuildingPack();
+        }
+    }
+
+    private void jsBuildTypeStateChanged(ChangeEvent e) {
+        if (jlBuildModel.getSelectedIndex() > -1) {
+            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildType.getModel();
+            currAB.getABEntry(jlBuildModel.getSelectedIndex()).Type = V.getNumber().shortValue();
+            RefreshBuildingPack();
+        }
+    }
+
+    private void jsBuildDoorIDStateChanged(ChangeEvent e) {
+        if (jlBuildModel.getSelectedIndex() > -1) {
+            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildDoorID.getModel();
+            currAB.getABEntry(jlBuildModel.getSelectedIndex()).DoorID = V.getNumber().shortValue();
+            RefreshBuildingPack();
+        }
+    }
+
+    private void jsBuildDoorXStateChanged(ChangeEvent e) {
+        if (jlBuildModel.getSelectedIndex() > -1) {
+            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildDoorX.getModel();
+            currAB.getABEntry(jlBuildModel.getSelectedIndex()).X = V.getNumber().shortValue();
+            RefreshBuildingPack();
+        }
+    }
+
+    private void jsBuildDoorYStateChanged(ChangeEvent e) {
+        if (jlBuildModel.getSelectedIndex() > -1) {
+            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildDoorY.getModel();
+            currAB.getABEntry(jlBuildModel.getSelectedIndex()).Y = V.getNumber().shortValue();
+            RefreshBuildingPack();
+        }
+    }
+
+    private void jsBuildDoorZStateChanged(ChangeEvent e) {
+        if (jlBuildModel.getSelectedIndex() > -1) {
+            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildDoorZ.getModel();
+            currAB.getABEntry(jlBuildModel.getSelectedIndex()).Z = V.getNumber().shortValue();
+            RefreshBuildingPack();
+        }
+    }
+
+    private void jsBuildUnknownStateChanged(ChangeEvent e) {
+        if (jlBuildModel.getSelectedIndex() > -1) {
+            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildUnknown.getModel();
+            currAB.getABEntry(jlBuildModel.getSelectedIndex()).Unused = V.getNumber().shortValue();
+            RefreshBuildingPack();
+        }
+    }
+
+    private void jsBuildUnknown2StateChanged(ChangeEvent e) {
+        if (jlBuildModel.getSelectedIndex() > -1) {
+            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildUnknown2.getModel();
+            currAB.getABEntry(jlBuildModel.getSelectedIndex()).Unused2 = V.getNumber().shortValue();
+            RefreshBuildingPack();
         }
     }
 
@@ -611,7 +676,30 @@ public class BuildingEditorDialogWB extends JDialog {
         jbExportBuilding = new JButton();
         jbRemoveBuilding = new JButton();
         jbFindBuilding = new JButton();
-        button1 = new JButton();
+        splitPane2 = new JSplitPane();
+        label2 = new JLabel();
+        jsBuildID = new JSpinner();
+        splitPane3 = new JSplitPane();
+        label3 = new JLabel();
+        jsBuildType = new JSpinner();
+        splitPane4 = new JSplitPane();
+        label4 = new JLabel();
+        jsBuildDoorID = new JSpinner();
+        splitPane5 = new JSplitPane();
+        label5 = new JLabel();
+        jsBuildDoorX = new JSpinner();
+        splitPane6 = new JSplitPane();
+        label6 = new JLabel();
+        jsBuildDoorY = new JSpinner();
+        splitPane7 = new JSplitPane();
+        label7 = new JLabel();
+        jsBuildDoorZ = new JSpinner();
+        splitPane8 = new JSplitPane();
+        label8 = new JLabel();
+        jsBuildUnknown = new JSpinner();
+        splitPane9 = new JSplitPane();
+        label9 = new JLabel();
+        jsBuildUnknown2 = new JSpinner();
         panel3 = new JPanel();
         jPanel8 = new JPanel();
         jLabel3 = new JLabel();
@@ -626,11 +714,9 @@ public class BuildingEditorDialogWB extends JDialog {
         scrollPane1 = new JScrollPane();
         panel6 = new JPanel();
         jLabel12 = new JLabel();
-        jsControllerFunc = new JSpinner();
+        jsBuildAnimationType = new JComboBox<>();
         jLabel25 = new JLabel();
         jsAnimPerSet = new JSpinner();
-        jLabel23 = new JLabel();
-        jsAnimType = new JSpinner();
         jPanel13 = new JPanel();
         jPanel14 = new JPanel();
         nitroDisplayBuildingPosEditor = new NitroDisplayGL();
@@ -683,7 +769,7 @@ public class BuildingEditorDialogWB extends JDialog {
         jLabel21 = new JLabel();
         jcbModelsSelected = new JComboBox<>();
         jsCurrAB = new JSpinner();
-        jbSaveAll = new JButton();
+        button1 = new JButton();
         jbCancel = new JButton();
 
         //======== this ========
@@ -704,12 +790,13 @@ public class BuildingEditorDialogWB extends JDialog {
 
             //======== jPanel3 ========
             {
-                jPanel3.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax. swing. border
-                . EmptyBorder( 0, 0, 0, 0) , "JF\u006frmDes\u0069gner \u0045valua\u0074ion", javax. swing. border. TitledBorder. CENTER, javax
-                . swing. border. TitledBorder. BOTTOM, new java .awt .Font ("D\u0069alog" ,java .awt .Font .BOLD ,
-                12 ), java. awt. Color. red) ,jPanel3. getBorder( )) ); jPanel3. addPropertyChangeListener (new java. beans
-                . PropertyChangeListener( ){ @Override public void propertyChange (java .beans .PropertyChangeEvent e) {if ("\u0062order" .equals (e .
-                getPropertyName () )) throw new RuntimeException( ); }} );
+                jPanel3.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax.
+                swing.border.EmptyBorder(0,0,0,0), "JFor\u006dDesi\u0067ner \u0045valu\u0061tion",javax.swing.border
+                .TitledBorder.CENTER,javax.swing.border.TitledBorder.BOTTOM,new java.awt.Font("Dia\u006cog"
+                ,java.awt.Font.BOLD,12),java.awt.Color.red),jPanel3. getBorder
+                ()));jPanel3. addPropertyChangeListener(new java.beans.PropertyChangeListener(){@Override public void propertyChange(java
+                .beans.PropertyChangeEvent e){if("bord\u0065r".equals(e.getPropertyName()))throw new RuntimeException
+                ();}});
                 jPanel3.setLayout(new MigLayout(
                     "insets 5,hidemode 3,gap 5 5",
                     // columns
@@ -745,7 +832,7 @@ public class BuildingEditorDialogWB extends JDialog {
                         nitroDisplayBuildingEditor.setLayout(nitroDisplayBuildingEditorLayout);
                         nitroDisplayBuildingEditorLayout.setHorizontalGroup(
                             nitroDisplayBuildingEditorLayout.createParallelGroup()
-                                .addGap(0, 656, Short.MAX_VALUE)
+                                .addGap(0, 650, Short.MAX_VALUE)
                         );
                         nitroDisplayBuildingEditorLayout.setVerticalGroup(
                             nitroDisplayBuildingEditorLayout.createParallelGroup()
@@ -779,9 +866,9 @@ public class BuildingEditorDialogWB extends JDialog {
                     {
                         panel2.setLayout(new GridBagLayout());
                         ((GridBagLayout)panel2.getLayout()).columnWidths = new int[] {0, 0};
-                        ((GridBagLayout)panel2.getLayout()).rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0};
+                        ((GridBagLayout)panel2.getLayout()).rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
                         ((GridBagLayout)panel2.getLayout()).columnWeights = new double[] {0.0, 1.0E-4};
-                        ((GridBagLayout)panel2.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4};
+                        ((GridBagLayout)panel2.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4};
 
                         //---- jbAddBuilding ----
                         jbAddBuilding.setIcon(new ImageIcon(getClass().getResource("/icons/AddIcon.png")));
@@ -829,10 +916,147 @@ public class BuildingEditorDialogWB extends JDialog {
                             GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                             new Insets(0, 0, 5, 0), 0, 0));
 
-                        //---- button1 ----
-                        button1.setText("Export Building Pack");
-                        button1.addActionListener(e -> exportABButtonPressed(e));
-                        panel2.add(button1, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0,
+                        //======== splitPane2 ========
+                        {
+                            splitPane2.setDividerSize(7);
+                            splitPane2.setDividerLocation(51);
+
+                            //---- label2 ----
+                            label2.setText("ID");
+                            label2.setHorizontalAlignment(SwingConstants.CENTER);
+                            splitPane2.setLeftComponent(label2);
+
+                            //---- jsBuildID ----
+                            jsBuildID.addChangeListener(e -> jsBuildIDStateChanged(e));
+                            splitPane2.setRightComponent(jsBuildID);
+                        }
+                        panel2.add(splitPane2, new GridBagConstraints(0, 8, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //======== splitPane3 ========
+                        {
+                            splitPane3.setDividerSize(7);
+                            splitPane3.setDividerLocation(51);
+
+                            //---- label3 ----
+                            label3.setText("Type");
+                            label3.setHorizontalAlignment(SwingConstants.CENTER);
+                            splitPane3.setLeftComponent(label3);
+
+                            //---- jsBuildType ----
+                            jsBuildType.addChangeListener(e -> jsBuildTypeStateChanged(e));
+                            splitPane3.setRightComponent(jsBuildType);
+                        }
+                        panel2.add(splitPane3, new GridBagConstraints(0, 9, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //======== splitPane4 ========
+                        {
+                            splitPane4.setDividerSize(7);
+                            splitPane4.setDividerLocation(51);
+
+                            //---- label4 ----
+                            label4.setText("Door ID");
+                            label4.setHorizontalAlignment(SwingConstants.CENTER);
+                            splitPane4.setLeftComponent(label4);
+
+                            //---- jsBuildDoorID ----
+                            jsBuildDoorID.addChangeListener(e -> jsBuildDoorIDStateChanged(e));
+                            splitPane4.setRightComponent(jsBuildDoorID);
+                        }
+                        panel2.add(splitPane4, new GridBagConstraints(0, 10, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //======== splitPane5 ========
+                        {
+                            splitPane5.setDividerSize(7);
+                            splitPane5.setDividerLocation(51);
+
+                            //---- label5 ----
+                            label5.setText("Door X");
+                            label5.setHorizontalAlignment(SwingConstants.CENTER);
+                            splitPane5.setLeftComponent(label5);
+
+                            //---- jsBuildDoorX ----
+                            jsBuildDoorX.addChangeListener(e -> jsBuildDoorXStateChanged(e));
+                            splitPane5.setRightComponent(jsBuildDoorX);
+                        }
+                        panel2.add(splitPane5, new GridBagConstraints(0, 11, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //======== splitPane6 ========
+                        {
+                            splitPane6.setDividerSize(7);
+                            splitPane6.setDividerLocation(51);
+
+                            //---- label6 ----
+                            label6.setText("Door Y");
+                            label6.setHorizontalAlignment(SwingConstants.CENTER);
+                            splitPane6.setLeftComponent(label6);
+
+                            //---- jsBuildDoorY ----
+                            jsBuildDoorY.addChangeListener(e -> jsBuildDoorYStateChanged(e));
+                            splitPane6.setRightComponent(jsBuildDoorY);
+                        }
+                        panel2.add(splitPane6, new GridBagConstraints(0, 12, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //======== splitPane7 ========
+                        {
+                            splitPane7.setDividerSize(7);
+                            splitPane7.setDividerLocation(51);
+
+                            //---- label7 ----
+                            label7.setText("Door Z");
+                            label7.setHorizontalAlignment(SwingConstants.CENTER);
+                            splitPane7.setLeftComponent(label7);
+
+                            //---- jsBuildDoorZ ----
+                            jsBuildDoorZ.addChangeListener(e -> jsBuildDoorZStateChanged(e));
+                            splitPane7.setRightComponent(jsBuildDoorZ);
+                        }
+                        panel2.add(splitPane7, new GridBagConstraints(0, 13, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //======== splitPane8 ========
+                        {
+                            splitPane8.setDividerSize(7);
+                            splitPane8.setDividerLocation(51);
+
+                            //---- label8 ----
+                            label8.setText("Unknown");
+                            label8.setHorizontalAlignment(SwingConstants.CENTER);
+                            splitPane8.setLeftComponent(label8);
+
+                            //---- jsBuildUnknown ----
+                            jsBuildUnknown.addChangeListener(e -> jsBuildUnknownStateChanged(e));
+                            splitPane8.setRightComponent(jsBuildUnknown);
+                        }
+                        panel2.add(splitPane8, new GridBagConstraints(0, 14, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //======== splitPane9 ========
+                        {
+                            splitPane9.setDividerSize(7);
+                            splitPane9.setDividerLocation(51);
+
+                            //---- label9 ----
+                            label9.setText("Unknown 2");
+                            label9.setHorizontalAlignment(SwingConstants.CENTER);
+                            splitPane9.setLeftComponent(label9);
+
+                            //---- jsBuildUnknown2 ----
+                            jsBuildUnknown2.addChangeListener(e -> jsBuildUnknown2StateChanged(e));
+                            splitPane9.setRightComponent(jsBuildUnknown2);
+                        }
+                        panel2.add(splitPane9, new GridBagConstraints(0, 15, 1, 1, 0.0, 0.0,
                             GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                             new Insets(0, 0, 0, 0), 0, 0));
                     }
@@ -962,28 +1186,25 @@ public class BuildingEditorDialogWB extends JDialog {
                                     "[]"));
 
                                 //---- jLabel12 ----
-                                jLabel12.setText("Controller Function");
+                                jLabel12.setText("Animation Type");
                                 panel6.add(jLabel12, "cell 0 0");
 
-                                //---- jsControllerFunc ----
-                                jsControllerFunc.addChangeListener(e -> jsControllerFuncStateChanged(e));
-                                panel6.add(jsControllerFunc, "cell 1 0");
+                                //---- jsBuildAnimationType ----
+                                jsBuildAnimationType.setModel(new DefaultComboBoxModel<>(new String[] {
+                                    "Unanimated",
+                                    "Ambient Animated",
+                                    "Dynamic",
+                                    "RTC"
+                                }));
+                                panel6.add(jsBuildAnimationType, "cell 1 0");
 
                                 //---- jLabel25 ----
-                                jLabel25.setText("Animations per set");
+                                jLabel25.setText("Animations Per Set");
                                 panel6.add(jLabel25, "cell 0 1");
 
                                 //---- jsAnimPerSet ----
                                 jsAnimPerSet.addChangeListener(e -> jsAnimPerSetStateChanged(e));
                                 panel6.add(jsAnimPerSet, "cell 1 1");
-
-                                //---- jLabel23 ----
-                                jLabel23.setText("Type");
-                                panel6.add(jLabel23, "cell 0 2");
-
-                                //---- jsAnimType ----
-                                jsAnimType.addChangeListener(e -> jsAnimTypeStateChanged(e));
-                                panel6.add(jsAnimType, "cell 1 2");
                             }
                             scrollPane1.setViewportView(panel6);
                         }
@@ -1441,14 +1662,10 @@ public class BuildingEditorDialogWB extends JDialog {
             jsCurrAB.addChangeListener(e -> jsCurrABStateChanged(e));
             panel1.add(jsCurrAB, "cell 1 0 2 1");
 
-            //---- jbSaveAll ----
-            jbSaveAll.setText("Save All");
-            jbSaveAll.setMaximumSize(null);
-            jbSaveAll.setMinimumSize(null);
-            jbSaveAll.setPreferredSize(new Dimension(100, 30));
-            jbSaveAll.setIcon(new ImageIcon(getClass().getResource("/icons/saveMapIconSmall.png")));
-            jbSaveAll.addActionListener(e -> jbSaveAllActionPerformed(e));
-            panel1.add(jbSaveAll, "cell 3 0");
+            //---- button1 ----
+            button1.setText("Export Building Pack");
+            button1.addActionListener(e -> exportABButtonPressed(e));
+            panel1.add(button1, "cell 3 0");
 
             //---- jbCancel ----
             jbCancel.setText("Close");
@@ -1477,7 +1694,30 @@ public class BuildingEditorDialogWB extends JDialog {
     private JButton jbExportBuilding;
     private JButton jbRemoveBuilding;
     private JButton jbFindBuilding;
-    private JButton button1;
+    private JSplitPane splitPane2;
+    private JLabel label2;
+    private JSpinner jsBuildID;
+    private JSplitPane splitPane3;
+    private JLabel label3;
+    private JSpinner jsBuildType;
+    private JSplitPane splitPane4;
+    private JLabel label4;
+    private JSpinner jsBuildDoorID;
+    private JSplitPane splitPane5;
+    private JLabel label5;
+    private JSpinner jsBuildDoorX;
+    private JSplitPane splitPane6;
+    private JLabel label6;
+    private JSpinner jsBuildDoorY;
+    private JSplitPane splitPane7;
+    private JLabel label7;
+    private JSpinner jsBuildDoorZ;
+    private JSplitPane splitPane8;
+    private JLabel label8;
+    private JSpinner jsBuildUnknown;
+    private JSplitPane splitPane9;
+    private JLabel label9;
+    private JSpinner jsBuildUnknown2;
     private JPanel panel3;
     private JPanel jPanel8;
     private JLabel jLabel3;
@@ -1492,11 +1732,9 @@ public class BuildingEditorDialogWB extends JDialog {
     private JScrollPane scrollPane1;
     private JPanel panel6;
     private JLabel jLabel12;
-    private JSpinner jsControllerFunc;
+    private JComboBox<String> jsBuildAnimationType;
     private JLabel jLabel25;
     private JSpinner jsAnimPerSet;
-    private JLabel jLabel23;
-    private JSpinner jsAnimType;
     private JPanel jPanel13;
     private JPanel jPanel14;
     private NitroDisplayGL nitroDisplayBuildingPosEditor;
@@ -1549,7 +1787,7 @@ public class BuildingEditorDialogWB extends JDialog {
     private JLabel jLabel21;
     private JComboBox<String> jcbModelsSelected;
     private JSpinner jsCurrAB;
-    private JButton jbSaveAll;
+    private JButton button1;
     private JButton jbCancel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
