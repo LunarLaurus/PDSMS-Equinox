@@ -561,10 +561,6 @@ public class BuildingEditorDialogWB extends JDialog {
         // TODO add your code here
     }
 
-    private void exportABButtonPressed(ActionEvent e) {
-        // TODO add your code here
-    }
-
     private void jbSaveAllActionPerformed(ActionEvent e) {
         // TODO add your code here
     }
