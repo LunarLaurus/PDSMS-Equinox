@@ -233,6 +233,7 @@ new FormModel {
 									} )
 									add( new FormComponent( "javax.swing.JSpinner" ) {
 										name: "jsControllerFunc"
+										addEvent( new FormEvent( "javax.swing.event.ChangeListener", "stateChanged", "jsControllerFuncStateChanged", true ) )
 									}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 										"value": "cell 1 0"
 									} )
@@ -244,6 +245,7 @@ new FormModel {
 									} )
 									add( new FormComponent( "javax.swing.JSpinner" ) {
 										name: "jsAnimPerSet"
+										addEvent( new FormEvent( "javax.swing.event.ChangeListener", "stateChanged", "jsAnimPerSetStateChanged", true ) )
 									}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 										"value": "cell 1 1"
 									} )
@@ -255,6 +257,7 @@ new FormModel {
 									} )
 									add( new FormComponent( "javax.swing.JSpinner" ) {
 										name: "jsAnimType"
+										addEvent( new FormEvent( "javax.swing.event.ChangeListener", "stateChanged", "jsAnimTypeStateChanged", true ) )
 									}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 										"value": "cell 1 2"
 									} )

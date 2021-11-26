@@ -573,6 +573,27 @@ public class BuildingEditorDialogWB extends JDialog {
         LoadAB();
     }
 
+    private void jsControllerFuncStateChanged(ChangeEvent e) {
+        if (jlBuildModel.getSelectedIndex() > -1) {
+            SpinnerNumberModel V = (SpinnerNumberModel) jsControllerFunc.getModel();
+            currAB.getABEntry(jlBuildModel.getSelectedIndex()).ControllerFunc = V.getNumber().shortValue();
+        }
+    }
+
+    private void jsAnimPerSetStateChanged(ChangeEvent e) {
+        if (jlBuildModel.getSelectedIndex() > -1) {
+            SpinnerNumberModel V = (SpinnerNumberModel) jsAnimPerSet.getModel();
+            currAB.getABEntry(jlBuildModel.getSelectedIndex()).AnimCountPerAnimSet = V.getNumber().byteValue();
+        }
+    }
+
+    private void jsAnimTypeStateChanged(ChangeEvent e) {
+        if (jlBuildModel.getSelectedIndex() > -1) {
+            SpinnerNumberModel V = (SpinnerNumberModel) jsAnimType.getModel();
+            currAB.getABEntry(jlBuildModel.getSelectedIndex()).AnimCount = V.getNumber().byteValue();
+        }
+    }
+
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
@@ -683,13 +704,12 @@ public class BuildingEditorDialogWB extends JDialog {
 
             //======== jPanel3 ========
             {
-                jPanel3.setBorder ( new javax . swing. border .CompoundBorder ( new javax . swing. border .TitledBorder ( new javax
-                . swing. border .EmptyBorder ( 0, 0 ,0 , 0) ,  "JF\u006frmDes\u0069gner \u0045valua\u0074ion" , javax. swing
-                .border . TitledBorder. CENTER ,javax . swing. border .TitledBorder . BOTTOM, new java. awt .
-                Font ( "D\u0069alog", java .awt . Font. BOLD ,12 ) ,java . awt. Color .red
-                ) ,jPanel3. getBorder () ) ); jPanel3. addPropertyChangeListener( new java. beans .PropertyChangeListener ( ){ @Override
-                public void propertyChange (java . beans. PropertyChangeEvent e) { if( "\u0062order" .equals ( e. getPropertyName (
-                ) ) )throw new RuntimeException( ) ;} } );
+                jPanel3.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax. swing. border
+                . EmptyBorder( 0, 0, 0, 0) , "JF\u006frmDes\u0069gner \u0045valua\u0074ion", javax. swing. border. TitledBorder. CENTER, javax
+                . swing. border. TitledBorder. BOTTOM, new java .awt .Font ("D\u0069alog" ,java .awt .Font .BOLD ,
+                12 ), java. awt. Color. red) ,jPanel3. getBorder( )) ); jPanel3. addPropertyChangeListener (new java. beans
+                . PropertyChangeListener( ){ @Override public void propertyChange (java .beans .PropertyChangeEvent e) {if ("\u0062order" .equals (e .
+                getPropertyName () )) throw new RuntimeException( ); }} );
                 jPanel3.setLayout(new MigLayout(
                     "insets 5,hidemode 3,gap 5 5",
                     // columns
@@ -944,16 +964,25 @@ public class BuildingEditorDialogWB extends JDialog {
                                 //---- jLabel12 ----
                                 jLabel12.setText("Controller Function");
                                 panel6.add(jLabel12, "cell 0 0");
+
+                                //---- jsControllerFunc ----
+                                jsControllerFunc.addChangeListener(e -> jsControllerFuncStateChanged(e));
                                 panel6.add(jsControllerFunc, "cell 1 0");
 
                                 //---- jLabel25 ----
                                 jLabel25.setText("Animations per set");
                                 panel6.add(jLabel25, "cell 0 1");
+
+                                //---- jsAnimPerSet ----
+                                jsAnimPerSet.addChangeListener(e -> jsAnimPerSetStateChanged(e));
                                 panel6.add(jsAnimPerSet, "cell 1 1");
 
                                 //---- jLabel23 ----
                                 jLabel23.setText("Type");
                                 panel6.add(jLabel23, "cell 0 2");
+
+                                //---- jsAnimType ----
+                                jsAnimType.addChangeListener(e -> jsAnimTypeStateChanged(e));
                                 panel6.add(jsAnimType, "cell 1 2");
                             }
                             scrollPane1.setViewportView(panel6);
