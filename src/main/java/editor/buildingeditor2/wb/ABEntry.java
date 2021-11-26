@@ -7,15 +7,15 @@ import java.util.List;
 
 public class ABEntry {
     public short ID;
-    public short Count;
+    public short Type;
     public short DoorID;
     public short X;
     public short Y;
     public short Z;
-    public short unk3;
-    public short unk4;
-    public short ItemsCount;
-    public byte Flag;
+    public short Unused;
+    public short Unused2;
+    public short ControllerFunc;
+    public byte AnimCountPerAnimSet;
     public byte AnimCount;
     private List<ModelAnimation> files = new ArrayList<>();
 

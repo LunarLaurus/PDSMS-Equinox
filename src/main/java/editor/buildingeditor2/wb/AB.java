@@ -1,5 +1,7 @@
 package editor.buildingeditor2.wb;
 
+import editor.buildingeditor2.animations.ModelAnimation;
+import utils.BinaryArrayReader;
 import utils.BinaryWriter;
 
 import java.io.IOException;
@@ -21,6 +23,66 @@ public class AB {
         ABEntries = new ArrayList<>();
         Models = new ArrayList<>();
         IDLookupTable = new HashMap<>();
+    }
+
+    public AB(BinaryArrayReader reader) throws Exception {
+        this();
+        Map<Short, Integer> ModelLookupTable = new HashMap<>();
+        ArrayList<Short> IDs = new ArrayList<>();
+
+        magic = (short) reader.readUInt16();
+        if (magic != 0x4241)
+            throw new Exception("Invalid AB file!");
+
+        short nFiles = (short) reader.readUInt16();
+        ArrayList<Integer> offsets = new ArrayList<>();
+
+        for (int i = 0; i < nFiles; i++)
+            offsets.add((int) reader.readUInt32());
+
+        int fileSize = (int) reader.readUInt32();
+
+        for (int i = 0; i < nFiles / 2; i++) {
+            ArrayList<Integer> fileOffsets = new ArrayList<>();
+            int startABEntrySection = offsets.get(i) + 0x14;
+            reader.jumpAbs(offsets.get(i));
+            ABEntry e = new ABEntry() {{
+                ID = (short) reader.readUInt16();
+                Type = (short) reader.readUInt16();
+                DoorID = (short) reader.readUInt16();
+                X = (short) reader.readUInt16();
+                Y = (short) reader.readUInt16();
+                Z = (short) reader.readUInt16();
+                Unused = (short) reader.readUInt16();
+                Unused2 = (short) reader.readUInt16();
+                ControllerFunc = (short) reader.readUInt16();
+                AnimCountPerAnimSet = (byte) reader.readUInt8();
+                AnimCount = (byte) reader.readUInt8();
+            }};
+            IDs.add(e.ID);
+
+            while (reader.peekUInt32() != -1 && fileOffsets.size() < 4)
+                fileOffsets.add(startABEntrySection + (int) reader.readUInt32());
+
+            for (int j = 0; j < fileOffsets.size(); j++)
+            {
+                reader.jumpAbs(fileOffsets.get(j) + 0x4);
+                int subFileSize = (int) reader.peekUInt32();
+                reader.jumpAbs(fileOffsets.get(j) - 0x4);
+                e.addFile(new ModelAnimation(reader.readBytes(subFileSize), 0));
+            }
+            ABEntries.add(e);
+        }
+
+        for (int i = nFiles / 2; i < nFiles; i++)
+        {
+            ModelLookupTable.put(IDs.get(nFiles - i - 1), nFiles - i - 1);
+            reader.jumpAbs(offsets.get(i) + 0x8);
+            int subFileSize = (int) reader.peekUInt32();
+            reader.jumpAbs(offsets.get(i));
+            addModel(new NitroModel(reader.readBytes(subFileSize)));
+        }
+        setIDLookupTable(ModelLookupTable);
     }
 
     public void add(ABEntry newEntry)
@@ -110,15 +172,15 @@ public class AB {
             // Write the header.
             ABEntry entry = ABEntries.get(i);
             b.writeUInt16(entry.ID);
-            b.writeUInt16(entry.Count);
+            b.writeUInt16(entry.Type);
             b.writeUInt16(entry.DoorID);
             b.writeUInt16(entry.X);
             b.writeUInt16(entry.Y);
             b.writeUInt16(entry.Z);
-            b.writeUInt16(entry.unk3);
-            b.writeUInt16(entry.unk4);
-            b.writeUInt16(entry.ItemsCount);
-            b.writeUInt8(entry.Flag);
+            b.writeUInt16(entry.Unused);
+            b.writeUInt16(entry.Unused2);
+            b.writeUInt16(entry.ControllerFunc);
+            b.writeUInt8(entry.AnimCountPerAnimSet);
             b.writeUInt8(entry.AnimCount);
 
             // Write the file header.

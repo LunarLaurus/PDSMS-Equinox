@@ -5,16 +5,17 @@
 package editor.buildingeditor2;
 
 import editor.buildingeditor2.animations.ModelAnimation;
-import editor.buildingeditor2.buildfile.BuildFile;
 import editor.buildingeditor2.wb.*;
 import editor.handler.MapEditorHandler;
 import net.miginfocom.swing.MigLayout;
+import nitroreader.nsbca.NSBCA;
 import nitroreader.nsbca.NSBCAreader;
 import nitroreader.nsbta.NSBTA;
 import nitroreader.nsbta.NSBTAreader;
 import nitroreader.nsbtp.NSBTP;
 import nitroreader.nsbtp.NSBTPreader;
 import nitroreader.shared.ByteReader;
+import nitroreader.shared.G3Dreader;
 import renderer.NitroDisplayGL;
 import renderer.ObjectGL;
 import utils.Utils;
@@ -32,6 +33,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.function.Function;
 
 /**
  * @author PlatinumMaster
@@ -50,8 +52,8 @@ public class BuildingEditorDialogWB extends JDialog {
     public BuildingEditorDialogWB(Window owner) {
         super(owner);
         initComponents();
-        nitroDisplayMap.getObjectsGL().add(new ObjectGL());
-        nitroDisplayGL.getObjectsGL().add(new ObjectGL());
+        nitroDisplayBuildingPosEditor.getObjectsGL().add(new ObjectGL());
+        nitroDisplayBuildingEditor.getObjectsGL().add(new ObjectGL());
     }
 
     public void init(MapEditorHandler handler, BuildHandlerWB buildHandler) {
@@ -63,10 +65,8 @@ public class BuildingEditorDialogWB extends JDialog {
         buildHandler.setGameFolderPath(folderPath);
         try {
             buildHandler.loadAllFiles();
-            currAB = buildHandler.getExtAB(0x34);
-            nitroDisplayGL.getObjectGL(0).setNsbtxData(buildHandler.getExtABTextures(0x34));
-            updateBuildingPack();
-            nitroDisplayMap.requestUpdate();
+            SwitchABType();
+            nitroDisplayBuildingPosEditor.requestUpdate();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "There was a problem reading some of the files.",
                     "Error opening game files", JOptionPane.ERROR_MESSAGE);
@@ -74,169 +74,161 @@ public class BuildingEditorDialogWB extends JDialog {
         }
     }
 
-    private void updateBuildingPack() {
-        DefaultListModel m = new DefaultListModel();
-        for (int i = 0; i < currAB.nModels(); ++i) {
-            m.addElement(String.format("%d: %s", currAB.getModelToID(i), currAB.getModel(i).getName()));
-        }
-        jlBuildModel.setModel(m);
-        loadCurrentNsbmd();
-        updateBuildingNames();
-    }
-
-    private void updateBuildingNames()
-    {
-        DefaultComboBoxModel m = new DefaultComboBoxModel();
-        for (int i = 0; i < currAB.nModels(); i++)
-            m.addElement(String.format("%d: %s", currAB.getModelToID(i), currAB.getModel(i).getName()));
-        jcBuildID.setModel(m);
-    }
-
-    private void jbOpenMapActionPerformed(ActionEvent e) {
+    private void fileOp(boolean saving, Function<File, Void> Actions, String FileType, FileNameExtensionFilter Filter) {
         final JFileChooser fc = new JFileChooser();
         if (handler.getLastMapDirectoryUsed() != null) {
             fc.setCurrentDirectory(new File(handler.getLastMapDirectoryUsed()));
         }
-        fc.setFileFilter(new FileNameExtensionFilter("NSBMD (*.nsbmd)", "nsbmd"));
-        fc.setApproveButtonText("Open");
-        fc.setDialogTitle("Open Map's NSBMD");
+        fc.setFileFilter(Filter);
+        fc.setApproveButtonText(saving ? "Save" : "Open");
+        fc.setDialogTitle(String.format("%s a %s", saving ? "Save" : "Open", FileType));
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             try {
                 handler.setLastMapDirectoryUsed(fc.getSelectedFile().getParent());
-                byte[] mapData = Files.readAllBytes(fc.getSelectedFile().toPath());
-                nitroDisplayMap.getObjectGL(0).setNsbmdData(mapData);
-                nitroDisplayMap.requestUpdate();
+                Actions.apply(fc.getSelectedFile());
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this,
-                        "There was problem importing the map's NSBMD",
-                        "Can't import map", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, String.format("An error has occured.\n%s", ex.getMessage()),
+                        "I/O Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
-    private void jbImportBldActionPerformed(ActionEvent e) {
-        final JFileChooser fc = new JFileChooser();
-        if (handler.getLastMapDirectoryUsed() != null) {
-            fc.setCurrentDirectory(new File(handler.getLastMapDirectoryUsed()));
+    private void SwitchABType() {
+        jsCurrAB.setValue(0);
+        currAB = jcbModelsSelected.getSelectedIndex() == 0 ? buildHandler.getExtAB(0) : buildHandler.getIntAB(0);
+        nitroDisplayBuildingEditor.getObjectGL(0).setNsbtxData(jcbModelsSelected.getSelectedIndex() == 0 ? buildHandler.getExtABTextures(0) : buildHandler.getIntABTextures(0));
+        RefreshBuildingPack();
+    }
+
+    private void LoadAB() {
+        if ((int)jsCurrAB.getValue() > -1) {
+            if (jcbModelsSelected.getSelectedIndex() == 0 && buildHandler.getExtABCount() > (int)jsCurrAB.getValue()) {
+                currAB = buildHandler.getExtAB((int)jsCurrAB.getValue());
+                nitroDisplayBuildingEditor.getObjectGL(0).setNsbtxData(buildHandler.getExtABTextures((int)jsCurrAB.getValue()));
+                RefreshBuildingPack();
+            }
+            else if (jcbModelsSelected.getSelectedIndex() == 1 && buildHandler.getIntABCount() > (int)jsCurrAB.getValue()) {
+                currAB = buildHandler.getIntAB((int)jsCurrAB.getValue());
+                nitroDisplayBuildingEditor.getObjectGL(0).setNsbtxData(buildHandler.getIntABTextures((int)jsCurrAB.getValue()));
+                nitroDisplayBuildingPosEditor.getObjectGL(0).setNsbtxData(buildHandler.getIntABTextures((int)jsCurrAB.getValue()));
+                RefreshBuildingPack();
+            }
         }
-        fc.setFileFilter(new FileNameExtensionFilter("WB Building File (*.bld)", "bld"));
-        fc.setApproveButtonText("Open");
-        fc.setDialogTitle("Open the BLD");
-        int returnVal = fc.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
+    }
+
+    private void OpenFile(String FileType, FileNameExtensionFilter Filter, Function<File, Void> Actions) {
+        fileOp(false, Actions, FileType, Filter);
+    }
+
+    private void SaveFile(String FileType, FileNameExtensionFilter Filter, Function<File, Void> Actions) {
+        fileOp(true, Actions, FileType, Filter);
+    }
+
+    private void UpdateModel(AB Data, JComboBox Mdl) {
+        DefaultComboBoxModel<String> M = new DefaultComboBoxModel();
+        for (int i = 0; i < Data.nModels(); ++i) {
+            M.addElement(String.format("%d: %s", Data.getModelToID(i), Data.getModel(i).getName()));
+        }
+        Mdl.setModel(M);
+    }
+
+    private void UpdateModel(AB Data, JList Mdl) {
+        DefaultListModel<String> M = new DefaultListModel<>();
+        for (int i = 0; i < Data.nModels(); ++i) {
+            M.addElement(String.format("%d: %s", Data.getModelToID(i), Data.getModel(i).getName()));
+        }
+        Mdl.setModel(M);
+    }
+
+    private void UpdateModel(WBBuildingList Data, JList Mdl) {
+        DefaultListModel<String> M = new DefaultListModel<>();
+        for (int i = 0; i < Data.size(); ++i) {
+            M.addElement(String.format("%d: %s", Data.get(i).id, currAB.getModel(currAB.getIDToModel(Data.get(i).id)).getName()));
+        }
+        Mdl.setModel(M);
+    }
+
+    private void RefreshBuildingPack() {
+        UpdateModel(currAB, jlBuildModel);
+        UpdateModel(currAB, jcBuildID);
+        UpdateNSBMD();
+    }
+
+    private void jbOpenMapActionPerformed(ActionEvent e) {
+        OpenFile("Map", new FileNameExtensionFilter("NITRO System Binary Model Data (*.nsbmd)", "nsbmd"), (Data) -> {
             try {
-                handler.setLastMapDirectoryUsed(fc.getSelectedFile().getParent());
-                // Parse Gen V BLD
-                buildHandler.loadBuildingData(fc.getSelectedFile().toPath());
-                updateViewBuildFileList(0);
-                updateViewNitroDisplayMap();
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this,
-                        "There was an issue while loading the building file.",
-                        "Cannot import bld", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
+                nitroDisplayBuildingPosEditor.getObjectGL(0).setNsbmdData(Files.readAllBytes(Data.toPath()));
+                nitroDisplayBuildingPosEditor.requestUpdate();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
             }
-        }
+            return null;
+        });
     }
 
-    private void updateViewBuildFileList(int indexSelected) {
-        jlBuildFileEnabled.value = false;
-        DefaultListModel listModel = new DefaultListModel();
-        for (int i = 0; i < buildHandler.getBuildingList().size(); i++) {
-            WBBuildingEntry e = buildHandler.getBuildingList().get(i);
-            int num = currAB.getIDToModel(e.id);
-            if (num != -1)
-                listModel.addElement(String.format("%d: %s", e.id, currAB.getModel(num).getName()));
-            else
-                listModel.addElement(String.format("%d: Unknown", e.id));
-        }
-        jlBuildFile.setModel(listModel);
-        jlBuildFileEnabled.value = true;
+    private void jbOpenBldActionPerformed(ActionEvent e) {
+        OpenFile("Building Positions", new FileNameExtensionFilter("Building Positions (*.bld)", "bld"), (Data) -> {
+            try {
+                buildHandler.loadBuildingData(Data.toPath());
+                UpdateBuildingList(0);
+                RefreshNitroDisplay();
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+            return null;
+        });
+    }
 
+    private void UpdateBuildingList(int indexSelected) {
+        jlBuildFileEnabled.value = false;
+        UpdateModel(buildHandler.getBuildingList(), jlBuildFile);
         jlBuildFile.setSelectedIndex(indexSelected);
         jlBuildFile.ensureIndexIsVisible(indexSelected);
-
+        jlBuildFileEnabled.value = true;
     }
 
     private void jcBuildIDStateChanged(ActionEvent e) {
         if (buildPropertiesEnabled.value) {
             buildHandler.getBuildingList().get(currEntry).id = currAB.getModelToID(jcBuildID.getSelectedIndex());
-            updateViewNitroDisplayMap();
-            updateViewBuildFileList(jlBuildFile.getSelectedIndex());
+            RefreshNitroDisplay();
+            UpdateBuildingList(jlBuildFile.getSelectedIndex());
         }
     }
 
-    private void jsBuildXStateChanged(ChangeEvent e) {
+    private void UpdateCoordinates(ChangeEvent e) {
+        SpinnerNumberModel X = (SpinnerNumberModel) jsBuildX.getModel(),
+                Y = (SpinnerNumberModel) jsBuildY.getModel(),
+                Z = (SpinnerNumberModel) jsBuildZ.getModel(),
+                Rotation = (SpinnerNumberModel) jsRotation.getModel();
         if (buildPropertiesEnabled.value) {
-            float val = ((Double)jsBuildX.getValue()).floatValue();
-            buildHandler.getBuildingList().get(currEntry).coords[0].SetValue(FX32.TryParse(val));
-            updateViewNitroDisplayMap();
+            buildHandler.getBuildingList().get(currEntry).coords = new FX32[]{
+                    FX32.TryParse(X.getNumber().floatValue()),
+                    FX32.TryParse(Z.getNumber().floatValue()),
+                    FX32.TryParse(-Y.getNumber().floatValue()),
+            };
+            buildHandler.getBuildingList().get(currEntry).rotation = Rotation.getNumber().shortValue();
         }
-    }
-
-    private void jsBuildYStateChanged(ChangeEvent e) {
-        if (buildPropertiesEnabled.value) {
-            float val = ((Double)jsBuildY.getValue()).floatValue();
-            buildHandler.getBuildingList().get(currEntry).coords[2].SetValue(FX32.TryParse(-val));
-            updateViewNitroDisplayMap();
-        }
-    }
-
-    private void jsBuildZStateChanged(ChangeEvent e) {
-        if (buildPropertiesEnabled.value) {
-            float val = ((Double)jsBuildZ.getValue()).floatValue();
-            buildHandler.getBuildingList().get(currEntry).coords[1].SetValue(FX32.TryParse(val));
-            updateViewNitroDisplayMap();
-        }
-    }
-
-    private void jsRotationChanged(ChangeEvent e) {
-        if (buildPropertiesEnabled.value) {
-            buildHandler.getBuildingList().get(currEntry).rotation = (short)jsRotation.getValue();
-            updateViewNitroDisplayMap();
-        }
+        RefreshNitroDisplay();
     }
 
     private void jbExportBldActionPerformed(ActionEvent e) {
-        final JFileChooser fc = new JFileChooser();
-        if (handler.getLastMapDirectoryUsed() != null) {
-            fc.setCurrentDirectory(new File(handler.getLastMapDirectoryUsed()));
-        }
-        fc.setFileFilter(new FileNameExtensionFilter("BLD (*.bld)", "bld"));
-        fc.setApproveButtonText("Save");
-        fc.setDialogTitle("Save Building File");
-        try {
-            File file = new File(handler.getMapMatrix().filePath);
-            String fileName = Utils.removeExtensionFromPath(file.getName()) + "." + BuildFile.fileExtension;
-            fc.setSelectedFile(new File(fileName));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        int returnVal = fc.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
+        SaveFile("Building Positions", new FileNameExtensionFilter("Building Positions (*.bld)", "bld"), (Data) -> {
             try {
-                handler.setLastMapDirectoryUsed(fc.getSelectedFile().getParent());
-
-                byte[] buf = buildHandler.exportBLD(buildHandler.getBuildingList());
-                try (FileOutputStream fos = new FileOutputStream(fc.getSelectedFile())) {
-                    fos.write(buf);
-                } catch (Exception ex) {
-                    throw new IOException();
-                }
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "There was a problem writing to the BLD file.",
-                        "Error writing BLD file", JOptionPane.ERROR_MESSAGE);
+                buildHandler.getBuildingList().Serialize(Data.toPath().toString());
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
             }
-        }
+            return null;
+        });
     }
 
     public void setBoundingBoxes() {
-        for (ObjectGL object : nitroDisplayMap.getObjectsGL()) {
+        for (ObjectGL object : nitroDisplayBuildingPosEditor.getObjectsGL()) {
             object.setDrawBounds(false);
         }
 
         try {
-            nitroDisplayMap.getObjectsGL().get(1 + jlBuildFile.getSelectedIndex()).setDrawBounds(true);
+            nitroDisplayBuildingPosEditor.getObjectsGL().get(1 + jlBuildFile.getSelectedIndex()).setDrawBounds(true);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -254,8 +246,8 @@ public class BuildingEditorDialogWB extends JDialog {
                 rotation = 0x0;
             }
         });
-        updateViewBuildFileList(buildHandler.getBuildingList().size() - 1);
-        updateViewNitroDisplayMap();
+        UpdateBuildingList(buildHandler.getBuildingList().size() - 1);
+        RefreshNitroDisplay();
     }
 
     private void jbRemoveBldActionPerformed(ActionEvent e) {
@@ -269,30 +261,24 @@ public class BuildingEditorDialogWB extends JDialog {
         DefaultListModel m = (DefaultListModel) jlBuildFile.getModel();
         m.remove(jlBuildFile.getSelectedIndex());
         jlBuildFile.setModel(m);
-        updateViewNitroDisplayMap();
-        updateViewBuildFileList(0);
+        RefreshNitroDisplay();
+        UpdateBuildingList(0);
     }
 
-    public void updateViewNitroDisplayMap() {
-        for (int i = 1, size = nitroDisplayMap.getObjectsGL().size(); i < size; i++) {
-            nitroDisplayMap.getObjectsGL().remove(nitroDisplayMap.getObjectsGL().size() - 1);
+    public void RefreshNitroDisplay() {
+        for (int i = 1, size = nitroDisplayBuildingPosEditor.getObjectsGL().size(); i < size; i++) {
+            nitroDisplayBuildingPosEditor.getObjectsGL().remove(nitroDisplayBuildingPosEditor.getObjectsGL().size() - 1);
         }
 
         for (int i = 0; i < buildHandler.getBuildingList().size(); i++) {
             WBBuildingEntry e = buildHandler.getBuildingList().get(i);
-            ObjectGL object;
-            try {
-                object = nitroDisplayMap.getObjectGL(1 + i);
-            } catch (Exception ex) {
-                nitroDisplayMap.getObjectsGL().add(new ObjectGL());
-                object = nitroDisplayMap.getObjectGL(1 + i);
+            if (nitroDisplayBuildingPosEditor.getObjectsGL().size() < buildHandler.getBuildingList().size() + 1) {
+                nitroDisplayBuildingPosEditor.getObjectsGL().add(new ObjectGL());
             }
+            ObjectGL object = nitroDisplayBuildingPosEditor.getObjectGL(1 + i);
             try {
-                int num = currAB.getIDToModel(e.id);
-                if (num != -1)
-                    object.setNsbmdData(currAB.getModel(num).getData());
-                else
-                    object.setNsbmdData(currAB.getModel(0).getData());
+                object.setNsbmdData(currAB.getModel(currAB.getIDToModel(e.id)).getData());
+                object.setNsbtxData(jcbModelsSelected.getSelectedIndex() == 0 ? buildHandler.getExtABTextures((int)jsCurrAB.getValue()) : buildHandler.getIntABTextures((int)jsCurrAB.getValue()));
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -302,7 +288,7 @@ public class BuildingEditorDialogWB extends JDialog {
             object.setY(e.coords[1].GetValueAsFloat() * 16f); // Z (Up and Down)
             object.setZ(-e.coords[2].GetValueAsFloat() * 16f); // Y (Forward and Backward)
             // Negate Y value for proper placement.
-            nitroDisplayMap.requestUpdate();
+            nitroDisplayBuildingPosEditor.requestUpdate();
         }
         setBoundingBoxes();
     }
@@ -320,34 +306,36 @@ public class BuildingEditorDialogWB extends JDialog {
             jcBuildID.setSelectedIndex(currAB.getIDToModel(entry.id));
             buildPropertiesEnabled.value = true;
         }
-        updateViewNitroDisplayMap();
+        RefreshNitroDisplay();
     }
 
     private void jlBuildModelValueChanged(ListSelectionEvent e) {
         if (jlBuildModelEnabled.value) {
-            loadCurrentNsbmd();
-            updateViewSelectedBuildAnimationsList(jlBuildModel.getSelectedIndex());
-            nitroDisplayGL.fitCameraToModel(0);
-            nitroDisplayGL.requestUpdate();
+            UpdateNSBMD();
+            UpdateAnimationList(jlBuildModel.getSelectedIndex());
+            nitroDisplayBuildingEditor.fitCameraToModel(0);
+            nitroDisplayBuildingEditor.requestUpdate();
+            jsControllerFunc.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).ControllerFunc);
+            jsAnimPerSet.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).AnimCountPerAnimSet);
+            jsAnimType.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).AnimCount);
         }
     }
 
-    public void loadCurrentNsbmd() {
+    public void UpdateNSBMD() {
         if (jlBuildModel.getSelectedIndex() > -1) {
-            byte[] data = currAB.getModel(jlBuildModel.getSelectedIndex()).getData();
-            nitroDisplayGL.getObjectGL(0).setNsbmdData(data);
-            nitroDisplayGL.getObjectGL(0).setNsbca(null);
-            nitroDisplayGL.getObjectGL(0).setNsbtp(null);
-            nitroDisplayGL.getObjectGL(0).setNsbta(null);
-            nitroDisplayGL.getObjectGL(0).setNsbva(null);
+            nitroDisplayBuildingEditor.getObjectGL(0).setNsbmdData(currAB.getModel(jlBuildModel.getSelectedIndex()).getData());
+            nitroDisplayBuildingEditor.getObjectGL(0).setNsbca(null);
+            nitroDisplayBuildingEditor.getObjectGL(0).setNsbtp(null);
+            nitroDisplayBuildingEditor.getObjectGL(0).setNsbta(null);
+            nitroDisplayBuildingEditor.getObjectGL(0).setNsbva(null);
         }
     }
 
-    private void updateViewSelectedBuildAnimationsList(int indexSelected) {
+    private void UpdateAnimationList(int indexSelected) {
         jcbAnimationTypeEnabled.value = false;
         animationList.clear();
         ABEntry entry = currAB.getABEntryByID(currAB.getModelToID(indexSelected));
-        DefaultListModel m = new DefaultListModel();
+        DefaultListModel<String> m = new DefaultListModel<>();
         for (int i = 0; i < entry.numFiles(); ++i) {
             m.addElement(entry.getFile(i).getName());
             animationList.add(entry.getFile(i));
@@ -361,49 +349,29 @@ public class BuildingEditorDialogWB extends JDialog {
     }
 
     private void jbReplaceBuildingActionPerformed(ActionEvent e) {
-        final JFileChooser fc = new JFileChooser();
-        if (handler.getLastMapDirectoryUsed() != null) {
-            fc.setCurrentDirectory(new File(handler.getLastMapDirectoryUsed()));
-        }
-        fc.setFileFilter(new FileNameExtensionFilter("NSBMD (*.nsbmd)", "nsbmd"));
-        fc.setApproveButtonText("Open");
-        fc.setDialogTitle("Load model");
-        int returnVal = fc.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            try {
-                handler.setLastMapDirectoryUsed(fc.getSelectedFile().getParent());
-                currAB.replaceModel(jlBuildModel.getSelectedIndex(), new NitroModel(Files.readAllBytes(fc.getSelectedFile().toPath())));
-                updateBuildingPack();
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this,
-                        "There was an issue while replacing the model.",
-                        "Cannot import model", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
-            }
+        if (jlBuildModel.getSelectedIndex() > -1) {
+            OpenFile("Building Model", new FileNameExtensionFilter("NSBMD (*.nsbmd)", "nsbmd"), (Data) -> {
+                try {
+                    currAB.replaceModel(jlBuildModel.getSelectedIndex(), new NitroModel(Files.readAllBytes(Data.toPath())));
+                    RefreshBuildingPack();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                return null;
+            });
         }
     }
 
     private void jbExportBuildingActionPerformed(ActionEvent e) {
-        final JFileChooser fc = new JFileChooser();
-        if (handler.getLastMapDirectoryUsed() != null) {
-            fc.setCurrentDirectory(new File(handler.getLastMapDirectoryUsed()));
-        }
-        fc.setFileFilter(new FileNameExtensionFilter("NSBMD (*.nsbmd)", "nsbmd"));
-        fc.setApproveButtonText("Save");
-        fc.setDialogTitle("Save Model");
-        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            try {
-                handler.setLastMapDirectoryUsed(fc.getSelectedFile().getParent());
-                byte[] buf = currAB.getModel(jlBuildModel.getSelectedIndex()).getData();
-                try (FileOutputStream fos = new FileOutputStream(fc.getSelectedFile())) {
-                    fos.write(buf);
-                } catch (Exception ex) {
-                    throw new IOException();
+        if (jlBuildModel.getSelectedIndex() > -1) {
+            SaveFile("Building Model", new FileNameExtensionFilter("NSBMD (*.nsbmd)", "nsbmd"), (Data) -> {
+                try (FileOutputStream fos = new FileOutputStream(Data)) {
+                    fos.write(currAB.getModel(jlBuildModel.getSelectedIndex()).getData());
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
                 }
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "There was a problem writing to the BLD file.",
-                        "Error writing model.", JOptionPane.ERROR_MESSAGE);
-            }
+                return null;
+            });
         }
     }
 
@@ -440,123 +408,183 @@ public class BuildingEditorDialogWB extends JDialog {
     }
 
     private void jbAddAnimToBuildActionPerformed(ActionEvent e) {
-        // TODO add your code here
+        ABEntry curr;
+        if (jlBuildModel.getSelectedIndex() > -1 && (curr = currAB.getABEntry(jlBuildModel.getSelectedIndex())).numFiles() < 4) {
+            OpenFile("Animation File", new FileNameExtensionFilter("Animation File (*.nsbta, *.nsbtp, *.nsbca)", "nsbta, nsbtp, nsbca"), (Data) -> {
+                try {
+                    curr.addFile(new ModelAnimation(Files.readAllBytes(Data.toPath()), jlSelectedAnimationsList.getSelectedIndex()));
+                    UpdateNSBMD();
+                    UpdateAnimationList(jlBuildModel.getSelectedIndex());
+                    RefreshBuildingPack();
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+                return null;
+            });
+        }
     }
 
     private void jbReplaceAnimToBuildActionPerformed(ActionEvent e) {
         if (jlSelectedAnimationsList.getSelectedIndex() > -1) {
-            final JFileChooser fc = new JFileChooser();
-            if (handler.getLastMapDirectoryUsed() != null) {
-                fc.setCurrentDirectory(new File(handler.getLastMapDirectoryUsed()));
-            }
-            fc.setFileFilter(new FileNameExtensionFilter("Animation File (*.nsbta, *.nsbtp, *.nsbca)", "nsbta, nsbtp, nsbca"));
-            fc.setApproveButtonText("Open");
-            fc.setDialogTitle("Load model");
-            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            OpenFile("Animation File", new FileNameExtensionFilter("Animation File (*.nsbta, *.nsbtp, *.nsbca)", "nsbta, nsbtp, nsbca"), (Data) -> {
                 try {
-                    handler.setLastMapDirectoryUsed(fc.getSelectedFile().getParent());
-                    currAB.getABEntry(jlBuildModel.getSelectedIndex()).replaceFile(jlSelectedAnimationsList.getSelectedIndex(), new ModelAnimation(Files.readAllBytes(fc.getSelectedFile().toPath()), jlSelectedAnimationsList.getSelectedIndex()));
-                    loadCurrentNsbmd();
-                    updateViewSelectedBuildAnimationsList(jlBuildModel.getSelectedIndex());
-                    updateBuildingPack();
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this,
-                            "There was an issue while replacing the model.",
-                            "Cannot import model", JOptionPane.ERROR_MESSAGE);
-                    ex.printStackTrace();
+                    currAB.getABEntry(jlBuildModel.getSelectedIndex()).replaceFile(jlSelectedAnimationsList.getSelectedIndex(),
+                            new ModelAnimation(Files.readAllBytes(Data.toPath()),
+                                    jlSelectedAnimationsList.getSelectedIndex())
+                    );
+                    UpdateNSBMD();
+                    UpdateAnimationList(jlBuildModel.getSelectedIndex());
+                    RefreshBuildingPack();
+                } catch (Exception exception) {
+                    exception.printStackTrace();
                 }
-            }
+                return null;
+            });
         }
     }
 
     private void jbExportAnim(ActionEvent e) {
         if (jlSelectedAnimationsList.getSelectedIndex() > -1) {
-            final JFileChooser fc = new JFileChooser();
-            if (handler.getLastMapDirectoryUsed() != null) {
-                fc.setCurrentDirectory(new File(handler.getLastMapDirectoryUsed()));
-            }
-            fc.setFileFilter(new FileNameExtensionFilter("NSBMD (*.nsbmd)", "nsbmd"));
-            fc.setApproveButtonText("Save");
-            fc.setDialogTitle("Save Model");
-            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                try {
-                    handler.setLastMapDirectoryUsed(fc.getSelectedFile().getParent());
-                    byte[] buf = currAB.getABEntry(jlBuildModel.getSelectedIndex()).getFile(jlSelectedAnimationsList.getSelectedIndex()).getData();
-                    try (FileOutputStream fos = new FileOutputStream(fc.getSelectedFile())) {
-                        fos.write(buf);
-                    } catch (Exception ex) {
-                        throw new IOException();
-                    }
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(this, "There was a problem writing to the BLD file.",
-                            "Error writing model.", JOptionPane.ERROR_MESSAGE);
+            SaveFile("Animation", new FileNameExtensionFilter("Animation File (*.nsbta, *.nsbtp, *.nsbca)", "nsbta, nsbtp, nsbca"), (Data) -> {
+                try (FileOutputStream fos = new FileOutputStream(Data)) {
+                    fos.write(currAB.getABEntry(jlBuildModel.getSelectedIndex()).getFile(jlSelectedAnimationsList.getSelectedIndex()).getData());
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
                 }
-            }
+                return null;
+            });
         }
     }
     private void jbRemoveAnimToBuildActionPerformed(ActionEvent e) {
-        // TODO add your code here
+        if (jlSelectedAnimationsList.getSelectedIndex() > -1) {
+            try {
+                currAB.getABEntry(jlBuildModel.getSelectedIndex()).removeFile(jlSelectedAnimationsList.getSelectedIndex());
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "There was a problem removing an entry.",
+                        "Error writing model.", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void exportABButtonPressed(ActionEvent e) {
+        if (currAB != null) {
+            SaveFile("Building Pack", new FileNameExtensionFilter("Building Pack (*.ab)", "ab"), (Data) -> {
+                try {
+                    currAB.Serialize(Data.toPath().toString());
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                return null;
+            });
+        }
     }
 
     private void jbPlayActionPerformed(ActionEvent e) {
         if (jlSelectedAnimationsList.getSelectedIndex() != -1) {
-            loadAnimationInNitroDisplay(nitroDisplayGL, 0, animationList.get(jlSelectedAnimationsList.getSelectedIndex()));
+            LoadAnimation(nitroDisplayBuildingEditor, 0, animationList.get(jlSelectedAnimationsList.getSelectedIndex()));
         }
     }
 
-    private void jcbAnimType1ActionPerformed(ActionEvent e) {
-        // TODO add your code here
-    }
-
-    private void jcbLoopTypeActionPerformed(ActionEvent e) {
-        // TODO add your code here
-    }
-
-    private void jcbAnimType2ActionPerformed(ActionEvent e) {
-        // TODO add your code here
-    }
-
-    private void jcbNumAnimsActionPerformed(ActionEvent e) {
-        // TODO add your code here
-    }
-
-    private void jcbUnknown1ActionPerformed(ActionEvent e) {
-        // TODO add your code here
-    }
-
-    private void loadAnimationInNitroDisplay(NitroDisplayGL display, int objectIndex, ModelAnimation anim) {
+    private void LoadAnimation(NitroDisplayGL display, int objectIndex, ModelAnimation anim) {
         System.out.println(anim.getName());
-        if (anim.getAnimationType() == ModelAnimation.TYPE_NSBCA) {
-            NSBCAreader reader = new NSBCAreader(new ByteReader(anim.getData()));
-            display.getObjectGL(objectIndex).setNsbca(reader.readFile());
-            display.requestUpdate();
-        } else if (anim.getAnimationType() == ModelAnimation.TYPE_NSBTA) {
-            NSBTAreader reader = new NSBTAreader(new ByteReader(anim.getData()));
-            display.getObjectGL(objectIndex).setNsbta((NSBTA) reader.readFile());
-            display.requestUpdate();
-        } else if (anim.getAnimationType() == ModelAnimation.TYPE_NSBTP) {
-            NSBTPreader reader = new NSBTPreader(new ByteReader(anim.getData()));
-            display.getObjectGL(objectIndex).setNsbtp((NSBTP) reader.readFile());
-            display.requestUpdate();
+        G3Dreader reader;
+        switch (anim.getAnimationType()) {
+            case ModelAnimation.TYPE_NSBCA:
+                reader = new NSBCAreader(new ByteReader(anim.getData()));
+                display.getObjectGL(objectIndex).setNsbca((NSBCA) reader.readFile());
+                break;
+            case ModelAnimation.TYPE_NSBTA:
+                reader = new NSBTAreader(new ByteReader(anim.getData()));
+                display.getObjectGL(objectIndex).setNsbta((NSBTA) reader.readFile());
+                break;
+            case ModelAnimation.TYPE_NSBTP:
+                reader = new NSBTPreader(new ByteReader(anim.getData()));
+                display.getObjectGL(objectIndex).setNsbtp((NSBTP) reader.readFile());
+                break;
         }
-        /*else if (anim.getAnimationType() == BuildAnimation.TYPE_NSBMA) {
-            NSBMAreader reader = new NSBMAreader(new ByteReader(anim.getData()));
-            nitroDisplayGL1.getHandler().setNsbma((NSBMA) reader.readFile());
-            nitroDisplayGL1.requestUpdate();
-        }*/
+        display.requestUpdate();
     }
 
-    private void button1ActionPerformed(ActionEvent e) throws IOException {
-        currAB.Serialize("testing.ab");
+    private void jcbModelsSelectedActionPerformed(ActionEvent e) {
+        SwitchABType();
+    }
+
+    private void jlBuildTsetListValueChanged(ListSelectionEvent e) {
+        // TODO add your code here
+    }
+
+    private void jbAddTsetActionPerformed(ActionEvent e) {
+        // TODO add your code here
+    }
+
+    private void jbAddEmptyTilesetActionPerformed(ActionEvent e) {
+        // TODO add your code here
+    }
+
+    private void jbReplaceTsetActionPerformed(ActionEvent e) {
+        // TODO add your code here
+    }
+
+    private void jbExportTilesetActionPerformed(ActionEvent e) {
+        // TODO add your code here
+    }
+
+    private void jbRemoveTsetActionPerformed(ActionEvent e) {
+        // TODO add your code here
+    }
+
+    private void jlAreaBuildListValueChanged(ListSelectionEvent e) {
+        // TODO add your code here
+    }
+
+    private void jbAddBuildToTsetActionPerformed(ActionEvent e) {
+        // TODO add your code here
+    }
+
+    private void jbReplaceBuildToTsetActionPerformed(ActionEvent e) {
+        // TODO add your code here
+    }
+
+    private void jbRemoveBuildToTsetActionPerformed(ActionEvent e) {
+        // TODO add your code here
+    }
+
+    private void jbAddTexToNsbtxActionPerformed(ActionEvent e) {
+        // TODO add your code here
+    }
+
+    private void jbRemoveTexturesActionPerformed(ActionEvent e) {
+        // TODO add your code here
+    }
+
+    private void jbRemoveAllUnusedTexPalsActionPerformed(ActionEvent e) {
+        // TODO add your code here
+    }
+
+    private void button1ActionPerformed(ActionEvent e) {
+        // TODO add your code here
+    }
+
+    private void jbSaveAllActionPerformed(ActionEvent e) {
+        // TODO add your code here
+    }
+
+    private void jbCancelActionPerformed(ActionEvent e) {
+        // TODO add your code here
+    }
+
+    private void jsCurrABStateChanged(ChangeEvent e) {
+        LoadAB();
     }
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        // Generated using JFormDesigner Evaluation license - Tungsten
         jTabbedPane1 = new JTabbedPane();
         jPanel3 = new JPanel();
         jPanel1 = new JPanel();
         jLabel4 = new JLabel();
-        nitroDisplayGL = new NitroDisplayGL();
+        nitroDisplayBuildingEditor = new NitroDisplayGL();
         jScrollPane1 = new JScrollPane();
         jlBuildModel = new JList<>();
         panel2 = new JPanel();
@@ -572,13 +600,22 @@ public class BuildingEditorDialogWB extends JDialog {
         jScrollPane3 = new JScrollPane();
         jlSelectedAnimationsList = new JList<>();
         panel5 = new JPanel();
-        jbAddAnimToBuild = new JButton();
-        jbReplaceAnimToBuild = new JButton();
-        jbRemoveAnimToBuild = new JButton();
         jbPlay = new JButton();
+        jbAddAnimToBuild = new JButton();
+        jbRemoveAnimToBuild = new JButton();
+        jbReplaceAnimToBuild = new JButton();
+        jbPlay2 = new JButton();
+        scrollPane1 = new JScrollPane();
+        panel6 = new JPanel();
+        jLabel12 = new JLabel();
+        jsControllerFunc = new JSpinner();
+        jLabel25 = new JLabel();
+        jsAnimPerSet = new JSpinner();
+        jLabel23 = new JLabel();
+        jsAnimType = new JSpinner();
         jPanel13 = new JPanel();
         jPanel14 = new JPanel();
-        nitroDisplayMap = new NitroDisplayGL();
+        nitroDisplayBuildingPosEditor = new NitroDisplayGL();
         jbOpenMap = new JButton();
         jPanel15 = new JPanel();
         jPanel17 = new JPanel();
@@ -601,12 +638,41 @@ public class BuildingEditorDialogWB extends JDialog {
         jsBuildZ = new JSpinner();
         jLabel17 = new JLabel();
         jsRotation = new JSpinner();
+        jPanel7 = new JPanel();
+        jPanel10 = new JPanel();
+        jScrollPane6 = new JScrollPane();
+        jlBuildTsetList = new JList<>();
+        jLabel10 = new JLabel();
+        panel8 = new JPanel();
+        jbAddTset = new JButton();
+        jbAddEmptyTileset = new JButton();
+        jbReplaceTset = new JButton();
+        jbExportTileset = new JButton();
+        jbRemoveTset = new JButton();
+        jPanel11 = new JPanel();
+        jLabel9 = new JLabel();
+        jScrollPane7 = new JScrollPane();
+        jlAreaBuildList = new JList<>();
+        panel9 = new JPanel();
+        jbAddBuildToTset = new JButton();
+        jbReplaceBuildToTset = new JButton();
+        jbRemoveBuildToTset = new JButton();
+        jbAddTexToNsbtx = new JButton();
+        jbRemoveTextures = new JButton();
+        jbRemoveAllUnusedTexPals = new JButton();
+        nitroDisplayAreaData = new NitroDisplayGL();
+        panel1 = new JPanel();
+        jLabel21 = new JLabel();
+        jcbModelsSelected = new JComboBox<>();
+        jsCurrAB = new JSpinner();
+        jbSaveAll = new JButton();
+        jbCancel = new JButton();
 
         //======== this ========
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Building Editor for Generation V (Experimental)");
         setModal(true);
-        Container contentPane = getContentPane();
+        var contentPane = getContentPane();
         contentPane.setLayout(new MigLayout(
             "insets 0,hidemode 3,gap 5 5",
             // columns
@@ -620,6 +686,13 @@ public class BuildingEditorDialogWB extends JDialog {
 
             //======== jPanel3 ========
             {
+                jPanel3.setBorder ( new javax . swing. border .CompoundBorder ( new javax . swing. border .TitledBorder ( new
+                javax . swing. border .EmptyBorder ( 0, 0 ,0 , 0) ,  "JF\u006frmDes\u0069gner \u0045valua\u0074ion" , javax
+                . swing .border . TitledBorder. CENTER ,javax . swing. border .TitledBorder . BOTTOM, new java
+                . awt .Font ( "D\u0069alog", java .awt . Font. BOLD ,12 ) ,java . awt
+                . Color .red ) ,jPanel3. getBorder () ) ); jPanel3. addPropertyChangeListener( new java. beans .
+                PropertyChangeListener ( ){ @Override public void propertyChange (java . beans. PropertyChangeEvent e) { if( "\u0062order" .
+                equals ( e. getPropertyName () ) )throw new RuntimeException( ) ;} } );
                 jPanel3.setLayout(new MigLayout(
                     "insets 5,hidemode 3,gap 5 5",
                     // columns
@@ -647,22 +720,22 @@ public class BuildingEditorDialogWB extends JDialog {
                     jLabel4.setToolTipText("");
                     jPanel1.add(jLabel4, "cell 1 0");
 
-                    //======== nitroDisplayGL ========
+                    //======== nitroDisplayBuildingEditor ========
                     {
-                        nitroDisplayGL.setBorder(new LineBorder(new Color(102, 102, 102)));
+                        nitroDisplayBuildingEditor.setBorder(new LineBorder(new Color(102, 102, 102)));
 
-                        GroupLayout nitroDisplayGLLayout = new GroupLayout(nitroDisplayGL);
-                        nitroDisplayGL.setLayout(nitroDisplayGLLayout);
-                        nitroDisplayGLLayout.setHorizontalGroup(
-                            nitroDisplayGLLayout.createParallelGroup()
-                                .addGap(0, 657, Short.MAX_VALUE)
+                        GroupLayout nitroDisplayBuildingEditorLayout = new GroupLayout(nitroDisplayBuildingEditor);
+                        nitroDisplayBuildingEditor.setLayout(nitroDisplayBuildingEditorLayout);
+                        nitroDisplayBuildingEditorLayout.setHorizontalGroup(
+                            nitroDisplayBuildingEditorLayout.createParallelGroup()
+                                .addGap(0, 656, Short.MAX_VALUE)
                         );
-                        nitroDisplayGLLayout.setVerticalGroup(
-                            nitroDisplayGLLayout.createParallelGroup()
+                        nitroDisplayBuildingEditorLayout.setVerticalGroup(
+                            nitroDisplayBuildingEditorLayout.createParallelGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
                         );
                     }
-                    jPanel1.add(nitroDisplayGL, "cell 0 0 1 2");
+                    jPanel1.add(nitroDisplayBuildingEditor, "cell 0 0 1 2");
 
                     //======== jScrollPane1 ========
                     {
@@ -740,14 +813,8 @@ public class BuildingEditorDialogWB extends JDialog {
                             new Insets(0, 0, 5, 0), 0, 0));
 
                         //---- button1 ----
-                        button1.setText("pack test");
-                        button1.addActionListener(e -> {
-                            try {
-                                button1ActionPerformed(e);
-                            } catch (IOException ioException) {
-                                ioException.printStackTrace();
-                            }
-                        });
+                        button1.setText("Export Building Pack");
+                        button1.addActionListener(e -> button1ActionPerformed(e));
                         panel2.add(button1, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0,
                             GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                             new Insets(0, 0, 0, 0), 0, 0));
@@ -809,25 +876,25 @@ public class BuildingEditorDialogWB extends JDialog {
                         {
                             panel5.setLayout(new GridBagLayout());
                             ((GridBagLayout)panel5.getLayout()).columnWidths = new int[] {0, 0};
-                            ((GridBagLayout)panel5.getLayout()).rowHeights = new int[] {0, 0, 0, 0, 0};
+                            ((GridBagLayout)panel5.getLayout()).rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
                             ((GridBagLayout)panel5.getLayout()).columnWeights = new double[] {1.0, 1.0E-4};
-                            ((GridBagLayout)panel5.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 1.0E-4};
+                            ((GridBagLayout)panel5.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4};
+
+                            //---- jbPlay ----
+                            jbPlay.setIcon(new ImageIcon(getClass().getResource("/icons/AnimationIcon.png")));
+                            jbPlay.setText("Play Animation");
+                            jbPlay.setHorizontalAlignment(SwingConstants.LEFT);
+                            jbPlay.addActionListener(e -> jbPlayActionPerformed(e));
+                            panel5.add(jbPlay, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                                new Insets(0, 0, 5, 0), 0, 0));
 
                             //---- jbAddAnimToBuild ----
                             jbAddAnimToBuild.setIcon(new ImageIcon(getClass().getResource("/icons/AddIcon.png")));
                             jbAddAnimToBuild.setText("Add Animation");
                             jbAddAnimToBuild.setHorizontalAlignment(SwingConstants.LEFT);
                             jbAddAnimToBuild.addActionListener(e -> jbAddAnimToBuildActionPerformed(e));
-                            panel5.add(jbAddAnimToBuild, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-                                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                                new Insets(0, 0, 5, 0), 0, 0));
-
-                            //---- jbReplaceAnimToBuild ----
-                            jbReplaceAnimToBuild.setIcon(new ImageIcon(getClass().getResource("/icons/ReplaceIcon.png")));
-                            jbReplaceAnimToBuild.setText("Replace Animation");
-                            jbReplaceAnimToBuild.setHorizontalAlignment(SwingConstants.LEFT);
-                            jbReplaceAnimToBuild.addActionListener(e -> jbReplaceAnimToBuildActionPerformed(e));
-                            panel5.add(jbReplaceAnimToBuild, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
+                            panel5.add(jbAddAnimToBuild, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
                                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                                 new Insets(0, 0, 5, 0), 0, 0));
 
@@ -840,16 +907,61 @@ public class BuildingEditorDialogWB extends JDialog {
                                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                                 new Insets(0, 0, 5, 0), 0, 0));
 
-                            //---- jbPlay ----
-                            jbPlay.setIcon(new ImageIcon(getClass().getResource("/icons/AnimationIcon.png")));
-                            jbPlay.setText("Play Animation");
-                            jbPlay.setHorizontalAlignment(SwingConstants.LEFT);
-                            jbPlay.addActionListener(e -> jbPlayActionPerformed(e));
-                            panel5.add(jbPlay, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
+                            //---- jbReplaceAnimToBuild ----
+                            jbReplaceAnimToBuild.setIcon(new ImageIcon(getClass().getResource("/icons/ReplaceIcon.png")));
+                            jbReplaceAnimToBuild.setText("Replace Animation");
+                            jbReplaceAnimToBuild.setHorizontalAlignment(SwingConstants.LEFT);
+                            jbReplaceAnimToBuild.addActionListener(e -> jbReplaceAnimToBuildActionPerformed(e));
+                            panel5.add(jbReplaceAnimToBuild, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
                                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                                new Insets(0, 0, 0, 0), 0, 0));
+                                new Insets(0, 0, 5, 0), 0, 0));
+
+                            //---- jbPlay2 ----
+                            jbPlay2.setIcon(new ImageIcon(getClass().getResource("/icons/ExportIcon.png")));
+                            jbPlay2.setText("Export Animation");
+                            jbPlay2.setHorizontalAlignment(SwingConstants.LEFT);
+                            jbPlay2.addActionListener(e -> jbPlayActionPerformed(e));
+                            panel5.add(jbPlay2, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0,
+                                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                                new Insets(0, 0, 5, 0), 0, 0));
                         }
                         jPanel8.add(panel5, "cell 1 1");
+
+                        //======== scrollPane1 ========
+                        {
+
+                            //======== panel6 ========
+                            {
+                                panel6.setLayout(new MigLayout(
+                                    "hidemode 3",
+                                    // columns
+                                    "[fill]" +
+                                    "[112,grow,fill]" +
+                                    "[fill]" +
+                                    "[grow,fill]",
+                                    // rows
+                                    "[]" +
+                                    "[]" +
+                                    "[]"));
+
+                                //---- jLabel12 ----
+                                jLabel12.setText("Controller Function");
+                                panel6.add(jLabel12, "cell 0 0");
+                                panel6.add(jsControllerFunc, "cell 1 0");
+
+                                //---- jLabel25 ----
+                                jLabel25.setText("Animations per set");
+                                panel6.add(jLabel25, "cell 0 1");
+                                panel6.add(jsAnimPerSet, "cell 1 1");
+
+                                //---- jLabel23 ----
+                                jLabel23.setText("Type");
+                                panel6.add(jLabel23, "cell 0 2");
+                                panel6.add(jsAnimType, "cell 1 2");
+                            }
+                            scrollPane1.setViewportView(panel6);
+                        }
+                        jPanel8.add(scrollPane1, "cell 0 2");
                     }
                     panel3.add(jPanel8, "cell 0 0 1 2");
                 }
@@ -873,20 +985,17 @@ public class BuildingEditorDialogWB extends JDialog {
                         "[fill]" +
                         "[grow,fill]"));
 
-                    //======== nitroDisplayMap ========
+                    //======== nitroDisplayBuildingPosEditor ========
                     {
-                        nitroDisplayMap.setBorder(new LineBorder(new Color(102, 102, 102)));
-                        nitroDisplayMap.setLayout(new BoxLayout(nitroDisplayMap, BoxLayout.X_AXIS));
+                        nitroDisplayBuildingPosEditor.setBorder(new LineBorder(new Color(102, 102, 102)));
+                        nitroDisplayBuildingPosEditor.setLayout(new BoxLayout(nitroDisplayBuildingPosEditor, BoxLayout.X_AXIS));
                     }
-                    jPanel14.add(nitroDisplayMap, "cell 0 1 2 1");
+                    jPanel14.add(nitroDisplayBuildingPosEditor, "cell 0 1 2 1");
 
                     //---- jbOpenMap ----
                     jbOpenMap.setIcon(new ImageIcon(getClass().getResource("/icons/ImportTileIcon.png")));
                     jbOpenMap.setText("Open Map");
-                    jbOpenMap.addActionListener(e -> {
-			jbOpenMapActionPerformed(e);
-			jbOpenMapActionPerformed(e);
-		});
+                    jbOpenMap.addActionListener(e -> jbOpenMapActionPerformed(e));
                     jPanel14.add(jbOpenMap, "cell 0 0");
                 }
                 jPanel13.add(jPanel14);
@@ -916,7 +1025,7 @@ public class BuildingEditorDialogWB extends JDialog {
                             jbImportBld.setIcon(new ImageIcon(getClass().getResource("/icons/ImportTileIcon.png")));
                             jbImportBld.setText("Import BLD File");
                             jbImportBld.setToolTipText("");
-                            jbImportBld.addActionListener(e -> jbImportBldActionPerformed(e));
+                            jbImportBld.addActionListener(e -> jbOpenBldActionPerformed(e));
                             jPanel18.add(jbImportBld);
 
                             //---- jbExportBld ----
@@ -1003,8 +1112,8 @@ public class BuildingEditorDialogWB extends JDialog {
                         jPanel16.add(jLabel14, "cell 0 1");
 
                         //---- jsBuildX ----
-                        jsBuildX.setModel(new SpinnerNumberModel(0.0F, -16.0F, 16.0F, 0.5F));
-                        jsBuildX.addChangeListener(e -> jsBuildXStateChanged(e));
+                        jsBuildX.setModel(new SpinnerNumberModel(0.0, -16.0, 16.0, 0.5));
+                        jsBuildX.addChangeListener(e -> UpdateCoordinates(e));
                         jPanel16.add(jsBuildX, "cell 1 1");
 
                         //---- jLabel16 ----
@@ -1013,8 +1122,8 @@ public class BuildingEditorDialogWB extends JDialog {
                         jPanel16.add(jLabel16, "cell 0 2");
 
                         //---- jsBuildY ----
-                        jsBuildY.setModel(new SpinnerNumberModel(0.0F, -16.0F, 16.0F, 0.5F));
-                        jsBuildY.addChangeListener(e -> jsBuildYStateChanged(e));
+                        jsBuildY.setModel(new SpinnerNumberModel(0.0, -16.0, 16.0, 0.5));
+                        jsBuildY.addChangeListener(e -> UpdateCoordinates(e));
                         jPanel16.add(jsBuildY, "cell 1 2");
 
                         //---- jLabel15 ----
@@ -1023,8 +1132,8 @@ public class BuildingEditorDialogWB extends JDialog {
                         jPanel16.add(jLabel15, "cell 0 3");
 
                         //---- jsBuildZ ----
-                        jsBuildZ.setModel(new SpinnerNumberModel(0.0F, -16.0F, 16.0F, 0.5F));
-                        jsBuildZ.addChangeListener(e -> jsBuildZStateChanged(e));
+                        jsBuildZ.setModel(new SpinnerNumberModel(0.0, -16.0, 16.0, 0.5));
+                        jsBuildZ.addChangeListener(e -> UpdateCoordinates(e));
                         jPanel16.add(jsBuildZ, "cell 1 3");
 
                         //---- jLabel17 ----
@@ -1034,7 +1143,7 @@ public class BuildingEditorDialogWB extends JDialog {
 
                         //---- jsRotation ----
                         jsRotation.setModel(new SpinnerNumberModel(0, null, null, 0));
-                        jsRotation.addChangeListener(e -> jsRotationChanged(e));
+                        jsRotation.addChangeListener(e -> UpdateCoordinates(e));
                         jPanel16.add(jsRotation, "cell 1 4");
                     }
                     jPanel15.add(jPanel16, "cell 0 1");
@@ -1042,19 +1151,298 @@ public class BuildingEditorDialogWB extends JDialog {
                 jPanel13.add(jPanel15);
             }
             jTabbedPane1.addTab("Map Buildings Editor", jPanel13);
+
+            //======== jPanel7 ========
+            {
+                jPanel7.setLayout(new MigLayout(
+                    "insets 05 5 5 5,hidemode 3,gap 5 5",
+                    // columns
+                    "[grow,fill]" +
+                    "[grow,fill]",
+                    // rows
+                    "[grow,fill]"));
+
+                //======== jPanel10 ========
+                {
+                    jPanel10.setBorder(new TitledBorder("Building Tileset Selector (areabm_texset.narc)"));
+                    jPanel10.setLayout(new MigLayout(
+                        "insets 5,hidemode 3,gap 5 5",
+                        // columns
+                        "[368,fill]" +
+                        "[353,grow,fill]",
+                        // rows
+                        "[fill]" +
+                        "[grow,fill]"));
+
+                    //======== jScrollPane6 ========
+                    {
+                        jScrollPane6.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                        jScrollPane6.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+                        //---- jlBuildTsetList ----
+                        jlBuildTsetList.setModel(new AbstractListModel<String>() {
+                            String[] values = {
+
+                            };
+                            @Override
+                            public int getSize() { return values.length; }
+                            @Override
+                            public String getElementAt(int i) { return values[i]; }
+                        });
+                        jlBuildTsetList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                        jlBuildTsetList.addListSelectionListener(e -> jlBuildTsetListValueChanged(e));
+                        jScrollPane6.setViewportView(jlBuildTsetList);
+                    }
+                    jPanel10.add(jScrollPane6, "cell 1 1");
+
+                    //---- jLabel10 ----
+                    jLabel10.setIcon(new ImageIcon(getClass().getResource("/icons/MaterialIcon.png")));
+                    jLabel10.setText("Building Tileset List:");
+                    jPanel10.add(jLabel10, "cell 1 0");
+
+                    //======== panel8 ========
+                    {
+                        panel8.setLayout(new GridBagLayout());
+                        ((GridBagLayout)panel8.getLayout()).columnWidths = new int[] {0, 0};
+                        ((GridBagLayout)panel8.getLayout()).rowHeights = new int[] {0, 0, 0, 0, 0, 0};
+                        ((GridBagLayout)panel8.getLayout()).columnWeights = new double[] {1.0, 1.0E-4};
+                        ((GridBagLayout)panel8.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4};
+
+                        //---- jbAddTset ----
+                        jbAddTset.setIcon(new ImageIcon(getClass().getResource("/icons/AddIcon.png")));
+                        jbAddTset.setText("Add Tileset");
+                        jbAddTset.setHorizontalAlignment(SwingConstants.LEFT);
+                        jbAddTset.addActionListener(e -> jbAddTsetActionPerformed(e));
+                        panel8.add(jbAddTset, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //---- jbAddEmptyTileset ----
+                        jbAddEmptyTileset.setIcon(new ImageIcon(getClass().getResource("/icons/AddIcon.png")));
+                        jbAddEmptyTileset.setText("Add Empty Tileset");
+                        jbAddEmptyTileset.setHorizontalAlignment(SwingConstants.LEFT);
+                        jbAddEmptyTileset.addActionListener(e -> jbAddEmptyTilesetActionPerformed(e));
+                        panel8.add(jbAddEmptyTileset, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //---- jbReplaceTset ----
+                        jbReplaceTset.setIcon(new ImageIcon(getClass().getResource("/icons/ReplaceIcon.png")));
+                        jbReplaceTset.setText("Replace Tileset");
+                        jbReplaceTset.setHorizontalAlignment(SwingConstants.LEFT);
+                        jbReplaceTset.addActionListener(e -> jbReplaceTsetActionPerformed(e));
+                        panel8.add(jbReplaceTset, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //---- jbExportTileset ----
+                        jbExportTileset.setIcon(new ImageIcon(getClass().getResource("/icons/ExportIcon.png")));
+                        jbExportTileset.setText("Export Tileset");
+                        jbExportTileset.setHorizontalAlignment(SwingConstants.LEFT);
+                        jbExportTileset.addActionListener(e -> jbExportTilesetActionPerformed(e));
+                        panel8.add(jbExportTileset, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //---- jbRemoveTset ----
+                        jbRemoveTset.setIcon(new ImageIcon(getClass().getResource("/icons/RemoveIcon.png")));
+                        jbRemoveTset.setText("Remove Tileset");
+                        jbRemoveTset.setEnabled(false);
+                        jbRemoveTset.setHorizontalAlignment(SwingConstants.LEFT);
+                        jbRemoveTset.addActionListener(e -> jbRemoveTsetActionPerformed(e));
+                        panel8.add(jbRemoveTset, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 0, 0), 0, 0));
+                    }
+                    jPanel10.add(panel8, "cell 1 1");
+                }
+                jPanel7.add(jPanel10, "cell 0 0");
+
+                //======== jPanel11 ========
+                {
+                    jPanel11.setBorder(new TitledBorder("Building Tileset Properties (area_build.narc)"));
+                    jPanel11.setLayout(new MigLayout(
+                        "insets 05 5 5 5,hidemode 3,gap 5 5",
+                        // columns
+                        "[196,grow,fill]" +
+                        "[340,grow,fill]",
+                        // rows
+                        "[fill]" +
+                        "[fill]" +
+                        "[grow,fill]"));
+
+                    //---- jLabel9 ----
+                    jLabel9.setIcon(new ImageIcon(getClass().getResource("/icons/BuildingIcon.png")));
+                    jLabel9.setText("Buildings used by the Tileset:");
+                    jPanel11.add(jLabel9, "cell 0 0 2 1");
+
+                    //======== jScrollPane7 ========
+                    {
+                        jScrollPane7.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                        jScrollPane7.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+                        //---- jlAreaBuildList ----
+                        jlAreaBuildList.setModel(new AbstractListModel<String>() {
+                            String[] values = {
+
+                            };
+                            @Override
+                            public int getSize() { return values.length; }
+                            @Override
+                            public String getElementAt(int i) { return values[i]; }
+                        });
+                        jlAreaBuildList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                        jlAreaBuildList.addListSelectionListener(e -> jlAreaBuildListValueChanged(e));
+                        jScrollPane7.setViewportView(jlAreaBuildList);
+                    }
+                    jPanel11.add(jScrollPane7, "cell 0 1 1 2");
+
+                    //======== panel9 ========
+                    {
+                        panel9.setLayout(new GridBagLayout());
+                        ((GridBagLayout)panel9.getLayout()).columnWidths = new int[] {0, 0};
+                        ((GridBagLayout)panel9.getLayout()).rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0};
+                        ((GridBagLayout)panel9.getLayout()).columnWeights = new double[] {1.0, 1.0E-4};
+                        ((GridBagLayout)panel9.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4};
+
+                        //---- jbAddBuildToTset ----
+                        jbAddBuildToTset.setIcon(new ImageIcon(getClass().getResource("/icons/AddIcon.png")));
+                        jbAddBuildToTset.setText("Add Building");
+                        jbAddBuildToTset.setHorizontalAlignment(SwingConstants.LEFT);
+                        jbAddBuildToTset.addActionListener(e -> jbAddBuildToTsetActionPerformed(e));
+                        panel9.add(jbAddBuildToTset, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //---- jbReplaceBuildToTset ----
+                        jbReplaceBuildToTset.setIcon(new ImageIcon(getClass().getResource("/icons/ReplaceIcon.png")));
+                        jbReplaceBuildToTset.setText("Replace Building");
+                        jbReplaceBuildToTset.setHorizontalAlignment(SwingConstants.LEFT);
+                        jbReplaceBuildToTset.addActionListener(e -> jbReplaceBuildToTsetActionPerformed(e));
+                        panel9.add(jbReplaceBuildToTset, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //---- jbRemoveBuildToTset ----
+                        jbRemoveBuildToTset.setIcon(new ImageIcon(getClass().getResource("/icons/RemoveIcon.png")));
+                        jbRemoveBuildToTset.setText("Remove Building");
+                        jbRemoveBuildToTset.setHorizontalAlignment(SwingConstants.LEFT);
+                        jbRemoveBuildToTset.addActionListener(e -> jbRemoveBuildToTsetActionPerformed(e));
+                        panel9.add(jbRemoveBuildToTset, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //---- jbAddTexToNsbtx ----
+                        jbAddTexToNsbtx.setIcon(new ImageIcon(getClass().getResource("/icons/AddIcon.png")));
+                        jbAddTexToNsbtx.setText("Add Texs & Pals to NSBTX");
+                        jbAddTexToNsbtx.setHorizontalAlignment(SwingConstants.LEFT);
+                        jbAddTexToNsbtx.addActionListener(e -> jbAddTexToNsbtxActionPerformed(e));
+                        panel9.add(jbAddTexToNsbtx, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //---- jbRemoveTextures ----
+                        jbRemoveTextures.setIcon(new ImageIcon(getClass().getResource("/icons/RemoveIcon.png")));
+                        jbRemoveTextures.setText("Remove Tex & Pals from NSBTX");
+                        jbRemoveTextures.setToolTipText("");
+                        jbRemoveTextures.setHorizontalAlignment(SwingConstants.LEFT);
+                        jbRemoveTextures.addActionListener(e -> jbRemoveTexturesActionPerformed(e));
+                        panel9.add(jbRemoveTextures, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 5, 0), 0, 0));
+
+                        //---- jbRemoveAllUnusedTexPals ----
+                        jbRemoveAllUnusedTexPals.setIcon(new ImageIcon(getClass().getResource("/icons/RemoveIcon.png")));
+                        jbRemoveAllUnusedTexPals.setText("Removed All Unused Tex & Pals");
+                        jbRemoveAllUnusedTexPals.setHorizontalAlignment(SwingConstants.LEFT);
+                        jbRemoveAllUnusedTexPals.addActionListener(e -> jbRemoveAllUnusedTexPalsActionPerformed(e));
+                        panel9.add(jbRemoveAllUnusedTexPals, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                            new Insets(0, 0, 0, 0), 0, 0));
+                    }
+                    jPanel11.add(panel9, "cell 1 1");
+
+                    //======== nitroDisplayAreaData ========
+                    {
+                        nitroDisplayAreaData.setBorder(new LineBorder(new Color(102, 102, 102)));
+
+                        GroupLayout nitroDisplayAreaDataLayout = new GroupLayout(nitroDisplayAreaData);
+                        nitroDisplayAreaData.setLayout(nitroDisplayAreaDataLayout);
+                        nitroDisplayAreaDataLayout.setHorizontalGroup(
+                            nitroDisplayAreaDataLayout.createParallelGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                        );
+                        nitroDisplayAreaDataLayout.setVerticalGroup(
+                            nitroDisplayAreaDataLayout.createParallelGroup()
+                                .addGap(0, 322, Short.MAX_VALUE)
+                        );
+                    }
+                    jPanel11.add(nitroDisplayAreaData, "cell 1 2");
+                }
+                jPanel7.add(jPanel11, "cell 1 0");
+            }
+            jTabbedPane1.addTab("Building Tileset Editor", jPanel7);
         }
         contentPane.add(jTabbedPane1, "cell 0 0");
+
+        //======== panel1 ========
+        {
+            panel1.setLayout(new MigLayout(
+                "insets 0,hidemode 3,gap 5 5",
+                // columns
+                "[364:n,grow,fill]" +
+                "[fill]" +
+                "[600,fill]" +
+                "[fill]" +
+                "[fill]",
+                // rows
+                "[fill]"));
+
+            //---- jLabel21 ----
+            jLabel21.setText("Models Selected:");
+            panel1.add(jLabel21, "");
+
+            //---- jcbModelsSelected ----
+            jcbModelsSelected.setModel(new DefaultComboBoxModel<>(new String[] {
+                "Outdoor Models",
+                "Indoor Models"
+            }));
+            jcbModelsSelected.addActionListener(e -> jcbModelsSelectedActionPerformed(e));
+            panel1.add(jcbModelsSelected, "cell 0 0");
+
+            //---- jsCurrAB ----
+            jsCurrAB.setModel(new SpinnerNumberModel(0, 0, null, 1));
+            jsCurrAB.addChangeListener(e -> jsCurrABStateChanged(e));
+            panel1.add(jsCurrAB, "cell 1 0 2 1");
+
+            //---- jbSaveAll ----
+            jbSaveAll.setText("Save All");
+            jbSaveAll.setMaximumSize(null);
+            jbSaveAll.setMinimumSize(null);
+            jbSaveAll.setPreferredSize(new Dimension(100, 30));
+            jbSaveAll.setIcon(new ImageIcon(getClass().getResource("/icons/saveMapIconSmall.png")));
+            jbSaveAll.addActionListener(e -> jbSaveAllActionPerformed(e));
+            panel1.add(jbSaveAll, "cell 3 0");
+
+            //---- jbCancel ----
+            jbCancel.setText("Close");
+            jbCancel.setPreferredSize(new Dimension(100, 30));
+            jbCancel.addActionListener(e -> jbCancelActionPerformed(e));
+            panel1.add(jbCancel, "cell 4 0");
+        }
+        contentPane.add(panel1, "cell 0 1,gapx 5 5,gapy 5 5");
         pack();
         setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
+    // Generated using JFormDesigner Evaluation license - Tungsten
     private JTabbedPane jTabbedPane1;
     private JPanel jPanel3;
     private JPanel jPanel1;
     private JLabel jLabel4;
-    private NitroDisplayGL nitroDisplayGL;
+    private NitroDisplayGL nitroDisplayBuildingEditor;
     private JScrollPane jScrollPane1;
     private JList<String> jlBuildModel;
     private JPanel panel2;
@@ -1070,13 +1458,22 @@ public class BuildingEditorDialogWB extends JDialog {
     private JScrollPane jScrollPane3;
     private JList<String> jlSelectedAnimationsList;
     private JPanel panel5;
-    private JButton jbAddAnimToBuild;
-    private JButton jbReplaceAnimToBuild;
-    private JButton jbRemoveAnimToBuild;
     private JButton jbPlay;
+    private JButton jbAddAnimToBuild;
+    private JButton jbRemoveAnimToBuild;
+    private JButton jbReplaceAnimToBuild;
+    private JButton jbPlay2;
+    private JScrollPane scrollPane1;
+    private JPanel panel6;
+    private JLabel jLabel12;
+    private JSpinner jsControllerFunc;
+    private JLabel jLabel25;
+    private JSpinner jsAnimPerSet;
+    private JLabel jLabel23;
+    private JSpinner jsAnimType;
     private JPanel jPanel13;
     private JPanel jPanel14;
-    private NitroDisplayGL nitroDisplayMap;
+    private NitroDisplayGL nitroDisplayBuildingPosEditor;
     private JButton jbOpenMap;
     private JPanel jPanel15;
     private JPanel jPanel17;
@@ -1099,5 +1496,34 @@ public class BuildingEditorDialogWB extends JDialog {
     private JSpinner jsBuildZ;
     private JLabel jLabel17;
     private JSpinner jsRotation;
+    private JPanel jPanel7;
+    private JPanel jPanel10;
+    private JScrollPane jScrollPane6;
+    private JList<String> jlBuildTsetList;
+    private JLabel jLabel10;
+    private JPanel panel8;
+    private JButton jbAddTset;
+    private JButton jbAddEmptyTileset;
+    private JButton jbReplaceTset;
+    private JButton jbExportTileset;
+    private JButton jbRemoveTset;
+    private JPanel jPanel11;
+    private JLabel jLabel9;
+    private JScrollPane jScrollPane7;
+    private JList<String> jlAreaBuildList;
+    private JPanel panel9;
+    private JButton jbAddBuildToTset;
+    private JButton jbReplaceBuildToTset;
+    private JButton jbRemoveBuildToTset;
+    private JButton jbAddTexToNsbtx;
+    private JButton jbRemoveTextures;
+    private JButton jbRemoveAllUnusedTexPals;
+    private NitroDisplayGL nitroDisplayAreaData;
+    private JPanel panel1;
+    private JLabel jLabel21;
+    private JComboBox<String> jcbModelsSelected;
+    private JSpinner jsCurrAB;
+    private JButton jbSaveAll;
+    private JButton jbCancel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

@@ -13,18 +13,18 @@ public class FX32 {
         return val;
     }
 
-    public float GetValueAsFloat()
-    {
-        return val * 4096;
-    }
-
     public void SetValue(int val)
     {
         this.val = val;
     }
 
-    public static int TryParse(float val)
+    public float GetValueAsFloat()
     {
-        return (int) (val / 4096);
+        return val / 4096f;
+    }
+
+    public static FX32 TryParse(double val)
+    {
+        return new FX32((int) (val * 4096f));
     }
 }
