@@ -561,7 +561,7 @@ public class BuildingEditorDialogWB extends JDialog {
         // TODO add your code here
     }
 
-    private void button1ActionPerformed(ActionEvent e) {
+    private void exportABButtonPressed(ActionEvent e) {
         // TODO add your code here
     }
 
@@ -687,12 +687,13 @@ public class BuildingEditorDialogWB extends JDialog {
 
             //======== jPanel3 ========
             {
-                jPanel3.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax.swing.border.
-                EmptyBorder(0,0,0,0), "JF\u006frmDesi\u0067ner Ev\u0061luatio\u006e",javax.swing.border.TitledBorder.CENTER,javax.swing
-                .border.TitledBorder.BOTTOM,new java.awt.Font("Dialo\u0067",java.awt.Font.BOLD,12),
-                java.awt.Color.red),jPanel3. getBorder()));jPanel3. addPropertyChangeListener(new java.beans.PropertyChangeListener()
-                {@Override public void propertyChange(java.beans.PropertyChangeEvent e){if("borde\u0072".equals(e.getPropertyName()))
-                throw new RuntimeException();}});
+                jPanel3.setBorder ( new javax . swing. border .CompoundBorder ( new javax . swing. border .TitledBorder ( new javax
+                . swing. border .EmptyBorder ( 0, 0 ,0 , 0) ,  "JF\u006frmDes\u0069gner \u0045valua\u0074ion" , javax. swing
+                .border . TitledBorder. CENTER ,javax . swing. border .TitledBorder . BOTTOM, new java. awt .
+                Font ( "D\u0069alog", java .awt . Font. BOLD ,12 ) ,java . awt. Color .red
+                ) ,jPanel3. getBorder () ) ); jPanel3. addPropertyChangeListener( new java. beans .PropertyChangeListener ( ){ @Override
+                public void propertyChange (java . beans. PropertyChangeEvent e) { if( "\u0062order" .equals ( e. getPropertyName (
+                ) ) )throw new RuntimeException( ) ;} } );
                 jPanel3.setLayout(new MigLayout(
                     "insets 5,hidemode 3,gap 5 5",
                     // columns
@@ -814,7 +815,7 @@ public class BuildingEditorDialogWB extends JDialog {
 
                         //---- button1 ----
                         button1.setText("Export Building Pack");
-                        button1.addActionListener(e -> button1ActionPerformed(e));
+                        button1.addActionListener(e -> exportABButtonPressed(e));
                         panel2.add(button1, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0,
                             GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                             new Insets(0, 0, 0, 0), 0, 0));
