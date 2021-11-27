@@ -126,7 +126,6 @@ new FormModel {
 								} )
 								add( new FormComponent( "javax.swing.JSpinner" ) {
 									name: "jsBuildID"
-									addEvent( new FormEvent( "javax.swing.event.ChangeListener", "stateChanged", "jsBuildIDStateChanged", true ) )
 								}, new FormLayoutConstraints( class java.lang.String ) {
 									"value": "right"
 								} )
@@ -146,7 +145,6 @@ new FormModel {
 								} )
 								add( new FormComponent( "javax.swing.JSpinner" ) {
 									name: "jsBuildType"
-									addEvent( new FormEvent( "javax.swing.event.ChangeListener", "stateChanged", "jsBuildTypeStateChanged", true ) )
 								}, new FormLayoutConstraints( class java.lang.String ) {
 									"value": "right"
 								} )
@@ -166,7 +164,6 @@ new FormModel {
 								} )
 								add( new FormComponent( "javax.swing.JSpinner" ) {
 									name: "jsBuildDoorID"
-									addEvent( new FormEvent( "javax.swing.event.ChangeListener", "stateChanged", "jsBuildDoorIDStateChanged", true ) )
 								}, new FormLayoutConstraints( class java.lang.String ) {
 									"value": "right"
 								} )
@@ -186,7 +183,6 @@ new FormModel {
 								} )
 								add( new FormComponent( "javax.swing.JSpinner" ) {
 									name: "jsBuildDoorX"
-									addEvent( new FormEvent( "javax.swing.event.ChangeListener", "stateChanged", "jsBuildDoorXStateChanged", true ) )
 								}, new FormLayoutConstraints( class java.lang.String ) {
 									"value": "right"
 								} )
@@ -206,7 +202,6 @@ new FormModel {
 								} )
 								add( new FormComponent( "javax.swing.JSpinner" ) {
 									name: "jsBuildDoorY"
-									addEvent( new FormEvent( "javax.swing.event.ChangeListener", "stateChanged", "jsBuildDoorYStateChanged", true ) )
 								}, new FormLayoutConstraints( class java.lang.String ) {
 									"value": "right"
 								} )
@@ -226,7 +221,6 @@ new FormModel {
 								} )
 								add( new FormComponent( "javax.swing.JSpinner" ) {
 									name: "jsBuildDoorZ"
-									addEvent( new FormEvent( "javax.swing.event.ChangeListener", "stateChanged", "jsBuildDoorZStateChanged", true ) )
 								}, new FormLayoutConstraints( class java.lang.String ) {
 									"value": "right"
 								} )
@@ -246,7 +240,6 @@ new FormModel {
 								} )
 								add( new FormComponent( "javax.swing.JSpinner" ) {
 									name: "jsBuildUnknown"
-									addEvent( new FormEvent( "javax.swing.event.ChangeListener", "stateChanged", "jsBuildUnknownStateChanged", true ) )
 								}, new FormLayoutConstraints( class java.lang.String ) {
 									"value": "right"
 								} )
@@ -266,7 +259,6 @@ new FormModel {
 								} )
 								add( new FormComponent( "javax.swing.JSpinner" ) {
 									name: "jsBuildUnknown2"
-									addEvent( new FormEvent( "javax.swing.event.ChangeListener", "stateChanged", "jsBuildUnknown2StateChanged", true ) )
 								}, new FormLayoutConstraints( class java.lang.String ) {
 									"value": "right"
 								} )
@@ -404,7 +396,6 @@ new FormModel {
 									} )
 									add( new FormComponent( "javax.swing.JSpinner" ) {
 										name: "jsAnimPerSet"
-										addEvent( new FormEvent( "javax.swing.event.ChangeListener", "stateChanged", "jsAnimPerSetStateChanged", true ) )
 									}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 										"value": "cell 1 1"
 									} )

@@ -19,6 +19,7 @@ import nitroreader.shared.G3Dreader;
 import renderer.NitroDisplayGL;
 import renderer.ObjectGL;
 import utils.Utils;
+import utils.listeners.ToggleableChangeListener;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -67,6 +68,15 @@ public class BuildingEditorDialogWB extends JDialog {
             buildHandler.loadAllFiles();
             SwitchABType();
             nitroDisplayBuildingPosEditor.requestUpdate();
+            jsBuildID.addChangeListener(jsBuildIDStateChanged);
+            jsBuildType.addChangeListener(jsBuildTypeStateChanged);
+            jsBuildDoorID.addChangeListener(jsBuildDoorIDStateChanged);
+            jsBuildDoorX.addChangeListener(jsBuildDoorXStateChanged);
+            jsBuildDoorY.addChangeListener(jsBuildDoorYStateChanged);
+            jsBuildDoorZ.addChangeListener(jsBuildDoorZStateChanged);
+            jsBuildUnknown.addChangeListener(jsBuildUnknownStateChanged);
+            jsBuildUnknown2.addChangeListener(jsBuildUnknown2StateChanged);
+            jsAnimPerSet.addChangeListener(jsAnimPerSetStateChanged);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "There was a problem reading some of the files.",
                     "Error opening game files", JOptionPane.ERROR_MESSAGE);
@@ -311,22 +321,33 @@ public class BuildingEditorDialogWB extends JDialog {
 
     private void jlBuildModelValueChanged(ListSelectionEvent e) {
         if (jlBuildModelEnabled.value) {
+            ABEntry Current = currAB.getABEntry(jlBuildModel.getSelectedIndex());
             UpdateNSBMD();
             UpdateAnimationList(jlBuildModel.getSelectedIndex());
             nitroDisplayBuildingEditor.fitCameraToModel(0);
             nitroDisplayBuildingEditor.requestUpdate();
-            if (!e.getValueIsAdjusting()) {
-                jsBuildID.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).ID);
-                jsBuildType.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).Type);
-                jsBuildDoorID.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).DoorID);
-                jsBuildDoorX.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).X);
-                jsBuildDoorY.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).Y);
-                jsBuildDoorZ.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).Z);
-                jsBuildUnknown.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).Unused);
-                jsBuildUnknown2.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).Unused2);
-                jsBuildAnimationType.setSelectedIndex(currAB.getABEntry(jlBuildModel.getSelectedIndex()).ControllerFunc);
-                jsAnimPerSet.setValue(currAB.getABEntry(jlBuildModel.getSelectedIndex()).AnimCountPerAnimSet);
-            }
+            ToggleableChangeListener.setAllowEventsMulti(false,
+                    jsBuildIDStateChanged, jsBuildTypeStateChanged,
+                    jsBuildDoorIDStateChanged, jsBuildDoorXStateChanged,
+                    jsBuildDoorYStateChanged, jsBuildDoorZStateChanged,
+                    jsBuildUnknownStateChanged, jsBuildUnknown2StateChanged,
+                    jsAnimPerSetStateChanged);
+            jsBuildID.setValue(Current.ID);
+            jsBuildType.setValue(Current.Type);
+            jsBuildDoorID.setValue(Current.DoorID);
+            jsBuildDoorX.setValue(Current.X);
+            jsBuildDoorY.setValue(Current.Y);
+            jsBuildDoorZ.setValue(Current.Z);
+            jsBuildUnknown.setValue(Current.Unused);
+            jsBuildUnknown2.setValue(Current.Unused2);
+            jsBuildAnimationType.setSelectedIndex(Current.ControllerFunc);
+            jsAnimPerSet.setValue(Current.AnimCountPerAnimSet);
+            ToggleableChangeListener.setAllowEventsMulti(true,
+                    jsBuildIDStateChanged, jsBuildTypeStateChanged,
+                    jsBuildDoorIDStateChanged, jsBuildDoorXStateChanged,
+                    jsBuildDoorYStateChanged, jsBuildDoorZStateChanged,
+                    jsBuildUnknownStateChanged, jsBuildUnknown2StateChanged,
+                    jsAnimPerSetStateChanged);
         }
     }
 
@@ -588,77 +609,95 @@ public class BuildingEditorDialogWB extends JDialog {
         }
     }
 
-    private void jsAnimPerSetStateChanged(ChangeEvent e) {
-        if (jlBuildModel.getSelectedIndex() > -1) {
-            SpinnerNumberModel V = (SpinnerNumberModel) jsAnimPerSet.getModel();
-            currAB.getABEntry(jlBuildModel.getSelectedIndex()).AnimCountPerAnimSet = V.getNumber().byteValue();
+    private ToggleableChangeListener jsAnimPerSetStateChanged = new ToggleableChangeListener() {
+        @Override
+        public void onApprovedStateChange(ChangeEvent e) {
+            if (jlBuildModel.getSelectedIndex() > -1) {
+                SpinnerNumberModel V = (SpinnerNumberModel) jsAnimPerSet.getModel();
+                currAB.getABEntry(jlBuildModel.getSelectedIndex()).AnimCountPerAnimSet = V.getNumber().byteValue();
+            }
         }
-    }
+    };
 
-    private void jsBuildIDStateChanged(ChangeEvent e) {
-        if (jlBuildModel.getSelectedIndex() > -1) {
-            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildID.getModel();
-            currAB.getABEntry(jlBuildModel.getSelectedIndex()).ID = V.getNumber().shortValue();
-            RefreshBuildingPack();
+    private ToggleableChangeListener jsBuildIDStateChanged = new ToggleableChangeListener() {
+        @Override
+        public void onApprovedStateChange(ChangeEvent e) {
+            if (jlBuildModel.getSelectedIndex() > -1) {
+                SpinnerNumberModel V = (SpinnerNumberModel) jsBuildID.getModel();
+                currAB.getABEntry(jlBuildModel.getSelectedIndex()).ID = V.getNumber().shortValue();
+            }
         }
-    }
+    };
 
-    private void jsBuildTypeStateChanged(ChangeEvent e) {
-        if (jlBuildModel.getSelectedIndex() > -1) {
-            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildType.getModel();
-            currAB.getABEntry(jlBuildModel.getSelectedIndex()).Type = V.getNumber().shortValue();
-            RefreshBuildingPack();
+    private ToggleableChangeListener jsBuildTypeStateChanged = new ToggleableChangeListener() {
+        @Override
+        public void onApprovedStateChange(ChangeEvent e) {
+            if (jlBuildModel.getSelectedIndex() > -1) {
+                SpinnerNumberModel V = (SpinnerNumberModel) jsBuildType.getModel();
+                currAB.getABEntry(jlBuildModel.getSelectedIndex()).Type = V.getNumber().shortValue();
+            }
         }
-    }
+    };
 
-    private void jsBuildDoorIDStateChanged(ChangeEvent e) {
-        if (jlBuildModel.getSelectedIndex() > -1) {
-            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildDoorID.getModel();
-            currAB.getABEntry(jlBuildModel.getSelectedIndex()).DoorID = V.getNumber().shortValue();
-            RefreshBuildingPack();
+    private ToggleableChangeListener jsBuildDoorIDStateChanged = new ToggleableChangeListener() {
+        @Override
+        public void onApprovedStateChange(ChangeEvent e) {
+            if (jlBuildModel.getSelectedIndex() > -1) {
+                SpinnerNumberModel V = (SpinnerNumberModel) jsBuildDoorID.getModel();
+                currAB.getABEntry(jlBuildModel.getSelectedIndex()).DoorID = V.getNumber().shortValue();
+            }
         }
-    }
+    };
 
-    private void jsBuildDoorXStateChanged(ChangeEvent e) {
-        if (jlBuildModel.getSelectedIndex() > -1) {
-            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildDoorX.getModel();
-            currAB.getABEntry(jlBuildModel.getSelectedIndex()).X = V.getNumber().shortValue();
-            RefreshBuildingPack();
+    private ToggleableChangeListener jsBuildDoorXStateChanged = new ToggleableChangeListener() {
+        @Override
+        public void onApprovedStateChange(ChangeEvent e) {
+            if (jlBuildModel.getSelectedIndex() > -1) {
+                SpinnerNumberModel V = (SpinnerNumberModel) jsBuildDoorX.getModel();
+                currAB.getABEntry(jlBuildModel.getSelectedIndex()).X = V.getNumber().shortValue();
+            }
         }
-    }
+    };
 
-    private void jsBuildDoorYStateChanged(ChangeEvent e) {
-        if (jlBuildModel.getSelectedIndex() > -1) {
-            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildDoorY.getModel();
-            currAB.getABEntry(jlBuildModel.getSelectedIndex()).Y = V.getNumber().shortValue();
-            RefreshBuildingPack();
+    private ToggleableChangeListener jsBuildDoorYStateChanged = new ToggleableChangeListener() {
+        @Override
+        public void onApprovedStateChange(ChangeEvent e) {
+            if (jlBuildModel.getSelectedIndex() > -1) {
+                SpinnerNumberModel V = (SpinnerNumberModel) jsBuildDoorY.getModel();
+                currAB.getABEntry(jlBuildModel.getSelectedIndex()).Y = V.getNumber().shortValue();
+            }
         }
-    }
+    };
 
-    private void jsBuildDoorZStateChanged(ChangeEvent e) {
-        if (jlBuildModel.getSelectedIndex() > -1) {
-            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildDoorZ.getModel();
-            currAB.getABEntry(jlBuildModel.getSelectedIndex()).Z = V.getNumber().shortValue();
-            RefreshBuildingPack();
+    private ToggleableChangeListener jsBuildDoorZStateChanged = new ToggleableChangeListener() {
+        @Override
+        public void onApprovedStateChange(ChangeEvent e) {
+            if (jlBuildModel.getSelectedIndex() > -1) {
+                SpinnerNumberModel V = (SpinnerNumberModel) jsBuildDoorZ.getModel();
+                currAB.getABEntry(jlBuildModel.getSelectedIndex()).Z = V.getNumber().shortValue();
+            }
         }
-    }
+    };
 
-    private void jsBuildUnknownStateChanged(ChangeEvent e) {
-        if (jlBuildModel.getSelectedIndex() > -1) {
-            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildUnknown.getModel();
-            currAB.getABEntry(jlBuildModel.getSelectedIndex()).Unused = V.getNumber().shortValue();
-            RefreshBuildingPack();
+    private ToggleableChangeListener jsBuildUnknownStateChanged = new ToggleableChangeListener() {
+        @Override
+        public void onApprovedStateChange(ChangeEvent e) {
+            if (jlBuildModel.getSelectedIndex() > -1) {
+                SpinnerNumberModel V = (SpinnerNumberModel) jsBuildUnknown.getModel();
+                currAB.getABEntry(jlBuildModel.getSelectedIndex()).Unused = V.getNumber().shortValue();
+            }
         }
-    }
+    };
 
-    private void jsBuildUnknown2StateChanged(ChangeEvent e) {
-        if (jlBuildModel.getSelectedIndex() > -1) {
-            SpinnerNumberModel V = (SpinnerNumberModel) jsBuildUnknown2.getModel();
-            currAB.getABEntry(jlBuildModel.getSelectedIndex()).Unused2 = V.getNumber().shortValue();
-            RefreshBuildingPack();
+    private ToggleableChangeListener jsBuildUnknown2StateChanged = new ToggleableChangeListener() {
+        @Override
+        public void onApprovedStateChange(ChangeEvent e) {
+            if (jlBuildModel.getSelectedIndex() > -1) {
+                SpinnerNumberModel V = (SpinnerNumberModel) jsBuildUnknown2.getModel();
+                currAB.getABEntry(jlBuildModel.getSelectedIndex()).Unused2 = V.getNumber().shortValue();
+            }
         }
-    }
-
+    };
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
@@ -790,13 +829,12 @@ public class BuildingEditorDialogWB extends JDialog {
 
             //======== jPanel3 ========
             {
-                jPanel3.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax.
-                swing.border.EmptyBorder(0,0,0,0), "JFor\u006dDesi\u0067ner \u0045valu\u0061tion",javax.swing.border
-                .TitledBorder.CENTER,javax.swing.border.TitledBorder.BOTTOM,new java.awt.Font("Dia\u006cog"
-                ,java.awt.Font.BOLD,12),java.awt.Color.red),jPanel3. getBorder
-                ()));jPanel3. addPropertyChangeListener(new java.beans.PropertyChangeListener(){@Override public void propertyChange(java
-                .beans.PropertyChangeEvent e){if("bord\u0065r".equals(e.getPropertyName()))throw new RuntimeException
-                ();}});
+                jPanel3.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax. swing. border
+                . EmptyBorder( 0, 0, 0, 0) , "JF\u006frmD\u0065sig\u006eer \u0045val\u0075ati\u006fn", javax. swing. border. TitledBorder. CENTER, javax
+                . swing. border. TitledBorder. BOTTOM, new java .awt .Font ("Dia\u006cog" ,java .awt .Font .BOLD ,
+                12 ), java. awt. Color. red) ,jPanel3. getBorder( )) ); jPanel3. addPropertyChangeListener (new java. beans
+                . PropertyChangeListener( ){ @Override public void propertyChange (java .beans .PropertyChangeEvent e) {if ("\u0062ord\u0065r" .equals (e .
+                getPropertyName () )) throw new RuntimeException( ); }} );
                 jPanel3.setLayout(new MigLayout(
                     "insets 5,hidemode 3,gap 5 5",
                     // columns
@@ -925,9 +963,6 @@ public class BuildingEditorDialogWB extends JDialog {
                             label2.setText("ID");
                             label2.setHorizontalAlignment(SwingConstants.CENTER);
                             splitPane2.setLeftComponent(label2);
-
-                            //---- jsBuildID ----
-                            jsBuildID.addChangeListener(e -> jsBuildIDStateChanged(e));
                             splitPane2.setRightComponent(jsBuildID);
                         }
                         panel2.add(splitPane2, new GridBagConstraints(0, 8, 1, 1, 0.0, 0.0,
@@ -943,9 +978,6 @@ public class BuildingEditorDialogWB extends JDialog {
                             label3.setText("Type");
                             label3.setHorizontalAlignment(SwingConstants.CENTER);
                             splitPane3.setLeftComponent(label3);
-
-                            //---- jsBuildType ----
-                            jsBuildType.addChangeListener(e -> jsBuildTypeStateChanged(e));
                             splitPane3.setRightComponent(jsBuildType);
                         }
                         panel2.add(splitPane3, new GridBagConstraints(0, 9, 1, 1, 0.0, 0.0,
@@ -961,9 +993,6 @@ public class BuildingEditorDialogWB extends JDialog {
                             label4.setText("Door ID");
                             label4.setHorizontalAlignment(SwingConstants.CENTER);
                             splitPane4.setLeftComponent(label4);
-
-                            //---- jsBuildDoorID ----
-                            jsBuildDoorID.addChangeListener(e -> jsBuildDoorIDStateChanged(e));
                             splitPane4.setRightComponent(jsBuildDoorID);
                         }
                         panel2.add(splitPane4, new GridBagConstraints(0, 10, 1, 1, 0.0, 0.0,
@@ -979,9 +1008,6 @@ public class BuildingEditorDialogWB extends JDialog {
                             label5.setText("Door X");
                             label5.setHorizontalAlignment(SwingConstants.CENTER);
                             splitPane5.setLeftComponent(label5);
-
-                            //---- jsBuildDoorX ----
-                            jsBuildDoorX.addChangeListener(e -> jsBuildDoorXStateChanged(e));
                             splitPane5.setRightComponent(jsBuildDoorX);
                         }
                         panel2.add(splitPane5, new GridBagConstraints(0, 11, 1, 1, 0.0, 0.0,
@@ -997,9 +1023,6 @@ public class BuildingEditorDialogWB extends JDialog {
                             label6.setText("Door Y");
                             label6.setHorizontalAlignment(SwingConstants.CENTER);
                             splitPane6.setLeftComponent(label6);
-
-                            //---- jsBuildDoorY ----
-                            jsBuildDoorY.addChangeListener(e -> jsBuildDoorYStateChanged(e));
                             splitPane6.setRightComponent(jsBuildDoorY);
                         }
                         panel2.add(splitPane6, new GridBagConstraints(0, 12, 1, 1, 0.0, 0.0,
@@ -1015,9 +1038,6 @@ public class BuildingEditorDialogWB extends JDialog {
                             label7.setText("Door Z");
                             label7.setHorizontalAlignment(SwingConstants.CENTER);
                             splitPane7.setLeftComponent(label7);
-
-                            //---- jsBuildDoorZ ----
-                            jsBuildDoorZ.addChangeListener(e -> jsBuildDoorZStateChanged(e));
                             splitPane7.setRightComponent(jsBuildDoorZ);
                         }
                         panel2.add(splitPane7, new GridBagConstraints(0, 13, 1, 1, 0.0, 0.0,
@@ -1033,9 +1053,6 @@ public class BuildingEditorDialogWB extends JDialog {
                             label8.setText("Unknown");
                             label8.setHorizontalAlignment(SwingConstants.CENTER);
                             splitPane8.setLeftComponent(label8);
-
-                            //---- jsBuildUnknown ----
-                            jsBuildUnknown.addChangeListener(e -> jsBuildUnknownStateChanged(e));
                             splitPane8.setRightComponent(jsBuildUnknown);
                         }
                         panel2.add(splitPane8, new GridBagConstraints(0, 14, 1, 1, 0.0, 0.0,
@@ -1051,9 +1068,6 @@ public class BuildingEditorDialogWB extends JDialog {
                             label9.setText("Unknown 2");
                             label9.setHorizontalAlignment(SwingConstants.CENTER);
                             splitPane9.setLeftComponent(label9);
-
-                            //---- jsBuildUnknown2 ----
-                            jsBuildUnknown2.addChangeListener(e -> jsBuildUnknown2StateChanged(e));
                             splitPane9.setRightComponent(jsBuildUnknown2);
                         }
                         panel2.add(splitPane9, new GridBagConstraints(0, 15, 1, 1, 0.0, 0.0,
@@ -1201,9 +1215,6 @@ public class BuildingEditorDialogWB extends JDialog {
                                 //---- jLabel25 ----
                                 jLabel25.setText("Animations Per Set");
                                 panel6.add(jLabel25, "cell 0 1");
-
-                                //---- jsAnimPerSet ----
-                                jsAnimPerSet.addChangeListener(e -> jsAnimPerSetStateChanged(e));
                                 panel6.add(jsAnimPerSet, "cell 1 1");
                             }
                             scrollPane1.setViewportView(panel6);
