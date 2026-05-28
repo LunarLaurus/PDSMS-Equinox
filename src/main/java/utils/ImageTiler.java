@@ -1,19 +1,15 @@
 
 package utils;
 
-import java.awt.Image;
+import tileset.Tile;
+import tileset.Tileset;
+
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import javax.imageio.ImageIO;
-
-import tileset.Tile;
-import tileset.Tileset;
-import tileset.TilesetMaterial;
 
 /**
  * @author Trifindo

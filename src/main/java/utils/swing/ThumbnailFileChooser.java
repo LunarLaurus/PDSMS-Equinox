@@ -5,7 +5,9 @@ package utils.swing;
  * @author Trifindo
  */
 
-import java.awt.Image;
+import javax.swing.*;
+import javax.swing.filechooser.FileView;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Map;
@@ -13,13 +15,6 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JFileChooser;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.filechooser.FileView;
 
 public class ThumbnailFileChooser extends JFileChooser {
 

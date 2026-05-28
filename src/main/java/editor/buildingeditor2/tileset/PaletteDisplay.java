@@ -3,11 +3,10 @@ package editor.buildingeditor2.tileset;
 import formats.nsbtx2.NsbtxPalette;
 import formats.nsbtx2.NsbtxTexture;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import javax.swing.*;
-import javax.swing.GroupLayout;
 
 /**
  * @author Trifindo, JackHack96

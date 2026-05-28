@@ -1,15 +1,10 @@
 package editor.mapmatrix;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-
 import editor.handler.MapEditorHandler;
-import editor.state.MapLayerState;
 
-import java.awt.Point;
-import net.miginfocom.swing.*;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 
 /**
  * @author Trifindo, JackHack96

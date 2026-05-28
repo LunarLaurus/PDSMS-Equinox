@@ -1,33 +1,27 @@
 
 package editor.handler;
 
-import editor.mapmatrix.MapMatrix;
-import editor.grid.MapGrid;
 import editor.MainFrame;
-import formats.backsound.Backsound;
-import formats.bdhc.Bdhc;
 import editor.bordermap.BorderMapsGrid;
 import editor.buildingeditor2.buildfile.BuildFile;
-import formats.bdhcam.Bdhcam;
-import formats.collisions.Collisions;
 import editor.game.Game;
+import editor.grid.MapGrid;
+import editor.mapmatrix.MapMatrix;
 import editor.smartdrawing.SmartGrid;
 import editor.state.MapLayerState;
 import editor.state.StateHandler;
-
-import java.awt.Color;
-import java.awt.Point;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.TreeSet;
-
+import formats.backsound.Backsound;
+import formats.bdhc.Bdhc;
+import formats.bdhcam.Bdhcam;
+import formats.collisions.Collisions;
 import tileset.Tile;
 import tileset.Tileset;
 import utils.Utils;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.*;
 
 /**
  * @author Trifindo

@@ -1,35 +1,25 @@
 package editor.vertexcolors;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
-import javax.swing.border.*;
-import javax.swing.event.*;
-
 import editor.handler.MapEditorHandler;
 import editor.tileseteditor.TilesetEditorHandler;
+import net.miginfocom.swing.MigLayout;
+import utils.Utils.MutableBoolean;
 
-import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.swing.JTextField;
+import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.SoftBevelBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
-import javax.swing.text.DocumentFilter.FilterBypass;
-import net.miginfocom.swing.*;
-
-import tileset.TileGeometryCompresser;
-import utils.Utils;
-import utils.Utils.MutableBoolean;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Trifindo, JackHack96

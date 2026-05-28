@@ -1,4 +1,4 @@
-# Pokemon DS Map Studio
+# Pokemon DS Map Studio - PlatinumMaster's Fork
 ![Java CI with Gradle](https://github.com/Trifindo/Pokemon-DS-Map-Studio/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=master)
 
 Pokemon DS Map Studio is a tool for creating NDS Pokémon maps, designed to be used alongside SDSME.

@@ -1,10 +1,17 @@
 package editor.gameselector;
 
-import tileset.TilesetRenderer;
 import editor.game.Game;
 import editor.handler.MapEditorHandler;
 import editor.smartdrawing.SmartGrid;
+import tileset.TextureNotFoundException;
+import tileset.Tileset;
+import tileset.TilesetIO;
+import tileset.TilesetRenderer;
+import utils.Utils;
 
+import javax.swing.*;
+import javax.swing.border.SoftBevelBorder;
+import javax.swing.event.ListSelectionEvent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
@@ -15,14 +22,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import javax.swing.*;
-import javax.swing.border.SoftBevelBorder;
-import javax.swing.event.ListSelectionEvent;
-
-import tileset.TextureNotFoundException;
-import tileset.Tileset;
-import tileset.TilesetIO;
-import utils.Utils;
 
 
 /**

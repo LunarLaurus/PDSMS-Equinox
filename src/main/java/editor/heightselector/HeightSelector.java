@@ -2,10 +2,10 @@ package editor.heightselector;
 
 import editor.handler.MapEditorHandler;
 
-import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.GroupLayout;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * @author Trifindo, JackHack96

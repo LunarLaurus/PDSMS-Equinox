@@ -1,11 +1,11 @@
 
 package editor.smartdrawing;
 
-import static editor.smartdrawing.SmartGrid.height;
-import static editor.smartdrawing.SmartGrid.width;
-
 import tileset.Tile;
 import tileset.Tileset;
+
+import static editor.smartdrawing.SmartGrid.height;
+import static editor.smartdrawing.SmartGrid.width;
 
 /**
  * @author Trifindo

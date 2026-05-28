@@ -1,9 +1,10 @@
 
 package formats.narc2;
 
-import java.util.ArrayList;
-
 import utils.Utils.MutableInt;
+
+import java.io.File;
+import java.util.ArrayList;
 
 public class Narc {
 
@@ -92,7 +93,7 @@ public class Narc {
     }
 
     public NarcFile getFileByPath(String path){
-        return getFileByPath(path.replace('\\', '/').split("/"));
+        return getFileByPath(path.split(File.separator));
     }
 
     public NarcFile getFileByPath(String[] splitPath){

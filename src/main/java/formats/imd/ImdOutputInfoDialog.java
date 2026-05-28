@@ -1,32 +1,25 @@
 package formats.imd;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
-import javax.swing.border.*;
-
 import editor.handler.MapEditorHandler;
+import tileset.NormalsNotFoundException;
+import tileset.TextureNotFoundException;
+import utils.Utils;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.font.TextAttribute;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-
-import tileset.NormalsNotFoundException;
-import tileset.TextureNotFoundException;
-import utils.Utils;
 
 /**
  * @author Trifindo, JackHack96

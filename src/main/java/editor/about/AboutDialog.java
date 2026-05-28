@@ -1,17 +1,17 @@
 package editor.about;
 
-import javax.swing.border.*;
-
 import editor.handler.MapEditorHandler;
+import net.miginfocom.swing.MigLayout;
 
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import net.miginfocom.swing.*;
 
 /**
  * @author Trifindo, JackHack96

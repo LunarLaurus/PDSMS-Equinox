@@ -4,25 +4,23 @@
 
 package formats.bdhcam;
 
-import java.awt.event.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
-
-import formats.bdhcam.camplate.*;
 import editor.handler.MapEditorHandler;
+import formats.bdhcam.camplate.*;
+import net.miginfocom.swing.MigLayout;
 
+import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
-
-import net.miginfocom.swing.*;
 
 /**
  * @author Trifindo
@@ -202,25 +200,14 @@ public class BdhcamEditorDialog extends JDialog {
     }
 
     private void jbRemovePlateActionPerformed(ActionEvent e) {
-        ArrayList<Camplate> plateList = this.bdhcamHandler.getBdhcam().getPlates();
-        if (plateList.size() > 0) {
-            plateList.remove(bdhcamHandler.getIndexSelected());
-            updateViewPlateList(plateList.size() - 1);
+        if (bdhcamHandler.getBdhcam().getPlates().size() > 0) {
+            bdhcamHandler.getBdhcam().getPlates().remove(bdhcamHandler.getIndexSelected());
+            updateViewPlateList(bdhcamHandler.getBdhcam().getPlates().size() - 1);
             updateView();
             platesDisplay.repaint();
         }
     }
-    
-	private void jbDuplicatePlateActionPerformed(ActionEvent e) {
-		ArrayList<Camplate> plateList = this.bdhcamHandler.getBdhcam().getPlates();
-		if (plateList.size() > 0) {
-			bdhcamHandler.getBdhcam().duplicatePlate(plateList.get(bdhcamHandler.getIndexSelected()));
-			updateViewPlateList(plateList.size() - 1);
-			updateView();
-			this.platesDisplay.repaint();
-		} 
-	}
-	
+
     private void jcbPlateTypeActionPerformed(ActionEvent e) {
         if (jcbPlateTypeEnabled) {
             if (bdhcamHandler.getSelectedPlate() != null) {
@@ -229,7 +216,6 @@ public class BdhcamEditorDialog extends JDialog {
             }
         }
     }
-   
 
     private void jcbHeightActionPerformed(ActionEvent e) {
         if(jcbHeightEnabled){
@@ -267,7 +253,7 @@ public class BdhcamEditorDialog extends JDialog {
         fc.setFileFilter(new FileNameExtensionFilter("Terrain File (*.bdhcam)", Bdhcam.fileExtension));
         fc.setApproveButtonText("Open");
         fc.setDialogTitle("Open BDHCAM");
-        final int returnVal = fc.showOpenDialog(this);
+        int returnVal = fc.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             try {
                 String path = fc.getSelectedFile().getPath();
@@ -293,7 +279,7 @@ public class BdhcamEditorDialog extends JDialog {
         fc.setFileFilter(new FileNameExtensionFilter("Camera File (*.bdhcam)", Bdhcam.fileExtension));
         fc.setApproveButtonText("Save");
         fc.setDialogTitle("Save BDHCAM");
-        final int returnVal = fc.showOpenDialog(this);
+        int returnVal = fc.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             try {
                 String path = fc.getSelectedFile().getPath();
@@ -333,7 +319,6 @@ public class BdhcamEditorDialog extends JDialog {
         panel4 = new JPanel();
         jbAddPlate = new JButton();
         jbRemovePlate = new JButton();
-        jbDuplicatePlate = new JButton();
         bdhcamDisplay = new BdhcamCameraDisplay();
         panel3 = new JPanel();
         label3 = new JLabel();
@@ -366,7 +351,6 @@ public class BdhcamEditorDialog extends JDialog {
         jsFirstValue = new JSpinner();
         label10 = new JLabel();
         jsSecondValue = new JSpinner();
-		hSpacer2 = new JPanel(null);
         panel6 = new JPanel();
         label12 = new JLabel();
         jlTutorial = new JLabel();
@@ -494,12 +478,6 @@ public class BdhcamEditorDialog extends JDialog {
                             jbRemovePlate.setIcon(new ImageIcon(getClass().getResource("/icons/RemoveIcon.png")));
                             jbRemovePlate.addActionListener(e -> jbRemovePlateActionPerformed(e));
                             panel4.add(jbRemovePlate);
-                            
-                            //---- jbDuplicatePlate ----
-                            jbDuplicatePlate.setText("Duplicate");
-     						jbDuplicatePlate.setIcon(new ImageIcon(getClass().getResource("/icons/CopyIcon.png")));
-     						jbDuplicatePlate.addActionListener(e -> jbDuplicatePlateActionPerformed(e));
-     						panel4.add(this.jbDuplicatePlate);
                         }
                         panel2.add(panel4, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
                             GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL,
@@ -1076,7 +1054,6 @@ public class BdhcamEditorDialog extends JDialog {
     private JButton jbImportBdhcam;
     private JButton jbExportBdhcam;
     private JLabel label11;
-    private JPanel hSpacer1;
     private JSplitPane splitPane1;
     private JPanel displayContainer;
     private BdhcamPlatesDisplay platesDisplay;
@@ -1089,7 +1066,6 @@ public class BdhcamEditorDialog extends JDialog {
     private JPanel panel4;
     private JButton jbAddPlate;
     private JButton jbRemovePlate;
-	private JButton jbDuplicatePlate;
     private BdhcamCameraDisplay bdhcamDisplay;
     private JPanel panel3;
     private JLabel label3;
@@ -1122,7 +1098,6 @@ public class BdhcamEditorDialog extends JDialog {
     private JSpinner jsFirstValue;
     private JLabel label10;
     private JSpinner jsSecondValue;
-    private JPanel hSpacer2;
     private JPanel panel6;
     private JLabel label12;
     private JLabel jlTutorial;

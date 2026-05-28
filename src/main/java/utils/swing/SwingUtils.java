@@ -1,10 +1,10 @@
 
 package utils.swing;
 
-import java.awt.Color;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import java.awt.*;
 
 /**
  * @author Trifindo

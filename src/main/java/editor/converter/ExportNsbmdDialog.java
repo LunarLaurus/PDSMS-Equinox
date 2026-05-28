@@ -1,25 +1,18 @@
 
 package editor.converter;
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
-import javax.swing.border.*;
 import editor.handler.MapEditorHandler;
+import net.miginfocom.swing.MigLayout;
+import utils.Utils;
+import utils.swing.JScrollCheckboxList;
 
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileFilter;
+import java.awt.*;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
-import javax.swing.DefaultListModel;
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
-import net.miginfocom.swing.*;
-
-import utils.Utils;
-import utils.swing.*;
 
 /**
  * @author Trifindo

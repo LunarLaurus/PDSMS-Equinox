@@ -1,22 +1,16 @@
 package editor.tileselector;
 
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-
-import editor.handler.MapEditorHandler;
-import editor.tileseteditor.TilesetEditorDialog;
-
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-
 import tileset.Tile;
 import tileset.Tileset;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 /**
  * @author Trifindo, JackHack96

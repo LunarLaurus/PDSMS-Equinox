@@ -6,7 +6,7 @@ import editor.handler.MapEditorHandler;
 import editor.state.CollisionLayerState;
 import editor.state.StateHandler;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /**

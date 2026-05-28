@@ -1,25 +1,13 @@
 package editor.layerselector;
 
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-
-import editor.handler.MapEditorHandler;
 import editor.grid.MapGrid;
+import editor.handler.MapEditorHandler;
 import editor.state.MapLayerState;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
-import javax.swing.SwingUtilities;
 
 /**
  * @author Trifindo, JackHack96
@@ -74,10 +62,8 @@ public class ThumbnailLayerSelector extends JPanel {
                     if (!handler.isLayerChanged()) {
                         handler.setLayerChanged(true);
                         handler.addMapState(new MapLayerState("Layer change", handler));
+
                     }
-                    if (index == handler.getActiveLayerIndex())
-                        handler.invertLayerState(index);
-                    
                     handler.setActiveTileLayer(index);
                 } else if (SwingUtilities.isRightMouseButton(evt)) {
                     //LayerPopupMenu popupMenu = new LayerPopupMenu(index);
@@ -163,7 +149,7 @@ public class ThumbnailLayerSelector extends JPanel {
                     itemShowLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/turnOnIcon.png")));
                     itemHideLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/turnOffIcon.png")));
                     itemClearLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/RemoveIcon.png")));
-                    itemCopyLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/CopyIcon.png")));
+                    itemCopyLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/copyIcon.png")));
                     itemPasteLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/pasteIcon.png")));
                     itemPasteTiles.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/pasteTileIcon.png")));
                     itemPasteHeights.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/pasteHeightIcon.png")));
@@ -183,7 +169,7 @@ public class ThumbnailLayerSelector extends JPanel {
                     //handler.invertLayerState(index);
                 } else if (SwingUtilities.isMiddleMouseButton(evt)) {
                     if (handler.isLayerTheOnlyActive(index))
-                        handler.invertEveryLayer(index);
+                        handler.setLayersEnabled(true);
                     else {
                         handler.setOnlyActiveTileLayer(index);
                     }

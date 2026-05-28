@@ -1,16 +1,16 @@
 
 package editor.buildingeditor2.buildfile;
 
+import utils.BinaryReader;
+import utils.BinaryWriter;
+import utils.Utils;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-
-import utils.BinaryReader;
-import utils.BinaryWriter;
-import utils.Utils;
 
 /**
  * @author Trifindo

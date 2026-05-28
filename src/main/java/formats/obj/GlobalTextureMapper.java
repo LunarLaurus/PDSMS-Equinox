@@ -1,12 +1,12 @@
 
 package formats.obj;
 
-import java.util.ArrayList;
-
 import tileset.Face;
 import tileset.Tile;
 import tileset.TileGeometryCompresser;
 import tileset.TileGeometryDecompresser;
+
+import java.util.ArrayList;
 
 /**
  * @author Trifindo

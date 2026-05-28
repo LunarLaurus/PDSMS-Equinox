@@ -1,13 +1,12 @@
 
 package formats.imd;
 
-import java.awt.Color;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-
 import tileset.TilesetMaterial;
 import utils.Utils;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 /**
  * @author Trifindo

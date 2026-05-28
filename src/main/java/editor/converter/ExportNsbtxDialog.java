@@ -1,27 +1,16 @@
 
 package editor.converter;
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
-import javax.swing.border.*;
-
 import editor.handler.MapEditorHandler;
+import utils.Utils;
+import utils.swing.JScrollCheckboxList;
 
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.TreeSet;
-import javax.swing.DefaultListModel;
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
-
-import utils.Utils;
-import utils.swing.*;
 
 /**
  * @author Trifindo
@@ -261,7 +250,7 @@ public class ExportNsbtxDialog extends javax.swing.JDialog {
         fc.setApproveButtonText("Select folder");
         fc.setDialogTitle("Select the folder for exporting the IMD files");
 
-        final int returnValOpen = fc.showOpenDialog(this);
+        int returnValOpen = fc.showOpenDialog(this);
         if (returnValOpen == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             if (file.exists() && file.isDirectory()) {
@@ -310,7 +299,7 @@ public class ExportNsbtxDialog extends javax.swing.JDialog {
 
     private void loadAreaIndices() {
 
-        TreeSet<Integer> areaIndicesSet = handler.getMapMatrix().getAreaIndices();
+        HashSet<Integer> areaIndicesSet = handler.getMapMatrix().getAreaIndices();
 
         areaIndices = new ArrayList();
         areaIndices.addAll(areaIndicesSet);

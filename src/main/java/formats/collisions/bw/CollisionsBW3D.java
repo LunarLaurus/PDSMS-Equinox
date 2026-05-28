@@ -1,7 +1,6 @@
 package formats.collisions.bw;
 
 import editor.game.Game;
-import formats.bdhcam.camplate.Camplate;
 import utils.BinaryArrayReader;
 import utils.BinaryArrayWriter;
 import utils.Utils;

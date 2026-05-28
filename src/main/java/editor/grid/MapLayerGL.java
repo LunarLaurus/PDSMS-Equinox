@@ -1,13 +1,11 @@
 
 package editor.grid;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Objects;
-
 import tileset.Tile;
 import tileset.Tileset;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * @author Trifindo

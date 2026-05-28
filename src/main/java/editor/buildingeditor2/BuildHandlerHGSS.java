@@ -1,31 +1,29 @@
 
 package editor.buildingeditor2;
 
-import editor.buildingeditor2.buildmodel.BuildModelMatshp;
-import editor.buildingeditor2.buildmodel.BuildModelList;
-import editor.buildingeditor2.animations.GlobalAnimationsList;
+import editor.buildingeditor2.animations.BuildAnimations;
 import editor.buildingeditor2.animations.BuildAnimeListHGSS;
 import editor.buildingeditor2.animations.MapAnimations;
 import editor.buildingeditor2.areabuild.AreaBuild;
 import editor.buildingeditor2.areabuild.AreaBuildList;
 import editor.buildingeditor2.areadata.AreaDataListHGSS;
+import editor.buildingeditor2.buildmodel.BuildModelList;
+import editor.buildingeditor2.buildmodel.BuildModelMatshp;
 import editor.buildingeditor2.tileset.BuildTileset;
 import editor.buildingeditor2.tileset.BuildTilesetList;
-import editor.game.GameFolder;
 import editor.game.GameFileSystemHGSS;
 import formats.narc2.Narc;
 import formats.narc2.NarcIO;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import nitroreader.nsbmd.NSBMD;
 import nitroreader.nsbmd.sbccommands.MAT;
 import nitroreader.nsbmd.sbccommands.SBCCommand;
 import nitroreader.nsbmd.sbccommands.SHP;
 import utils.Utils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Trifindo
@@ -34,7 +32,6 @@ public class BuildHandlerHGSS {
 
     //private MapEditorHandler handler;
     private String gameFolderPath = "";
-    private GameFolder gameFolder;
     private GameFileSystemHGSS gameFileSystem;
 
     private int buildBlockIndexSelected = 0;
@@ -43,7 +40,7 @@ public class BuildHandlerHGSS {
     private BuildModelList[] buildModelList = new BuildModelList[numBuildBlocks]; //2
     private BuildModelMatshp[] buildModelMatshp = new BuildModelMatshp[numBuildBlocks]; //2
     private BuildAnimeListHGSS[] buildModelAnimeList = new BuildAnimeListHGSS[numBuildBlocks]; //2
-    private GlobalAnimationsList globalAnimationsList;
+    private BuildAnimations buildModelAnims;
     private AreaDataListHGSS areaDataList;
     private BuildTilesetList buildTilesetList;
     private AreaBuildList areaBuildList;
@@ -52,7 +49,6 @@ public class BuildHandlerHGSS {
 
     public BuildHandlerHGSS(String gameFolderPath) {
         this.gameFolderPath = gameFolderPath;
-        this.gameFolder = new GameFolder(gameFolderPath);
         this.gameFileSystem = new GameFileSystemHGSS();
     }
 
@@ -63,7 +59,7 @@ public class BuildHandlerHGSS {
                 && buildModelMatshp[1] != null
                 && buildModelAnimeList[0] != null
                 && buildModelAnimeList[1] != null
-                && globalAnimationsList != null
+                && buildModelAnims != null
                 && areaDataList != null
                 && buildTilesetList != null
                 && areaBuildList != null
@@ -101,7 +97,7 @@ public class BuildHandlerHGSS {
             buildModelAnimeList[1] = new BuildAnimeListHGSS(buildModelRoomAnimeListNarc);
 
             Narc buildModelAnimsNarc = NarcIO.loadNarc(getGameFilePath(gameFileSystem.getBuildModelAnimePath()));
-            globalAnimationsList = new GlobalAnimationsList(buildModelAnimsNarc);
+            buildModelAnims = new BuildAnimations(buildModelAnimsNarc);
 
             Narc areaDataListNarc = NarcIO.loadNarc(getGameFilePath(gameFileSystem.getAreaDataPath()));
             areaDataList = new AreaDataListHGSS(areaDataListNarc);
@@ -123,7 +119,7 @@ public class BuildHandlerHGSS {
             buildModelMatshp[1] = null;
             buildModelAnimeList[0] = null;
             buildModelAnimeList[1] = null;
-            globalAnimationsList = null;
+            buildModelAnims = null;
             areaDataList = null;
             buildTilesetList = null;
             areaBuildList = null;
@@ -140,7 +136,7 @@ public class BuildHandlerHGSS {
             buildModelMatshp[1].saveToFile(getGameFilePath(gameFileSystem.getBuildModelRoomMatshpPath()));
             NarcIO.writeNarc(buildModelAnimeList[0].toNarc(), getGameFilePath(gameFileSystem.getBuildModelAnimeListPath()));
             NarcIO.writeNarc(buildModelAnimeList[1].toNarc(), getGameFilePath(gameFileSystem.getBuildModelRoomAnimeListPath()));
-            NarcIO.writeNarc(globalAnimationsList.toNarc(), getGameFilePath(gameFileSystem.getBuildModelAnimePath()));
+            NarcIO.writeNarc(buildModelAnims.toNarc(), getGameFilePath(gameFileSystem.getBuildModelAnimePath()));
             NarcIO.writeNarc(areaDataList.toNarc(), getGameFilePath(gameFileSystem.getAreaDataPath()));
             NarcIO.writeNarc(areaBuildList.toNarc(), getGameFilePath(gameFileSystem.getAreaBuildModelPath()));
             NarcIO.writeNarc(buildTilesetList.toNarc(), getGameFilePath(gameFileSystem.getAreaBuildTilesetPath()));
@@ -256,15 +252,15 @@ public class BuildHandlerHGSS {
     }
 
     public void addAnimationFile(String path) throws IOException {
-        globalAnimationsList.addAnimation(path);
+        buildModelAnims.addAnimation(path);
     }
 
     public void replaceAnimationFile(int index, String path) throws IOException {
-        globalAnimationsList.replaceAnimation(index, path);
+        buildModelAnims.replaceAnimation(index, path);
     }
 
     public void saveAnimationFile(int index, String path) throws IOException {
-        globalAnimationsList.saveAnimation(index, path);
+        buildModelAnims.saveAnimation(index, path);
     }
 
     public void addMapAnimationFile(String path) throws IOException {
@@ -280,11 +276,11 @@ public class BuildHandlerHGSS {
     }
 
     private String getGameFilePath(String relativePath) {
-        return gameFolder.getPath(relativePath);
+        return gameFolderPath + File.separator + relativePath;
     }
 
     private boolean isGameFileAvailable(String path) {
-        return isFileAvailable(getGameFilePath(path));
+        return isFileAvailable(gameFolderPath + File.separator + path);
     }
 
     private boolean isFileAvailable(String path) {
@@ -293,7 +289,6 @@ public class BuildHandlerHGSS {
 
     public void setGameFolderPath(String path) {
         this.gameFolderPath = path;
-        this.gameFolder = new GameFolder(path);
     }
 
     public String getGameFolderPath() {
@@ -312,8 +307,8 @@ public class BuildHandlerHGSS {
         return buildModelAnimeList[buildBlockIndexSelected];
     }
 
-    public GlobalAnimationsList getGlobalAnimationsList() {
-        return globalAnimationsList;
+    public BuildAnimations getBuildModelAnims() {
+        return buildModelAnims;
     }
 
     public AreaDataListHGSS getAreaDataList() {

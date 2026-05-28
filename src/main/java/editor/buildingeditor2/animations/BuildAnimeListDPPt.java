@@ -4,11 +4,10 @@ package editor.buildingeditor2.animations;
 import formats.narc2.Narc;
 import formats.narc2.NarcFile;
 import formats.narc2.NarcFolder;
-
-import java.util.ArrayList;
-
 import utils.BinaryReader;
 import utils.BinaryWriter;
+
+import java.util.ArrayList;
 
 /**
  * @author Trifindo

@@ -1,10 +1,6 @@
 
 package editor.buildingeditor2.areadata;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import utils.BinaryReader;
 import utils.BinaryWriter;
 

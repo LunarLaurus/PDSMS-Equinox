@@ -5,16 +5,13 @@ import com.jogamp.opengl.GL2;
 import editor.state.MapLayerState;
 import math.vec.Vec3f;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
 import java.util.HashSet;
-import javax.swing.SwingUtilities;
 
 /**
  * @author Trifindo

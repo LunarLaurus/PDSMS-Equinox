@@ -1,9 +1,9 @@
 
 package editor.game;
 
-import java.awt.image.BufferedImage;
-
 import utils.Utils;
+
+import java.awt.image.BufferedImage;
 
 /**
  * @author Trifindo

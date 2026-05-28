@@ -4,17 +4,18 @@
 
 package formats.collisions.bw;
 
+import editor.handler.MapEditorHandler;
+import net.miginfocom.swing.MigLayout;
+
+import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.text.DecimalFormat;
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import editor.handler.MapEditorHandler;
-import net.miginfocom.swing.*;
 
 /**
  * @author Truck

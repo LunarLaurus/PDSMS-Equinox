@@ -1,24 +1,14 @@
 package editor.layerselector;
 
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-
-import editor.handler.MapEditorHandler;
 import editor.grid.MapGrid;
-
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
-import javax.swing.SwingUtilities;
-
+import editor.handler.MapEditorHandler;
 import utils.Utils;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 
 /**
  * @author Trifindo, JackHack96

@@ -3,16 +3,15 @@ package editor.grid;
 
 import editor.handler.MapEditorHandler;
 import formats.obj.ObjWriter;
+import tileset.Tile;
+import tileset.Tileset;
+import utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
-
-import tileset.Tile;
-import tileset.Tileset;
-import utils.Utils;
 
 /**
  * @author Trifindo

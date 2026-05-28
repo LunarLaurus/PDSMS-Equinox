@@ -1,20 +1,15 @@
 package editor.tileseteditor;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
-import javax.swing.border.*;
-
-import editor.tileselector.*;
-import tileset.TilesetRenderer;
-
-import java.util.ArrayList;
-import javax.swing.JOptionPane;
-
+import editor.tileselector.TileMultiSelector;
 import tileset.Tile;
 import tileset.Tileset;
+import tileset.TilesetRenderer;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 
 /**
  * @author Trifindo, JackHack96

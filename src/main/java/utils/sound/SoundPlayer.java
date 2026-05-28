@@ -1,17 +1,13 @@
 
 package utils.sound;
 
+import utils.LambdaUtils.VoidInterface;
+
+import javax.sound.sampled.*;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.SourceDataLine;
-
-import utils.LambdaUtils.VoidInterface;
 
 /**
  * @author Trifindo

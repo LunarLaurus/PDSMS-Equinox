@@ -1,12 +1,10 @@
 package editor.converter;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
+import net.miginfocom.swing.MigLayout;
 
-import net.miginfocom.swing.*;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 
 /**
  * @author Trifindo, JackHack96

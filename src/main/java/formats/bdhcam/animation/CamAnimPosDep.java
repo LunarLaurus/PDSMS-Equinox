@@ -1,10 +1,10 @@
 package formats.bdhcam.animation;
 
+import editor.handler.MapEditorHandler;
 import formats.bdhcam.BdhcamHandler;
 import formats.bdhcam.camplate.CameraSettings;
 import formats.bdhcam.camplate.Camplate;
 import formats.bdhcam.camplate.CamplatePosDep;
-import editor.handler.MapEditorHandler;
 
 public class CamAnimPosDep extends CamAnimator{
 

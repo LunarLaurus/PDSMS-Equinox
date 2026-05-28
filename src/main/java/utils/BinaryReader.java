@@ -1,8 +1,6 @@
 
 package utils;
 
-import nitroreader.shared.ByteReader;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -35,6 +33,21 @@ public class BinaryReader {
         return new String(data);
     }
 
+    public long getPos() throws IOException
+    {
+        return fis.getChannel().position();
+    }
+
+    public void setPos(long pos) throws IOException
+    {
+        fis.getChannel().position(pos);
+    }
+
+    public long size() throws IOException
+    {
+        return getPos() + fis.available();
+    }
+
     public int readUInt8() throws IOException {
         return fis.read() & 0xFF;
     }
@@ -48,6 +61,13 @@ public class BinaryReader {
     public long readUInt32() throws IOException {
         byte[] data = new byte[4];
         fis.read(data);
+        return ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).getInt() & 0xFFFFFFFF;
+    }
+
+    public long peekUInt32() throws IOException {
+        byte[] data = new byte[4];
+        fis.read(data);
+        fis.skip(-4);
         return ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).getInt() & 0xFFFFFFFF;
     }
 

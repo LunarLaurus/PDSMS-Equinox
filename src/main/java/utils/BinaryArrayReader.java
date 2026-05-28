@@ -1,6 +1,5 @@
 package utils;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -83,6 +82,13 @@ public class BinaryArrayReader {
         byte[] data = new byte[2];
         read(data);
         return ((data[1] & 0xff) << 8) | (data[0] & 0xff);
+    }
+
+    public long peekUInt32() throws IOException {
+        byte[] data = new byte[4];
+        read(data);
+        skip(-4);
+        return ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).getInt() & 0xFFFFFFFF;
     }
 
     public long readUInt32() throws IOException {

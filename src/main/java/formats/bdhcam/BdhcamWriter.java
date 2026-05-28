@@ -8,14 +8,12 @@ import formats.bdhcam.camplate.CamParameter;
 import formats.bdhcam.camplate.CamParameterPosDep;
 import formats.bdhcam.camplate.CamParameterPosIndep;
 import formats.bdhcam.camplate.Camplate;
-import utils.BinaryArrayWriter;
 import utils.BinaryBufferWriter;
 import utils.BinaryWriter;
 import utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Parameter;
 import java.nio.file.Files;
 
 

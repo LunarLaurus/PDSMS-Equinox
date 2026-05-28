@@ -1,18 +1,23 @@
 package formats.nsbtx2;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.border.*;
-import javax.swing.event.*;
-
 import editor.converter.ConverterErrorDialog;
 import editor.handler.MapEditorHandler;
-import formats.nsbtx.*;
 import formats.nsbtx2.exceptions.NsbtxTextureSizeException;
+import net.miginfocom.swing.MigLayout;
+import utils.Utils;
+import utils.Utils.MutableBoolean;
+import utils.swing.ThumbnailFileChooser;
 
-import java.awt.Color;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,18 +26,6 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import javax.imageio.ImageIO;
-import javax.swing.DefaultListModel;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import net.miginfocom.swing.*;
-
-import utils.swing.ThumbnailFileChooser;
-import utils.Utils;
-import utils.Utils.MutableBoolean;
 
 /**
  * @author Trifindo, JackHack96

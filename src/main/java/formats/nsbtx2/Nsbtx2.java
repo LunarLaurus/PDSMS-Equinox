@@ -2,17 +2,15 @@
 package formats.nsbtx2;
 
 import formats.nsbtx2.exceptions.NsbtxTextureSizeException;
+import utils.Utils;
+import utils.image.Clusterer;
+import utils.image.FastColor;
 
-import java.awt.Color;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.TreeSet;
-
-import utils.Utils;
-import utils.image.Clusterer;
-import utils.image.FastColor;
 
 /**
  * @author Trifindo

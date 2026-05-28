@@ -1,12 +1,11 @@
 
 package editor.smartdrawing;
 
-import editor.handler.MapEditorHandler;
 import editor.grid.MapGrid;
+import editor.handler.MapEditorHandler;
+import tileset.Tile;
 
 import java.util.ArrayList;
-
-import tileset.Tile;
 
 /**
  * @author Trifindo

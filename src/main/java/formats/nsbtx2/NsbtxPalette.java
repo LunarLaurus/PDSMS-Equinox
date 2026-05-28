@@ -1,10 +1,10 @@
 
 package formats.nsbtx2;
 
-import java.awt.Color;
-import java.util.ArrayList;
-
 import utils.Utils;
+
+import java.awt.*;
+import java.util.ArrayList;
 
 /**
  * @author Trifindo

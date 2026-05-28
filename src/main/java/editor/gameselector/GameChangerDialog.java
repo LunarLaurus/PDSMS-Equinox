@@ -1,15 +1,12 @@
 package editor.gameselector;
 
-import formats.collisions.Collisions;
 import editor.game.Game;
 import editor.handler.MapEditorHandler;
 
-import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
-import javax.swing.border.*;
+import javax.swing.border.SoftBevelBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 
 /**
  * @author Trifindo, JackHack96

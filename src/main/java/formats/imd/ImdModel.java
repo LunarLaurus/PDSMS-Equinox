@@ -1,31 +1,27 @@
 
 package formats.imd;
 
+import formats.imd.nodes.Polygon;
 import formats.imd.nodes.*;
-import formats.imd.nodes.ImdMaterial;
-
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import javax.imageio.ImageIO;
-
-import formats.imd.nodes.Node;
-import tileset.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import tileset.Face;
+import tileset.NormalsNotFoundException;
+import tileset.TextureNotFoundException;
+import tileset.TilesetMaterial;
 import utils.Utils;
 
-import javax.xml.parsers.*;
+import javax.imageio.ImageIO;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
-
-import org.w3c.dom.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.ArrayList;
 
 /**
  * @author Trifindo
@@ -180,7 +176,6 @@ public class ImdModel extends ImdNode {
             TilesetMaterial material = materials.get(i);
             ImdTextureIndexed imdTexture = imdTextureArray.get(i);
             int tIndex = textureNames.indexOf(material.getTextureNameImd());
-
             if (tIndex == -1) {
                 textureIndices[i] = textureNames.size();
                 textureNames.add(material.getTextureNameImd());
@@ -197,7 +192,6 @@ public class ImdModel extends ImdNode {
             } else {
                 textureIndices[i] = tIndex;
             }
-
             int pIndex = paletteNames.indexOf(material.getPaletteNameImd());
             if (pIndex == -1) {
                 paletteIndices[i] = paletteNames.size();
@@ -223,33 +217,29 @@ public class ImdModel extends ImdNode {
         ImdNode materialArray = new ImdNode("material_array");
         materialArray.attributes.add(new ImdAttribute("size", materials.size()));
         for (int i = 0; i < materials.size(); i++) { //
-            TilesetMaterial current = materials.get(i);
-
-            //boolean[] lights;
-            //if (current.areVertexColorsEnabled()) {
-            //    lights = new boolean[]{false, false, false, false};
-            //} else {
-            //    lights = new boolean[]{
-            //            current.getLight0(),
-            //            current.getLight1(),
-            //            current.getLight2(),
-            //            current.getLight3()
-            //    };
-            //}
-            ImdMaterial material = new ImdMaterial(
-                    i,
-                    current.getMaterialName(),
-                    new boolean[] { current.getLight0(), current.getLight1(), current.getLight2(), current.getLight3() },
-                    new int[][] { current.getDiffuse(), current.getAmbient(), current.getSpecular(), current.getEmission() },
-                    current.getAlpha(),
-                    current.hasRenderBorder(),
+            boolean[] lights;
+            if (materials.get(i).vertexColorsEnabled()) {
+                lights = new boolean[]{false, false, false, false};
+            } else {
+                lights = new boolean[]{
+                        materials.get(i).light0(),
+                        materials.get(i).light1(),
+                        materials.get(i).light2(),
+                        materials.get(i).light3()
+                };
+            }
+            Material material = new Material(i,
+                    materials.get(i).getMaterialName(),
+                    lights,
+                    materials.get(i).getAlpha(),
+                    materials.get(i).renderBorder(),
                     textureIndices[i],
                     paletteIndices[i],
-                    current.renderBothFaces(),
-                    current.isFogEnabled(),
-                    current.getTexGenMode(),
-                    current.getTexTilingU(),
-                    current.getTexTilingV()
+                    materials.get(i).renderBothFaces(),
+                    materials.get(i).isFogEnabled(),
+                    materials.get(i).getTexGenMode(),
+                    materials.get(i).getTexTilingU(),
+                    materials.get(i).getTexTilingV()
             );
             materialArray.subnodes.add(material);
         }
@@ -287,13 +277,13 @@ public class ImdModel extends ImdNode {
                 //Calculate Quad Strips
                 StripeCalculator quadCalculator = new StripeCalculator(pData, true,
                         materials.get(textureIDs.get(i)).uniformNormalOrientation(),
-                        materials.get(textureIDs.get(i)).areVertexColorsEnabled());
+                        materials.get(textureIDs.get(i)).vertexColorsEnabled());
                 ArrayList<PolygonData> pDataStripQuad = quadCalculator.calculateQuadStrip();
 
                 //Calculate Triangle Strips
                 TriangleStripCalculator triCalculator = new TriangleStripCalculator(pData,
                         materials.get(textureIDs.get(i)).uniformNormalOrientation(),
-                        materials.get(textureIDs.get(i)).areVertexColorsEnabled());
+                        materials.get(textureIDs.get(i)).vertexColorsEnabled());
                 ArrayList<PolygonData> pDataStripTri = triCalculator.calculateTriStrip();
 
                 //Primitive array
@@ -318,7 +308,6 @@ public class ImdModel extends ImdNode {
                 int vertexSize = 0;
                 boolean firstPrimitive = true;
                 Primitive.init();
-
                 //Write quads
                 if (pDataStripQuad.get(0) != null) {
                     pDataStripQuad.get(0).groupByNormals(true);//NEW CODE
@@ -327,13 +316,12 @@ public class ImdModel extends ImdNode {
                             pDataStripQuad.get(0).vCoordsQuad.length / 3);
                     primitive.calculateElements(pDataStripQuad.get(0), firstPrimitive, true,
                             materials.get(textureIDs.get(i)).uniformNormalOrientation(),
-                            materials.get(textureIDs.get(i)).areVertexColorsEnabled());//TODO: Experimental
+                            materials.get(textureIDs.get(i)).vertexColorsEnabled());//TODO: Experimental
                     firstPrimitive = false;
                     primitiveArray.subnodes.add(primitive);
                     numPrimitives++;//NEW CODE
                     vertexSize += pDataStripQuad.get(0).vCoordsQuad.length / 3;
                 }
-
                 //Write quad strips
                 for (int j = 1; j < pDataStripQuad.size(); j++) {
                     Primitive primitive = new Primitive(
@@ -341,7 +329,7 @@ public class ImdModel extends ImdNode {
                             pDataStripQuad.get(j).vCoordsQuad.length / 3);
                     primitive.calculateElementsWithStrips(pDataStripQuad.get(j), firstPrimitive, true,
                             materials.get(textureIDs.get(i)).uniformNormalOrientation(),
-                            materials.get(textureIDs.get(i)).areVertexColorsEnabled());//TODO: Experimental
+                            materials.get(textureIDs.get(i)).vertexColorsEnabled());//TODO: Experimental
                     firstPrimitive = false;
                     primitiveArray.subnodes.add(primitive);
                     numPrimitives++;//NEW CODE
@@ -356,7 +344,7 @@ public class ImdModel extends ImdNode {
                             pDataStripTri.get(0).vCoordsTri.length / 3);
                     primitive.calculateElements(pDataStripTri.get(0), firstPrimitive, false,
                             materials.get(textureIDs.get(i)).uniformNormalOrientation(),
-                            materials.get(textureIDs.get(i)).areVertexColorsEnabled());//TODO: Experimental
+                            materials.get(textureIDs.get(i)).vertexColorsEnabled());//TODO: Experimental
                     firstPrimitive = false;
                     primitiveArray.subnodes.add(primitive);
                     numPrimitives++;//NEW CODE
@@ -369,7 +357,7 @@ public class ImdModel extends ImdNode {
                             pDataStripTri.get(j).vCoordsTri.length / 3);
                     primitive.calculateElementsWithStrips(pDataStripTri.get(j), firstPrimitive, false,
                             materials.get(textureIDs.get(i)).uniformNormalOrientation(),
-                            materials.get(textureIDs.get(i)).areVertexColorsEnabled());//TODO: Experimental
+                            materials.get(textureIDs.get(i)).vertexColorsEnabled());//TODO: Experimental
                     firstPrimitive = false;
                     primitiveArray.subnodes.add(primitive);
                     numPrimitives++;//NEW CODE
@@ -387,9 +375,9 @@ public class ImdModel extends ImdNode {
                         i, "polygon" + i,
                         vertexSize, polygonSize,
                         triangleSize, quadSize,
-                        new float[]{3.0f, 3.0f, 3.0f}, // TODO: check these values
+                        new float[]{3.0f, 3.0f, 3.0f}, // TODO: check this values
                         3.0f, 1, //TODO Check this again
-                        materials.get(textureIDs.get(i)).areVertexColorsEnabled());
+                        materials.get(textureIDs.get(i)).vertexColorsEnabled());
                 polygonArray.subnodes.add(p);
 
                 //Add mtxPrim
@@ -448,7 +436,6 @@ public class ImdModel extends ImdNode {
         String mtlName = "";
         int numQuads = 0;
         int numTris = 0;
-
         String lineObj;
         while ((lineObj = brObj.readLine()) != null) {
             if (lineObj.startsWith("mtllib")) {
@@ -483,10 +470,10 @@ public class ImdModel extends ImdNode {
                 //materialNames.add(lineObj.split(" ")[1]);
                 materialNames.add(lineObj.substring(lineObj.indexOf(" ") + 1));
             } else if (lineObj.startsWith("f")) {
-                String[] splitLine = (lineObj.substring(2)).split(" ");
-                Face f = new Face(splitLine.length > 3);
-                for (int i = 0; i < splitLine.length; i++) {
-                    String[] sArray = splitLine[i].split("/");
+                String[] splittedLine = (lineObj.substring(2)).split(" ");
+                Face f = new Face(splittedLine.length > 3);
+                for (int i = 0; i < splittedLine.length; i++) {
+                    String[] sArray = splittedLine[i].split("/");
                     f.vInd[i] = Integer.valueOf(sArray[0]);
                     f.tInd[i] = Integer.valueOf(sArray[1]);
                     if (sArray.length > 2) {

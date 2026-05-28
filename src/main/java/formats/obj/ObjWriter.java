@@ -3,25 +3,22 @@ package formats.obj;
 
 import editor.game.Game;
 import editor.grid.MapGrid;
+import tileset.Face;
+import tileset.Tile;
+import tileset.Tileset;
+import tileset.TilesetMaterial;
+import utils.Utils;
 
-import static editor.grid.MapGrid.cols;
-import static editor.grid.MapGrid.gridTileSize;
-import static editor.grid.MapGrid.rows;
-
-import java.awt.Point;
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import javax.imageio.ImageIO;
 
-import tileset.Face;
-import tileset.Tile;
-import tileset.Tileset;
-import tileset.TilesetMaterial;
-import utils.Utils;
+import static editor.grid.MapGrid.*;
 
 /**
  * @author Trifindo

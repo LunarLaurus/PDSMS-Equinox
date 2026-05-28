@@ -1,19 +1,13 @@
 package formats.collisions;
 
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-
 import editor.game.Game;
 import editor.state.CollisionLayerState;
 import utils.Utils;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.geom.AffineTransform;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 

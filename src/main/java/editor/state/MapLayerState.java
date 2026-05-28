@@ -4,7 +4,7 @@ package editor.state;
 import editor.handler.MapData;
 import editor.handler.MapEditorHandler;
 
-import java.awt.Point;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
