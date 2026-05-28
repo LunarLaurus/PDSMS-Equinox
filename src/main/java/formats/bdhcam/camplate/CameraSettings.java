@@ -2,29 +2,47 @@ package formats.bdhcam.camplate;
 
 public class CameraSettings {
 
-    public static final float[] defaultValues = {
+    public static final float[] gen4CamPreset = {
             0.5f, 28.0f, 35.0f,
             0.5f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f
     };
-    public float[] values = new float[defaultValues.length];
+	public static final float[] wideCamPreset = {
+            0.0f, 13.0f, 14.0f,
+            0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f
+    };
 
-    public CameraSettings(){
-        System.arraycopy(defaultValues, 0, values, 0, defaultValues.length);
+	public static boolean wideCamMode;
+    public float[] values = new float[3*3];
+
+    public CameraSettings(boolean wideCamMode) {
+        this.wideCamMode = wideCamMode;
+        copyDefaultValues();
+    }
+
+    public void copyDefaultValues() {
+        if (wideCamMode) {
+            System.arraycopy(wideCamPreset, 0, values, 0, gen4CamPreset.length);
+        } else {
+            System.arraycopy(gen4CamPreset, 0, values, 0, gen4CamPreset.length);
+        }
     }
 
     public CameraSettings(float x, float y, float z,
                           float targetX, float targetY, float targetZ,
                           float upX, float upY, float upZ) {
         values[0] = x;
-        values[1] = y;
-        values[2] = z;
+        values[2] = y;
+        values[1] = z;
+
         values[3] = targetX;
-        values[4] = targetY;
-        values[5] = targetZ;
+        values[5] = targetY;
+        values[4] = targetZ;
+
         values[6] = upX;
-        values[7] = upY;
-        values[8] = upZ;
+        values[8] = upY;
+        values[7] = upZ;
 
     }
 
@@ -36,7 +54,7 @@ public class CameraSettings {
             if(param.type.camParamIndex != -1) {
                 CamParameterPosIndep paramPosIndep = (CamParameterPosIndep) param;
                 float weight = Math.min((float) frame / paramPosIndep.duration, 1.0f);
-                values[param.type.camParamIndex] += param.getWeightedValue(weight);
+                values[param.type.camParamIndex] += param.getWeightedValue(weight)*1.0; 
             }
         }
     }
@@ -47,7 +65,7 @@ public class CameraSettings {
         //Apply camera parameters
         for (CamParameter param : plate.parameters) {
             if(param.type.camParamIndex !=-1){
-                values[param.type.camParamIndex] += param.getWeightedValue(weight);
+                values[param.type.camParamIndex] += param.getWeightedValue(weight)*1.0;
             }
         }
 
@@ -59,7 +77,7 @@ public class CameraSettings {
         //Apply camera parameters
         for (CamParameter param : plate.parameters) {
             if(param.type.camParamIndex != -1) {
-                values[param.type.camParamIndex] += param.getWeightedValue(weight);
+                values[param.type.camParamIndex] += param.getWeightedValue(weight)*1.0;
             }
         }
 
@@ -67,7 +85,7 @@ public class CameraSettings {
 
     private void moveCameraToPlayer(Camplate plate, float[] playerPos){
         //Copy default values
-        System.arraycopy(defaultValues, 0, values, 0, defaultValues.length);
+        copyDefaultValues();
 
         //Move camera to player position
         for (int i = 0; i < 6; i++) {
@@ -82,7 +100,7 @@ public class CameraSettings {
 
     private void moveCameraToPlate(Camplate plate){
         //Copy default values
-        System.arraycopy(defaultValues, 0, values, 0, defaultValues.length);
+        copyDefaultValues();
 
         //Move camera to center of plate
         float[] plateCenter = plate.getCenterInWorld();

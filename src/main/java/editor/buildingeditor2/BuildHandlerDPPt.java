@@ -3,13 +3,14 @@ package editor.buildingeditor2;
 
 import editor.buildingeditor2.buildmodel.BuildModelMatshp;
 import editor.buildingeditor2.buildmodel.BuildModelList;
-import editor.buildingeditor2.animations.BuildAnimations;
+import editor.buildingeditor2.animations.GlobalAnimationsList;
 import editor.buildingeditor2.animations.BuildAnimeListDPPt;
 import editor.buildingeditor2.areabuild.AreaBuild;
 import editor.buildingeditor2.areabuild.AreaBuildList;
 import editor.buildingeditor2.areadata.AreaDataListDPPt;
 import editor.buildingeditor2.tileset.BuildTileset;
 import editor.buildingeditor2.tileset.BuildTilesetList;
+import editor.game.GameFolder;
 import editor.game.GameFileSystemDPPt;
 import formats.narc2.Narc;
 import formats.narc2.NarcIO;
@@ -32,18 +33,20 @@ public class BuildHandlerDPPt {
 
     //private MapEditorHandler handler;
     private String gameFolderPath = "";
+    private GameFolder gameFolder;
     private GameFileSystemDPPt gameFileSystem;
 
     private BuildModelList buildModelList;
     private BuildModelMatshp buildModelMatshp;
     private BuildAnimeListDPPt buildModelAnimeList;
-    private BuildAnimations buildModelAnims;
+    private GlobalAnimationsList globalAnimationsList;
     private AreaDataListDPPt areaDataList;
     private BuildTilesetList buildTilesetList;
     private AreaBuildList areaBuildList;
 
     public BuildHandlerDPPt(String gameFolderPath) {
         this.gameFolderPath = gameFolderPath;
+        this.gameFolder = new GameFolder(gameFolderPath);
         this.gameFileSystem = new GameFileSystemDPPt();
     }
 
@@ -51,7 +54,7 @@ public class BuildHandlerDPPt {
         return buildModelList != null
                 && buildModelMatshp != null
                 && buildModelAnimeList != null
-                && buildModelAnims != null
+                && globalAnimationsList != null
                 && areaDataList != null
                 && buildTilesetList != null
                 && areaBuildList != null;
@@ -81,8 +84,8 @@ public class BuildHandlerDPPt {
             System.out.println("buildModelAnimeList LOADED!");
 
             Narc buildModelAnimsNarc = NarcIO.loadNarc(getGameFilePath(gameFileSystem.getBuildModelAnimePath()));
-            buildModelAnims = new BuildAnimations(buildModelAnimsNarc);
-            System.out.println("buildModelAnims LOADED!");
+            globalAnimationsList = new GlobalAnimationsList(buildModelAnimsNarc);
+            System.out.println("globalAnimationsList LOADED!");
 
             Narc areaDataListNarc = NarcIO.loadNarc(getGameFilePath(gameFileSystem.getAreaDataPath()));
             areaDataList = new AreaDataListDPPt(areaDataListNarc);
@@ -97,7 +100,7 @@ public class BuildHandlerDPPt {
             buildModelList = null;
             buildModelMatshp = null;
             buildModelAnimeList = null;
-            buildModelAnims = null;
+            globalAnimationsList = null;
             areaDataList = null;
             buildTilesetList = null;
             areaBuildList = null;
@@ -110,7 +113,7 @@ public class BuildHandlerDPPt {
             NarcIO.writeNarc(buildModelList.toNarc(), getGameFilePath(gameFileSystem.getBuildModelPath()));
             buildModelMatshp.saveToFile(getGameFilePath(gameFileSystem.getBuildModelMatshpPath()));
             NarcIO.writeNarc(buildModelAnimeList.toNarc(), getGameFilePath(gameFileSystem.getBuildModelAnimeListPath()));
-            NarcIO.writeNarc(buildModelAnims.toNarc(), getGameFilePath(gameFileSystem.getBuildModelAnimePath()));
+            NarcIO.writeNarc(globalAnimationsList.toNarc(), getGameFilePath(gameFileSystem.getBuildModelAnimePath()));
             NarcIO.writeNarc(areaDataList.toNarc(), getGameFilePath(gameFileSystem.getAreaDataPath()));
             NarcIO.writeNarc(areaBuildList.toNarc(), getGameFilePath(gameFileSystem.getAreaBuildModelPath()));
             NarcIO.writeNarc(buildTilesetList.toNarc(), getGameFilePath(gameFileSystem.getAreaBuildTilesetPath()));
@@ -225,23 +228,23 @@ public class BuildHandlerDPPt {
     }
 
     public void addAnimationFile(String path) throws IOException {
-        buildModelAnims.addAnimation(path);
+        globalAnimationsList.addAnimation(path);
     }
 
     public void replaceAnimationFile(int index, String path) throws IOException {
-        buildModelAnims.replaceAnimation(index, path);
+        globalAnimationsList.replaceAnimation(index, path);
     }
 
     public void saveAnimationFile(int index, String path) throws IOException {
-        buildModelAnims.saveAnimation(index, path);
+        globalAnimationsList.saveAnimation(index, path);
     }
 
     private String getGameFilePath(String relativePath) {
-        return gameFolderPath + File.separator + relativePath;
+        return gameFolder.getPath(relativePath);
     }
 
     private boolean isGameFileAvailable(String path) {
-        return isFileAvailable(gameFolderPath + File.separator + path);
+        return isFileAvailable(getGameFilePath(path));
     }
 
     private boolean isFileAvailable(String path) {
@@ -250,6 +253,7 @@ public class BuildHandlerDPPt {
 
     public void setGameFolderPath(String path) {
         this.gameFolderPath = path;
+        this.gameFolder = new GameFolder(path);
     }
 
     public String getGameFolderPath() {
@@ -268,8 +272,8 @@ public class BuildHandlerDPPt {
         return buildModelAnimeList;
     }
 
-    public BuildAnimations getBuildModelAnims() {
-        return buildModelAnims;
+    public GlobalAnimationsList getGlobalAnimationsList() {
+        return globalAnimationsList;
     }
 
     public AreaDataListDPPt getAreaDataList() {

@@ -1,7 +1,6 @@
 package formats.animationeditor;
 
 import editor.handler.MapEditorHandler;
-import formats.nsbtx2.Nsbtx2;
 import utils.Utils;
 
 import javax.swing.*;
@@ -58,9 +57,12 @@ public class AnimationEditorDialog extends JDialog {
 
     private void jlTextureNamesValueChanged(ListSelectionEvent e) {
         if (animHandler != null) {
-            if (animationListEnabled && !animHandler.isAnimationRunning()) {
-                animHandler.setCurrentDelay((Integer) jsDelay.getValue());
-                repaintFrames();
+            if (textureListEnabled && !e.getValueIsAdjusting() && !animHandler.isAnimationRunning()) {
+                int textureIndex = jlTextureNames.getSelectedIndex();
+                if (textureIndex >= 0 && animHandler.getAnimationSelected() != null) {
+                    animHandler.setCurrentTexture(textureIndex);
+                    repaintFrames();
+                }
             }
         }
     }
@@ -83,7 +85,12 @@ public class AnimationEditorDialog extends JDialog {
     }
 
     private void jlAnimationNamesValueChanged(ListSelectionEvent e) {
-        updateView();
+        if (animHandler != null) {
+            if (animationListEnabled && !e.getValueIsAdjusting()) {
+                animHandler.setCurrentFrameIndex(0);
+                updateView();
+            }
+        }
     }
 
     private void jbOpenAnimationFileActionPerformed(ActionEvent e) {
@@ -103,6 +110,7 @@ public class AnimationEditorDialog extends JDialog {
             if (animationListEnabled && !animHandler.isAnimationRunning()) {
                 if (animHandler.getAnimationFile() != null) {
                     animHandler.addAnimation("New animation");
+                    animHandler.setCurrentFrameIndex(0);
                     updateViewAnimationListNames(jlAnimationNames.getModel().getSize());
                     repaintFrames();
                 }
@@ -124,7 +132,9 @@ public class AnimationEditorDialog extends JDialog {
     }
 
     private void jbApplyActionPerformed(ActionEvent e) {
-        // TODO add your code here
+        if (animHandler != null && animHandler.getAnimationSelected() != null) {
+            changeAnimationName();
+        }
     }
 
     public void init(MapEditorHandler handler) {
@@ -166,7 +176,15 @@ public class AnimationEditorDialog extends JDialog {
     }
 
     public void updateViewTexturesNsbxt() {
-        jlTextureNames.setSelectedIndex(animHandler.getCurrentNsbtxTextureIndex());
+        textureListEnabled = false;
+        int textureIndex = animHandler.getCurrentNsbtxTextureIndex();
+        int textureCount = jlTextureNames.getModel().getSize();
+        if (textureIndex >= 0 && textureIndex < textureCount) {
+            jlTextureNames.setSelectedIndex(textureIndex);
+        } else {
+            jlTextureNames.clearSelection();
+        }
+        textureListEnabled = true;
     }
 
     public void updateViewDelayDisplay() {
@@ -244,7 +262,8 @@ public class AnimationEditorDialog extends JDialog {
 
     public void changeAnimationName() {
         String name = jtfAnimationName.getText();
-        if (name.length() <= Nsbtx2.maxNameSize) {
+        String validationError = Animation.getNameValidationError(name);
+        if (validationError == null) {
             jtfAnimNameEnabled.value = false;
             animHandler.getAnimationSelected().setName(name);
             jtfAnimationName.setBackground(rightColor);
@@ -254,8 +273,8 @@ public class AnimationEditorDialog extends JDialog {
             updateViewAnimationListNames(jlAnimationNames.getSelectedIndex());
         } else {
             JOptionPane.showMessageDialog(this,
-                    "The animation name has more than 16 characters",
-                    "The name is too long",
+                    validationError,
+                    "Invalid animation name",
                     JOptionPane.ERROR_MESSAGE);
         }
 
@@ -268,7 +287,7 @@ public class AnimationEditorDialog extends JDialog {
         }
         fc.setApproveButtonText("Open");
         fc.setDialogTitle("Open Animation File File");
-        int returnVal = fc.showOpenDialog(this);
+        final int returnVal = fc.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             handler.setLastNsbtxDirectoryUsed(fc.getSelectedFile().getParent());
             try {
@@ -293,7 +312,7 @@ public class AnimationEditorDialog extends JDialog {
         fc.setFileFilter(new FileNameExtensionFilter("NSBTX (*.nsbtx)", "nsbtx"));
         fc.setApproveButtonText("Open");
         fc.setDialogTitle("Open NSBTX File");
-        int returnVal = fc.showOpenDialog(this);
+        final int returnVal = fc.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             handler.setLastNsbtxDirectoryUsed(fc.getSelectedFile().getParent());
             try {
@@ -317,7 +336,7 @@ public class AnimationEditorDialog extends JDialog {
             }
             fc.setApproveButtonText("Save");
             fc.setDialogTitle("Save Animation File");
-            int returnVal = fc.showOpenDialog(this);
+            final int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 handler.setLastNsbtxDirectoryUsed(fc.getSelectedFile().getParent());
                 try {
@@ -326,8 +345,8 @@ public class AnimationEditorDialog extends JDialog {
                     animHandler.saveAnimationFile(path);
 
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(this, "There was an error saving the IMD",
-                            "Error saving IMD", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "There was an error saving the animation file.",
+                            "Error saving animation file", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }
@@ -335,11 +354,17 @@ public class AnimationEditorDialog extends JDialog {
 
     public void addFrame() {
         if (animHandler != null) {
-            if (animHandler.getAnimationSelected() != null) {
-                animHandler.getAnimationSelected().addFrame(
-                        jlTextureNames.getSelectedIndex(),
-                        (Integer) jsDelay.getValue());
-                repaintFrames();
+            Animation animation = animHandler.getAnimationSelected();
+            int textureIndex = jlTextureNames.getSelectedIndex();
+            if (animation != null && textureIndex >= 0) {
+                int newFrameIndex = animation.size();
+                if (animation.addFrame(textureIndex, (Integer) jsDelay.getValue())) {
+                    animHandler.setCurrentFrameIndex(newFrameIndex);
+                    repaintFrames();
+                } else {
+                    JOptionPane.showMessageDialog(this, "The animation already has the maximum number of frames.",
+                            "Can't add frame", JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
     }

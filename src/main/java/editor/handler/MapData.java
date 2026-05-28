@@ -46,6 +46,10 @@ public class MapData {
 
     //Area index
     private int areaIndex;
+    
+    //Exportgroup index
+    private int exportgroupIndex;
+    private boolean isExportGroupCenter = false;
 
     public MapData(MapEditorHandler handler) {
         this.handler = handler;
@@ -54,50 +58,67 @@ public class MapData {
         bdhc = new Bdhc();
         backsound = new Backsound();
         collisions = new Collisions(handler.getGameIndex());
-        collisions2 = new Collisions(handler.getGameIndex());;
+        collisions2 = new Collisions(handler.getGameIndex());
         buildings = new BuildFile();
         bdhcam = new Bdhcam();
 
         areaIndex = 0;
-        //System.out.println("Map data created");
+        exportgroupIndex = 0;
     }
 
     public void updateMapThumbnail() {
         int[][][] tiles = grid.tileLayers;
         int[][][] heights = grid.heightLayers;
 
-        mapThumbnail = new BufferedImage(mapThumbnailSize, mapThumbnailSize, BufferedImage.TYPE_INT_ARGB);
+        mapThumbnail = createEmptyThumbnail();
         Graphics g = mapThumbnail.getGraphics();
-
-        g.setColor(new Color(0.0f, 0.5f, 0.5f, 1.0f));
-        g.fillRect(0, 0, mapThumbnail.getWidth(), mapThumbnail.getHeight());
-
-        for (int i = 0; i < MapGrid.cols; i++) {
-            for (int j = 0; j < MapGrid.rows; j++) {
-                try {
-                    int maxHeight = -Integer.MIN_VALUE;
-                    int maxHeightIndex = 0;
-                    for (int k = 0; k < MapGrid.numLayers; k++) {
-                        if (heights[k][i][j] > maxHeight && tiles[k][i][j] > -1) {
-                            maxHeight = heights[k][i][j];
-                            maxHeightIndex = k;
-                        }
-                    }
-
-                    int tileIndex = tiles[maxHeightIndex][i][j];
-                    if (tileIndex != -1) {
-                        BufferedImage tileThumbnail = handler.getTileset().get(tileIndex).getSmallThumbnail();
-
-                        g.drawImage(tileThumbnail,
-                                i * smallTileSize,
-                                (MapGrid.cols - j - 1) * smallTileSize - (tileThumbnail.getHeight() - smallTileSize), //+ tileThumbnail.getHeight(),
-                                null);
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+        try {
+            for (int i = 0; i < MapGrid.cols; i++) {
+                for (int j = 0; j < MapGrid.rows; j++) {
+                    drawTileThumbnail(g, i, j, getTopTileIndex(tiles, heights, i, j));
                 }
             }
+        } finally {
+            g.dispose();
         }
+    }
+
+    private BufferedImage createEmptyThumbnail() {
+        BufferedImage thumbnail = new BufferedImage(mapThumbnailSize, mapThumbnailSize, BufferedImage.TYPE_INT_ARGB);
+        Graphics g = thumbnail.getGraphics();
+        try {
+            g.setColor(new Color(0.0f, 0.5f, 0.5f, 1.0f));
+            g.fillRect(0, 0, thumbnail.getWidth(), thumbnail.getHeight());
+        } finally {
+            g.dispose();
+        }
+        return thumbnail;
+    }
+
+    private int getTopTileIndex(int[][][] tiles, int[][][] heights, int col, int row) {
+        int maxHeight = -Integer.MIN_VALUE;
+        int maxHeightIndex = 0;
+        for (int layer = 0; layer < MapGrid.numLayers; layer++) {
+            if (heights[layer][col][row] > maxHeight && tiles[layer][col][row] > -1) {
+                maxHeight = heights[layer][col][row];
+                maxHeightIndex = layer;
+            }
+        }
+        return tiles[maxHeightIndex][col][row];
+    }
+
+    private void drawTileThumbnail(Graphics g, int col, int row, int tileIndex) {
+        if (tileIndex < 0 || handler.getTileset() == null || tileIndex >= handler.getTileset().size()) {
+            return;
+        }
+        BufferedImage tileThumbnail = handler.getTileset().get(tileIndex).getSmallThumbnail();
+        if (tileThumbnail == null) {
+            return;
+        }
+        g.drawImage(tileThumbnail,
+                col * smallTileSize,
+                (MapGrid.cols - row - 1) * smallTileSize - (tileThumbnail.getHeight() - smallTileSize),
+                null);
     }
 
     public MapGrid getGrid() {
@@ -159,16 +180,32 @@ public class MapData {
     public void setAreaIndex(int areaIndex) {
         this.areaIndex = areaIndex;
     }
-
+    
     public int getAreaIndex() {
         return areaIndex;
     }
+    
+    public void setExportgroupIndex(int exportgroupIndex) {
+        this.exportgroupIndex = exportgroupIndex;
+    }
 
+    public int getExportGroupIndex() {
+        return this.exportgroupIndex;
+    }
+        
     public Bdhcam getBdhcam() {
         return bdhcam;
     }
 
     public void setBdhcam(Bdhcam bdhcam) {
         this.bdhcam = bdhcam;
+    }
+
+    public boolean isExportGroupCenter() {
+        return isExportGroupCenter;
+    }
+
+    public void setExportGroupCenter(boolean exportGroupCenter) {
+        isExportGroupCenter = exportGroupCenter;
     }
 }

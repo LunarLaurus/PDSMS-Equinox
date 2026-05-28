@@ -35,13 +35,13 @@ import utils.Utils;
 public class MapEditorHandler {
 
     //Version name
-    public static final String versionName = "Pokemon DS Map Studio 2.2";
+    public static final String versionName = "Pokemon DS Map Studio 2.2.2 [AdAstra]";
 
     //Main frame
-    private MainFrame mainFrame;
+    private final MainFrame mainFrame;
 
     //Game
-    private Game game;
+    private final Game game;
 
     //Working directory
     private String lastTilesetDirectoryUsed = null;
@@ -62,7 +62,7 @@ public class MapEditorHandler {
     public static final int minHeight = -15;
     public static final int maxHeight = 15;
     public static final int numHeights = maxHeight - minHeight + 1;
-    private int[] heights = new int[numHeights];
+    private final int[] heights = new int[numHeights];
     private final Color[] heightColors = new Color[numHeights];
     private int heightIndexSelected = 15;
     private BufferedImage[] heightImages = new BufferedImage[numHeights];
@@ -294,15 +294,15 @@ public class MapEditorHandler {
 
     public void setActiveTileLayer(int index) {
         MapGrid grid = getCurrentMap().getGrid();
-        if (index >= 0 && index < grid.numLayers) {
+        if (index >= 0 && index < MapGrid.numLayers) {
             activeLayer = index;
         }
     }
 
     public void setOnlyActiveTileLayer(int index) {
         MapGrid grid = getCurrentMap().getGrid();
-        if (index >= 0 && index < grid.numLayers) {
-            for (int i = 0; i < grid.numLayers; i++) {
+        if (index >= 0 && index < MapGrid.numLayers) {
+            for (int i = 0; i < MapGrid.numLayers; i++) {
                 renderLayers[i] = false;
             }
             renderLayers[index] = true;
@@ -311,9 +311,20 @@ public class MapEditorHandler {
         }
     }
 
+    public void invertEveryLayer(int index) {
+        MapGrid grid = getCurrentMap().getGrid();
+        if (index >= 0 && index < MapGrid.numLayers) {
+            for (int i = 0; i < MapGrid.numLayers; i++) {
+                renderLayers[i] = !renderLayers[i];
+            }
+            activeLayer = index;
+            mainFrame.repaintMapDisplay();
+        }
+    }
+
     public boolean isLayerTheOnlyActive(int index) {
         MapGrid grid = getCurrentMap().getGrid();
-        for(int i = 0; i < grid.numLayers; i++){
+        for(int i = 0; i < MapGrid.numLayers; i++){
             if(renderLayers[i] && i != index){
                 return false;
             }
@@ -321,9 +332,9 @@ public class MapEditorHandler {
         return true;
     }
 
-    public void setLayersEnabled(boolean enabled) {
+    public void setAllLayersState(boolean enabled) {
         MapGrid grid = getCurrentMap().getGrid();
-        for(int i = 0; i< grid.numLayers; i++){
+        for(int i = 0; i < MapGrid.numLayers; i++){
             renderLayers[i] = enabled;
         }
     }
@@ -357,8 +368,8 @@ public class MapEditorHandler {
         //mainFrame.repaintMapDisplay();
     }
 
-    public void setLayerState(int index, boolean enabled) {
-        renderLayers[index] = enabled;
+    public void setLayerState(int index, boolean status) {
+        renderLayers[index] = status;
     }
 
     public void updateLayerThumbnail(int index) {
@@ -487,7 +498,7 @@ public class MapEditorHandler {
 
         //Check if materials in map use vertex colors
         for (Integer materialIndex : materialIndicesInGrid) {
-            if (tset.getMaterial(materialIndex).vertexColorsEnabled()) {
+            if (tset.getMaterial(materialIndex).areVertexColorsEnabled()) {
                 return true;
             }
         }
@@ -549,7 +560,7 @@ public class MapEditorHandler {
         this.mapSelected = mapCoords;
 
         mainFrame.getThumbnailLayerSelector().drawAllLayerThumbnails();
-        mainFrame.getThumbnailLayerSelector().repaint();
+        repaintThumbnailLayerSelector();
 
         mainFrame.getMapMatrixDisplay().repaint();
         if (updateScrollbars) {
@@ -573,7 +584,7 @@ public class MapEditorHandler {
     }
 
     public boolean mapExists(Point mapCoords) {
-        return mapMatrix.getMatrix().keySet().contains(mapCoords);
+        return mapMatrix.getMatrix().containsKey(mapCoords);
     }
 
     public boolean mapSelectedExists() {
@@ -601,13 +612,17 @@ public class MapEditorHandler {
         this.realTimePostProcessing = enabled;
     }
 
+    public void refreshLayer(int index) {
+        mainFrame.getMapDisplay().updateMapLayerGL(index);
+        mainFrame.getMapDisplay().repaint();
+        updateLayerThumbnail(index);
+        repaintThumbnailLayerSelector();
+    }
+
     public void clearLayer(int index) {
         addMapState(new MapLayerState("Clear Layer", this));
         getGrid().clearLayer(index);
-        mainFrame.getThumbnailLayerSelector().drawLayerThumbnail(index);
-        mainFrame.getThumbnailLayerSelector().repaint();
-        mainFrame.getMapDisplay().updateMapLayerGL(index);
-        mainFrame.getMapDisplay().repaint();
+        refreshLayer(index);
     }
 
     public void pasteLayer(int index) {
@@ -616,10 +631,7 @@ public class MapEditorHandler {
                 addMapState(new MapLayerState("Paste Tile and Height Layer", this));
                 pasteTileLayer(index);
                 pasteHeightLayer(index);
-                mainFrame.getMapDisplay().updateMapLayerGL(index);
-                mainFrame.getMapDisplay().repaint();
-                updateLayerThumbnail(index);
-                mainFrame.getThumbnailLayerSelector().repaint();
+                refreshLayer(index);
             }
         }
     }
@@ -629,10 +641,7 @@ public class MapEditorHandler {
             if (tileLayerCopy != null) {
                 addMapState(new MapLayerState("Paste Tile Layer", this));
                 pasteTileLayer(index);
-                mainFrame.getMapDisplay().updateMapLayerGL(index);
-                mainFrame.getMapDisplay().repaint();
-                updateLayerThumbnail(index);
-                mainFrame.getThumbnailLayerSelector().repaint();
+                refreshLayer(index);
             }
         }
     }
@@ -642,14 +651,10 @@ public class MapEditorHandler {
             if (heightLayerCopy != null) {
                 addMapState(new MapLayerState("Paste Height Layer", this));
                 pasteHeightLayer(index);
-                mainFrame.getMapDisplay().updateMapLayerGL(index);
-                mainFrame.getMapDisplay().repaint();
-                updateLayerThumbnail(index);
-                mainFrame.getThumbnailLayerSelector().repaint();
+                refreshLayer(index);
             }
         }
     }
-
 
     public void copySelectedLayer() {
         copyLayer(getActiveLayerIndex());

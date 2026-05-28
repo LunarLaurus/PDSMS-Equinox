@@ -101,6 +101,7 @@ import utils.Utils;
 public class MapDisplay extends GLJPanel implements GLEventListener, MouseListener, MouseMotionListener, KeyListener, MouseWheelListener {
 
     //Editor Handler
+    private boolean mouseWheelEnabled = true;
     protected MapEditorHandler handler;
 
     //Grid
@@ -169,7 +170,7 @@ public class MapDisplay extends GLJPanel implements GLEventListener, MouseListen
     protected BufferedImage screenshot;
     protected boolean screenshotRequested = false;
 
-    //Background Image 
+    //Background Image
     protected BufferedImage backImage = null;
     protected boolean backImageEnabled = false;
     protected float backImageAlpha = 0.5f;
@@ -220,6 +221,14 @@ public class MapDisplay extends GLJPanel implements GLEventListener, MouseListen
         //clearTileCursor = Utils.loadCursor("/cursors/clearTileCursor.png");
     }
 
+    public boolean isMouseWheelEnabled() {
+        return mouseWheelEnabled;
+    }
+
+    public void setMouseWheelEnabled(boolean mouseWheelEnabled) {
+        this.mouseWheelEnabled = mouseWheelEnabled;
+    }
+
     @Override
     public void init(GLAutoDrawable drawable) {
         glu = new GLU();
@@ -252,8 +261,10 @@ public class MapDisplay extends GLJPanel implements GLEventListener, MouseListen
 
     @Override
     public void display(GLAutoDrawable drawable) {
-        GL2 gl = drawable.getGL().getGL2();
+        renderMapScene(drawable.getGL().getGL2());
+    }
 
+    private void renderMapScene(GL2 gl) {
         gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //gl.glLoadIdentity();
@@ -263,9 +274,9 @@ public class MapDisplay extends GLJPanel implements GLEventListener, MouseListen
 
         if (updateRequested) {
 
-            //Load Textures into OpenGL
-            handler.getTileset().loadTexturesGL();
-            handler.getBorderMapsTileset().loadTexturesGL();
+            //Reload textures without leaving the old GL objects allocated.
+            handler.getTileset().updateTextures(gl);
+            handler.getBorderMapsTileset().updateTextures(gl);
 
             updateMapLayersGL();
 
@@ -320,7 +331,6 @@ public class MapDisplay extends GLJPanel implements GLEventListener, MouseListen
                 screenshotRequested = false;
             }
 
-            gl.glFinish();
         } catch (GLException ex) {
             ex.printStackTrace();
         }
@@ -471,6 +481,15 @@ public class MapDisplay extends GLJPanel implements GLEventListener, MouseListen
                 changeLayerWithNumKey(e, 7);
                 repaint();
                 break;
+            case KeyEvent.VK_9:
+                changeLayerWithNumKey(e, 8);
+                repaint();
+                break;
+            case KeyEvent.VK_BACK_SLASH:
+                handler.setAllLayersState(true);
+                handler.getMainFrame().getThumbnailLayerSelector().repaint();
+                repaint();
+                break;
         }
 
     }
@@ -487,7 +506,8 @@ public class MapDisplay extends GLJPanel implements GLEventListener, MouseListen
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-        viewMode.mouseWheelMoved(this, e);
+        if (mouseWheelEnabled)
+            viewMode.mouseWheelMoved(this, e);
     }
 
     @Override
@@ -497,9 +517,9 @@ public class MapDisplay extends GLJPanel implements GLEventListener, MouseListen
         if (handler != null) {
             viewMode.paintComponent(this, g);
 
-            if (backImageEnabled) {
-                drawBackImage(g);
-            }
+            //if (backImageEnabled) {
+            //    drawBackImage(g);
+            //}
         }
 
     }
@@ -1609,8 +1629,12 @@ public class MapDisplay extends GLJPanel implements GLEventListener, MouseListen
 
     public void drawBackImage(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
+
+        Point p = handler.getMapSelected();
         g2d.setComposite(AlphaComposite.SrcOver.derive(backImageAlpha));
-        g2d.drawImage(backImage, borderSize * tileSize, borderSize * tileSize, null);
+        g2d.drawImage(backImage,
+                borderSize * tileSize + p.x * cols * tileSize,
+                borderSize * tileSize + p.y * rows * tileSize, null);
         g2d.setComposite(AlphaComposite.SrcOver.derive(1.0f));
     }
 
@@ -1652,6 +1676,155 @@ public class MapDisplay extends GLJPanel implements GLEventListener, MouseListen
         gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_DIFFUSE, new float[]{0.8f, 0.8f, 0.8f, 0.0f}, 0);
         gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_POSITION, new float[]{1.0f, -1.0f, -1.0f, 1.0f}, 0);
 
+    }
+
+    public BufferedImage captureOrthoMapPreview(Point mapCoords) {
+        GLContext context = getContext();
+        if (context == null) {
+            return null;
+        }
+
+        boolean contextCurrent = false;
+        try {
+            contextCurrent = context.makeCurrent() != GLContext.CONTEXT_NOT_CURRENT;
+            if (!contextCurrent) {
+                return null;
+            }
+            return captureOrthoMapPreview(getGL().getGL2(), mapCoords);
+        } finally {
+            if (contextCurrent) {
+                context.release();
+            }
+        }
+    }
+
+    private BufferedImage captureOrthoMapPreview(GL2 gl, Point mapCoords) {
+        ViewMode previousViewMode = viewMode;
+        BufferedImage previousScreenshot = screenshot;
+        boolean previousScreenshotRequested = screenshotRequested;
+        float previousCameraX = cameraX;
+        float previousCameraY = cameraY;
+        float previousCameraZ = cameraZ;
+        float previousTargetX = targetX;
+        float previousTargetY = targetY;
+        float previousTargetZ = targetZ;
+        float previousCameraRotX = cameraRotX;
+        float previousCameraRotY = cameraRotY;
+        float previousCameraRotZ = cameraRotZ;
+        float previousOrthoScale = orthoScale;
+        boolean previousDrawGridEnabled = drawGridEnabled;
+        boolean previousDrawWireframeEnabled = drawWireframeEnabled;
+        boolean previousDrawGridBorderMaps = drawGridBorderMaps;
+
+        int[] previousViewport = new int[4];
+        int[] previousFramebuffer = new int[1];
+        int[] previousRenderbuffer = new int[1];
+        int[] previousReadBuffer = new int[1];
+        gl.glGetIntegerv(GL2.GL_VIEWPORT, previousViewport, 0);
+        gl.glGetIntegerv(GL2.GL_FRAMEBUFFER_BINDING, previousFramebuffer, 0);
+        gl.glGetIntegerv(GL2.GL_RENDERBUFFER_BINDING, previousRenderbuffer, 0);
+        gl.glGetIntegerv(GL2.GL_READ_BUFFER, previousReadBuffer, 0);
+
+        int[] framebuffer = new int[1];
+        int[] colorBuffer = new int[1];
+        int[] depthBuffer = new int[1];
+        int frameWidth = width;
+        int frameHeight = height;
+        int mapWidth = cols * tileSize;
+        int mapHeight = rows * tileSize;
+
+        try {
+            gl.glGenFramebuffers(1, framebuffer, 0);
+            gl.glBindFramebuffer(GL2.GL_FRAMEBUFFER, framebuffer[0]);
+
+            gl.glGenRenderbuffers(1, colorBuffer, 0);
+            gl.glBindRenderbuffer(GL2.GL_RENDERBUFFER, colorBuffer[0]);
+            gl.glRenderbufferStorage(GL2.GL_RENDERBUFFER, GL2.GL_RGBA8, frameWidth, frameHeight);
+            gl.glFramebufferRenderbuffer(GL2.GL_FRAMEBUFFER, GL2.GL_COLOR_ATTACHMENT0,
+                    GL2.GL_RENDERBUFFER, colorBuffer[0]);
+
+            gl.glGenRenderbuffers(1, depthBuffer, 0);
+            gl.glBindRenderbuffer(GL2.GL_RENDERBUFFER, depthBuffer[0]);
+            gl.glRenderbufferStorage(GL2.GL_RENDERBUFFER, GL2.GL_DEPTH_COMPONENT24, frameWidth, frameHeight);
+            gl.glFramebufferRenderbuffer(GL2.GL_FRAMEBUFFER, GL2.GL_DEPTH_ATTACHMENT,
+                    GL2.GL_RENDERBUFFER, depthBuffer[0]);
+
+            if (gl.glCheckFramebufferStatus(GL2.GL_FRAMEBUFFER) != GL2.GL_FRAMEBUFFER_COMPLETE) {
+                return null;
+            }
+
+            gl.glViewport(0, 0, frameWidth, frameHeight);
+            gl.glReadBuffer(GL2.GL_COLOR_ATTACHMENT0);
+
+            viewMode = ViewMode.VIEW_ORTHO_MODE;
+            cameraX = mapCoords.x * cols;
+            cameraY = -mapCoords.y * cols;
+            cameraZ = 32.0f;
+            targetX = cameraX;
+            targetY = cameraY;
+            targetZ = cameraZ;
+            cameraRotX = 0.0f;
+            cameraRotY = 0.0f;
+            cameraRotZ = 0.0f;
+            orthoScale = 1.0f;
+            drawGridEnabled = false;
+            drawWireframeEnabled = false;
+            drawGridBorderMaps = false;
+            screenshotRequested = false;
+
+            renderMapScene(gl);
+            return readFramebufferImage(gl, borderSize * tileSize, borderSize * tileSize, mapWidth, mapHeight);
+        } finally {
+            viewMode = previousViewMode;
+            cameraX = previousCameraX;
+            cameraY = previousCameraY;
+            cameraZ = previousCameraZ;
+            targetX = previousTargetX;
+            targetY = previousTargetY;
+            targetZ = previousTargetZ;
+            cameraRotX = previousCameraRotX;
+            cameraRotY = previousCameraRotY;
+            cameraRotZ = previousCameraRotZ;
+            orthoScale = previousOrthoScale;
+            drawGridEnabled = previousDrawGridEnabled;
+            drawWireframeEnabled = previousDrawWireframeEnabled;
+            drawGridBorderMaps = previousDrawGridBorderMaps;
+            screenshot = previousScreenshot;
+            screenshotRequested = previousScreenshotRequested;
+
+            gl.glBindFramebuffer(GL2.GL_FRAMEBUFFER, previousFramebuffer[0]);
+            gl.glBindRenderbuffer(GL2.GL_RENDERBUFFER, previousRenderbuffer[0]);
+            gl.glReadBuffer(previousReadBuffer[0]);
+            gl.glViewport(previousViewport[0], previousViewport[1], previousViewport[2], previousViewport[3]);
+
+            if (depthBuffer[0] != 0) {
+                gl.glDeleteRenderbuffers(1, depthBuffer, 0);
+            }
+            if (colorBuffer[0] != 0) {
+                gl.glDeleteRenderbuffers(1, colorBuffer, 0);
+            }
+            if (framebuffer[0] != 0) {
+                gl.glDeleteFramebuffers(1, framebuffer, 0);
+            }
+        }
+    }
+
+    private BufferedImage readFramebufferImage(GL2 gl, int x, int y, int imageWidth, int imageHeight) {
+        BufferedImage image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_RGB);
+        ByteBuffer buffer = GLBuffers.newDirectByteBuffer(imageWidth * imageHeight * 4);
+        gl.glReadPixels(x, y, imageWidth, imageHeight, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+        for (int row = 0; row < imageHeight; row++) {
+            for (int col = 0; col < imageWidth; col++) {
+                int red = buffer.get() & 0xff;
+                int green = buffer.get() & 0xff;
+                int blue = buffer.get() & 0xff;
+                buffer.get();
+                image.setRGB(col, imageHeight - 1 - row, (red << 16) | (green << 8) | blue);
+            }
+        }
+
+        return image;
     }
 
     public void requestScreenshot() {

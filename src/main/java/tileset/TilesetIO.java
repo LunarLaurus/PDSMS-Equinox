@@ -41,10 +41,19 @@ public class TilesetIO {
     private static final byte TAG_TEX_TILING_U = 40;
     private static final byte TAG_TEX_TILING_V = 41;
     private static final byte TAG_COLOR_FORMAT = 42;
+
     private static final byte TAG_LIGHT0 = 43;
+    private static final byte TAG_DIFFUSE = 53;
+
     private static final byte TAG_LIGHT1 = 44;
+    private static final byte TAG_AMBIENT = 54;
+
     private static final byte TAG_LIGHT2 = 45;
+    private static final byte TAG_SPECULAR = 55;
+
     private static final byte TAG_LIGHT3 = 46;
+    private static final byte TAG_EMISSION = 56;
+
     private static final byte TAG_RENDER_BORDER = 47;
     private static final byte TAG_VERTEX_COLORS = 48;
     private static final byte TAG_INCLUDE_IN_IMD = 35;
@@ -58,6 +67,7 @@ public class TilesetIO {
     private static final byte TAG_GLOBALTEXSCALE = 28;
     private static final byte TAG_XOFFSET = 38;
     private static final byte TAG_YOFFSET = 39;
+    private static final byte TAG_ZOFFSET = 23; //40 and 37 were already taken
     private static final byte TAG_VCOORDS = 15;
     private static final byte TAG_TCOORDS = 16;
     private static final byte TAG_NCOORDS = 22;
@@ -75,7 +85,7 @@ public class TilesetIO {
 
     private static final byte TAG_SMARTGRID = 26;
 
-    public static void saveTilesetToFile(String path, Tileset tset)
+    public static void writeTilesetToFile(String path, Tileset tset)
             throws FileNotFoundException, IOException {
 
         FileOutputStream out = new FileOutputStream(path);
@@ -83,6 +93,7 @@ public class TilesetIO {
         for (int i = 0; i < tset.getMaterials().size(); i++) {
             TilesetMaterial m = tset.getMaterials().get(i);
             writeIntElement(out, TAG_MATERIAL_START, i);
+
             writeStringElement(out, TAG_IMG_NAME, m.getImageName());
             writeStringElement(out, TAG_MAT_NAME, m.getMaterialName());
             writeStringElement(out, TAG_PNAME_IMD, m.getPaletteNameImd());
@@ -91,17 +102,27 @@ public class TilesetIO {
             writeBoolElement(out, TAG_BOTHFACE, m.renderBothFaces());
             writeBoolElement(out, TAG_NORMALORIENT, m.uniformNormalOrientation());
             writeBoolElement(out, TAG_INCLUDE_IN_IMD, m.alwaysIncludeInImd());
-            writeBoolElement(out, TAG_LIGHT0, m.light0());
-            writeBoolElement(out, TAG_LIGHT1, m.light1());
-            writeBoolElement(out, TAG_LIGHT2, m.light2());
-            writeBoolElement(out, TAG_LIGHT3, m.light3());
-            writeBoolElement(out, TAG_RENDER_BORDER, m.renderBorder());
-            writeBoolElement(out, TAG_VERTEX_COLORS, m.vertexColorsEnabled());
+
+            writeBoolElement(out, TAG_LIGHT0, m.getLight0());
+            writeByteArrayElement(out, TAG_DIFFUSE, intArrayToByteArray(m.getDiffuse()));
+
+            writeBoolElement(out, TAG_LIGHT1, m.getLight1());
+            writeByteArrayElement(out, TAG_AMBIENT, intArrayToByteArray(m.getAmbient()));
+
+            writeBoolElement(out, TAG_LIGHT2, m.getLight2());
+            writeByteArrayElement(out, TAG_SPECULAR, intArrayToByteArray(m.getSpecular()));
+
+            writeBoolElement(out, TAG_LIGHT3, m.getLight3());
+            writeByteArrayElement(out, TAG_EMISSION, intArrayToByteArray(m.getEmission()));
+
+            writeBoolElement(out, TAG_RENDER_BORDER, m.hasRenderBorder());
+            writeBoolElement(out, TAG_VERTEX_COLORS, m.areVertexColorsEnabled());
             writeIntElement(out, TAG_ALPHA, m.getAlpha());
             writeIntElement(out, TAG_TEXGENMODE, m.getTexGenMode());
             writeIntElement(out, TAG_TEX_TILING_U, m.getTexTilingU());
             writeIntElement(out, TAG_TEX_TILING_V, m.getTexTilingV());
             writeIntElement(out, TAG_COLOR_FORMAT, m.getColorFormat());
+
             writeIntElement(out, TAG_MATERIAL_END, i);
         }
 
@@ -122,6 +143,7 @@ public class TilesetIO {
             writeFloatElement(out, TAG_GLOBALTEXSCALE, tile.getGlobalTextureScale());
             writeFloatElement(out, TAG_XOFFSET, tile.getXOffset());
             writeFloatElement(out, TAG_YOFFSET, tile.getYOffset());
+            writeFloatElement(out, TAG_ZOFFSET, tile.getZOffset());
             writeFloatElement(out, TAG_VCOORDS, tile.getVertexCoordsObj());
             writeFloatElement(out, TAG_TCOORDS, tile.getTextureCoordsObj());
             writeFloatElement(out, TAG_NCOORDS, tile.getNormalCoordsObj());
@@ -199,18 +221,35 @@ public class TilesetIO {
                 case TAG_INCLUDE_IN_IMD:
                     material.setAlwaysIncludeInImd(readBoolElement(in));
                     break;
+
                 case TAG_LIGHT0:
                     material.setLight0(readBoolElement(in));
                     break;
+                case TAG_DIFFUSE:
+                    material.setDiffuse(byteArrayToIntArray(readByteArrayElement(in)));
+                    break;
+
                 case TAG_LIGHT1:
                     material.setLight1(readBoolElement(in));
                     break;
+                case TAG_AMBIENT:
+                    material.setAmbient(byteArrayToIntArray(readByteArrayElement(in)));
+                    break;
+
                 case TAG_LIGHT2:
                     material.setLight2(readBoolElement(in));
                     break;
+                case TAG_SPECULAR:
+                    material.setSpecular(byteArrayToIntArray(readByteArrayElement(in)));
+                    break;
+
                 case TAG_LIGHT3:
                     material.setLight3(readBoolElement(in));
                     break;
+                case TAG_EMISSION:
+                    material.setEmission(byteArrayToIntArray(readByteArrayElement(in)));
+                    break;
+
                 case TAG_RENDER_BORDER:
                     material.setRenderBorder(readBoolElement(in));
                     break;
@@ -300,6 +339,9 @@ public class TilesetIO {
                     break;
                 case TAG_YOFFSET:
                     tile.setYOffset(readFloatElement(in));
+                    break;
+                case TAG_ZOFFSET:
+                    tile.setZOffset(readFloatElement(in));
                     break;
                 case TAG_VCOORDS:
                     tile.setVertexCoordsObj(readFloatArray(in));
@@ -449,6 +491,18 @@ public class TilesetIO {
         return readFloat(in);
     }
 
+    private static byte[] readByteArrayElement(InputStream in)
+            throws IOException {
+        int size = readInt(in);
+
+        byte[] output = new byte[size];
+
+        for (int i = 0; i < size; i++) {
+            output[i] = (byte) (in.read() & 0xFF);
+        }
+        return output;
+    }
+
     private static Boolean readBoolElement(InputStream in)
             throws IOException {
         int size = readInt(in); //Discard size 1
@@ -595,6 +649,17 @@ public class TilesetIO {
         writeFloatValue(out, data);
     }
 
+    private static void writeByteArrayElement(FileOutputStream out, byte tag, byte[] data)
+            throws IOException {
+        writeTag(out, tag);
+        writeIntValue(out, data.length);
+
+        for (byte b : data) {
+            writeByteValue(out, b);
+        }
+    }
+
+
     private static void writeBoolElement(FileOutputStream out, byte tag, boolean data)
             throws IOException {
         writeTag(out, tag);
@@ -642,12 +707,20 @@ public class TilesetIO {
 
     private static void writeIntValue(FileOutputStream out, int value)
             throws IOException {
-        out.write(ByteBuffer.allocate(Integer.BYTES).putInt(value).array());
+        out.write((value >>> 24) & 0xFF);
+        out.write((value >>> 16) & 0xFF);
+        out.write((value >>> 8) & 0xFF);
+        out.write(value & 0xFF);
     }
 
     private static void writeFloatValue(FileOutputStream out, float value)
             throws IOException {
-        out.write(ByteBuffer.allocate(Float.BYTES).putFloat(value).array());
+        writeIntValue(out, Float.floatToRawIntBits(value));
+    }
+
+    private static void writeByteValue(FileOutputStream out, byte value)
+            throws IOException {
+        out.write(value);
     }
 
     private static void writeTag(FileOutputStream out, byte tag)
@@ -655,4 +728,19 @@ public class TilesetIO {
         out.write(tag);
     }
 
+    private static int[] byteArrayToIntArray (byte[] input) {
+        int[] output = new int[input.length];
+        for (int i = 0, inputLength = input.length; i < inputLength; i++) {
+            output[i] = input[i];
+        }
+        return output;
+    }
+
+    private static byte[] intArrayToByteArray (int[] input) {
+        byte[] output = new byte[input.length];
+        for (int i = 0, inputLength = input.length; i < inputLength; i++) {
+            output[i] = (byte) input[i];
+        }
+        return output;
+    }
 }

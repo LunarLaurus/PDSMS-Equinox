@@ -16,7 +16,6 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import javax.swing.AbstractAction;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
@@ -75,8 +74,10 @@ public class ThumbnailLayerSelector extends JPanel {
                     if (!handler.isLayerChanged()) {
                         handler.setLayerChanged(true);
                         handler.addMapState(new MapLayerState("Layer change", handler));
-
                     }
+                    if (index == handler.getActiveLayerIndex())
+                        handler.invertLayerState(index);
+                    
                     handler.setActiveTileLayer(index);
                 } else if (SwingUtilities.isRightMouseButton(evt)) {
                     //LayerPopupMenu popupMenu = new LayerPopupMenu(index);
@@ -162,7 +163,7 @@ public class ThumbnailLayerSelector extends JPanel {
                     itemShowLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/turnOnIcon.png")));
                     itemHideLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/turnOffIcon.png")));
                     itemClearLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/RemoveIcon.png")));
-                    itemCopyLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/copyIcon.png")));
+                    itemCopyLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/CopyIcon.png")));
                     itemPasteLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/pasteIcon.png")));
                     itemPasteTiles.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/pasteTileIcon.png")));
                     itemPasteHeights.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/pasteHeightIcon.png")));
@@ -182,7 +183,7 @@ public class ThumbnailLayerSelector extends JPanel {
                     //handler.invertLayerState(index);
                 } else if (SwingUtilities.isMiddleMouseButton(evt)) {
                     if (handler.isLayerTheOnlyActive(index))
-                        handler.setLayersEnabled(true);
+                        handler.invertEveryLayer(index);
                     else {
                         handler.setOnlyActiveTileLayer(index);
                     }

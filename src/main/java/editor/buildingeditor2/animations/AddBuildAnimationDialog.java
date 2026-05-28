@@ -5,7 +5,6 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
 import javax.swing.border.*;
 import javax.swing.event.*;
 
@@ -17,13 +16,13 @@ import renderer.*;
  */
 public class AddBuildAnimationDialog extends JDialog {
 
-    public static final int ACEPTED = 0, CANCELED = 1;
+    public static final int ACCEPTED = 0, CANCELED = 1;
     private int returnValue = CANCELED;
     private int indexSelected = 0;
 
     private byte[] buildModelData;
     private ArrayList<Integer> buildingAnimationIDs;
-    private BuildAnimations buildAnimations;
+    private GlobalAnimationsList globalAnimationsList;
 
     private ArrayList<Integer> animIconIndices;
     private ArrayList<ImageIcon> animIcons;
@@ -32,11 +31,14 @@ public class AddBuildAnimationDialog extends JDialog {
         super(owner);
         initComponents();
 
-        animIcons = new ArrayList<>(4);
-        animIcons.add(new ImageIcon(getClass().getResource("/icons/NsbcaIcon.png")));
-        animIcons.add(new ImageIcon(getClass().getResource("/icons/NsbtaIcon.png")));
-        animIcons.add(new ImageIcon(getClass().getResource("/icons/NsbtpIcon.png")));
-        animIcons.add(new ImageIcon(getClass().getResource("/icons/NsbmaIcon.png")));
+        final Class c = getClass();
+
+        animIcons = new ArrayList<>(5);
+        animIcons.add(new ImageIcon(c.getResource("/icons/NsbcaIcon.png")));
+        animIcons.add(new ImageIcon(c.getResource("/icons/NsbtaIcon.png")));
+        animIcons.add(new ImageIcon(c.getResource("/icons/NsbtpIcon.png")));
+        animIcons.add(new ImageIcon(c.getResource("/icons/NsbmaIcon.png")));
+        animIcons.add(new ImageIcon(c.getResource("/icons/NsbvaIcon.png")));
 
         animIconIndices = new ArrayList<>();
 
@@ -62,14 +64,14 @@ public class AddBuildAnimationDialog extends JDialog {
         indexSelected = jlAnimationsList.getSelectedIndex();
 
         try {
-            byte[] animData = buildAnimations.getAnimations().get(indexSelected).getData();
+            byte[] animData = globalAnimationsList.getAnimations().get(indexSelected).getData();
             ObjectGL object = nitroDisplayGL.getObjectGL(0);
             object.setNsbmdData(buildModelData);
             object.setNsbca(null);
             object.setNsbta(null);
             object.setNsbtp(null);
             object.setNsbva(null);
-            switch (buildAnimations.getAnimationType(indexSelected)) {
+            switch (globalAnimationsList.getAnimationType(indexSelected)) {
                 case ModelAnimation.TYPE_NSBCA:
                     object.setNsbcaData(animData);
                     break;
@@ -95,7 +97,7 @@ public class AddBuildAnimationDialog extends JDialog {
 
     private void jbAcceptActionPerformed(ActionEvent e) {
         if (!buildingAnimationIDs.contains(indexSelected)) {
-            returnValue = ACEPTED;
+            returnValue = ACCEPTED;
             dispose();
         } else {
             JOptionPane.showMessageDialog(this, "The animation selected is already used by the building.",
@@ -108,18 +110,18 @@ public class AddBuildAnimationDialog extends JDialog {
         dispose();
     }
 
-    public void init(byte[] buildModelData, BuildAnimations animations, ArrayList<Integer> buildingAnimationIDs) {
+    public void init(byte[] buildModelData, GlobalAnimationsList animations, ArrayList<Integer> buildingAnimationIDs) {
         this.buildModelData = buildModelData;
-        this.buildAnimations = animations;
+        this.globalAnimationsList = animations;
         this.buildingAnimationIDs = buildingAnimationIDs;
 
         updateViewAnimationsList(0);
     }
 
     private void updateViewAnimationsList(int indexSelected) {
-        if (buildAnimations != null) {
+        if (globalAnimationsList != null) {
             ArrayList<String> names = new ArrayList<>();
-            ArrayList<ModelAnimation> animations = buildAnimations.getAnimations();
+            ArrayList<ModelAnimation> animations = globalAnimationsList.getAnimations();
             animIconIndices = new ArrayList<>(animations.size());
             for (int i = 0; i < animations.size(); i++) {
                 names.add(String.valueOf(i) + ": "

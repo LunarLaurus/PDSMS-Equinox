@@ -337,6 +337,7 @@ public class ExportMapBinInfoDialog extends JDialog {
         int nFilesConverted = 0;
         int nFilesNotConverted = 0;
         for (Point p : mapCoords) {
+
             String mapName = handler.getMapMatrix().getMapName(p);
             ExportStatus exportStatus = ExportStatus.UNKNOWN_ERROR_STATUS;
             if (!Thread.currentThread().isInterrupted()) {

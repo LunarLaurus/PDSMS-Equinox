@@ -28,6 +28,9 @@ import static com.jogamp.opengl.GL2ES1.GL_ALPHA_TEST;
 import static com.jogamp.opengl.GL2ES3.GL_QUADS;
 
 public class BdhcamCameraDisplay extends GLJPanel implements GLEventListener, MouseListener, MouseMotionListener, KeyListener, MouseWheelListener {
+	
+	//Cam Choice
+	private static final boolean wideCamMode = false;
 
     //Editor Handler
     protected MapEditorHandler handler;
@@ -58,7 +61,7 @@ public class BdhcamCameraDisplay extends GLJPanel implements GLEventListener, Mo
     protected static final float defaultCamRotX = 40.0f, defaultCamRotY = 0.0f, defaultCamRotZ = 0.0f;
 
     //Camera
-    protected CameraSettings camera = new CameraSettings();
+    protected CameraSettings camera = new CameraSettings(wideCamMode);
 
     //Update
     protected boolean updateRequested = false;
@@ -139,9 +142,9 @@ public class BdhcamCameraDisplay extends GLJPanel implements GLEventListener, Mo
 
         if (updateRequested) {
 
-            //Load Textures into OpenGL
-            handler.getTileset().loadTexturesGL();
-            handler.getBorderMapsTileset().loadTexturesGL();
+            //Reload textures without leaving the old GL objects allocated.
+            handler.getTileset().updateTextures(gl);
+            handler.getBorderMapsTileset().updateTextures(gl);
             loadPlayerTextureGL();
 
             updateMapLayersGL();
@@ -171,7 +174,6 @@ public class BdhcamCameraDisplay extends GLJPanel implements GLEventListener, Mo
 
             drawPlayer(gl);
 
-            gl.glFinish();
         } catch (GLException ex) {
             ex.printStackTrace();
         }
@@ -242,19 +244,21 @@ public class BdhcamCameraDisplay extends GLJPanel implements GLEventListener, Mo
         gl.glLoadIdentity();
 
         float aspect = (float) getWidth() / (float) getHeight();
+        float jogampFOV;
+
+		if (wideCamMode) {
+		    jogampFOV = 38.5f;
+		} else {
+            jogampFOV = 15.0f;
+		}
+
         if (cameraZ < 40.0f) {
-            glu.gluPerspective(15.0f, aspect, 1.0f, 1000.0f);
+            glu.gluPerspective(jogampFOV, aspect, 1.0f, 1000.0f);
         } else {
-            glu.gluPerspective(15.0f, aspect, 1.0f + (cameraZ - 40.0f) / 4, 1000.0f + (cameraZ - 40.0f));
+            glu.gluPerspective(jogampFOV, aspect, 1.0f + (cameraZ - 40.0f) / 4, 1000.0f + (cameraZ - 40.0f));
         }
 
-        if(camera != null){
-            glu.gluLookAt(
-                    camera.values[0], -camera.values[1], camera.values[2],
-                    camera.values[3], -camera.values[4], camera.values[5],
-                    camera.values[6], -camera.values[7], camera.values[8]
-            );
-        }else{
+        if (camera == null) {
             glu.gluLookAt(
                     0.0f, 0.0f, cameraZ,
                     0.0f, 0.0f, 0.0f,
@@ -265,6 +269,12 @@ public class BdhcamCameraDisplay extends GLJPanel implements GLEventListener, Mo
             gl.glRotatef(-cameraRotZ, 0.0f, 0.0f, 1.0f);
 
             gl.glTranslatef(-cameraX, -cameraY, 0.0f);
+        } else {
+            glu.gluLookAt(
+                    camera.values[0], -camera.values[1], camera.values[2],
+                    camera.values[3], -camera.values[4], camera.values[5],
+                    camera.values[6], -camera.values[7], camera.values[8]
+            );
         }
 
         //Point mapCoords = handler.getMapSelected();

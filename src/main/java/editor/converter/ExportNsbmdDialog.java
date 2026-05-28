@@ -160,7 +160,7 @@ public class ExportNsbmdDialog extends javax.swing.JDialog {
             jbNsbBrowse.addActionListener(e -> jbNsbBrowseActionPerformed(e));
 
             //---- jCheckBox1 ----
-            jCheckBox1.setSelected(true);
+            jCheckBox1.setSelected(false);
             jCheckBox1.setText("Include NSBTX in NSBMD");
 
             GroupLayout jPanel2Layout = new GroupLayout(jPanel2);
@@ -268,7 +268,7 @@ public class ExportNsbmdDialog extends javax.swing.JDialog {
         fc.setApproveButtonText("Select folder");
         fc.setDialogTitle("Select the folder that contains the IMD files");
 
-        int returnValOpen = fc.showOpenDialog(this);
+        final int returnValOpen = fc.showOpenDialog(this);
         if (returnValOpen == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             if (file.exists()) {
@@ -343,7 +343,7 @@ public class ExportNsbmdDialog extends javax.swing.JDialog {
         fc.setApproveButtonText("Select folder");
         fc.setDialogTitle("Select the folder for exporting the IMD files");
 
-        int returnValOpen = fc.showOpenDialog(this);
+        final int returnValOpen = fc.showOpenDialog(this);
         if (returnValOpen == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             if (file.exists() && file.isDirectory()) {

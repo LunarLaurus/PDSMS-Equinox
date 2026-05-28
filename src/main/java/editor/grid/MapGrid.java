@@ -37,7 +37,7 @@ public class MapGrid {
     public static final int height = rows * tileSize;
     public static final float gridTileSize = 1.0f;
 
-    public static final int numLayers = 8;
+    public static final int numLayers = 9;
     public int[][][] tileLayers = new int[numLayers][cols][rows];
     public int[][][] heightLayers = new int[numLayers][cols][rows];
 
@@ -120,18 +120,19 @@ public class MapGrid {
         input.close();
     }*/
     public void saveMapToOBJ(Tileset tset, String path, boolean saveTextures,
-                             boolean saveVertexColors, float tileUpscale) throws FileNotFoundException {
+                             boolean includeVertexColors, float tileUpscale) throws FileNotFoundException {
+
         ObjWriter writer = new ObjWriter(tset, this, path, handler.getGameIndex(),
-                saveTextures, saveVertexColors, tileUpscale);
+                saveTextures, includeVertexColors, tileUpscale);
         writer.writeMapObj();
     }
 
     public static void loadMatrixFromFile(BufferedReader br, int[][] matrix) throws IOException {
         for (int i = 0; i < rows; i++) {
             String line = br.readLine();
-            String[] lineSplitted = line.split(" ");
+            String[] linesplit = line.split(" ");
             for (int j = 0; j < cols; j++) {
-                matrix[j][i] = Integer.parseInt(lineSplitted[j]);
+                matrix[j][i] = Integer.parseInt(linesplit[j]);
             }
         }
     }
@@ -140,9 +141,9 @@ public class MapGrid {
         Integer[][] layer = new Integer[cols][rows];
         for (int i = 0; i < rows; i++) {
             String line = br.readLine();
-            String[] lineSplitted = line.split(" ");
+            String[] linesplit = line.split(" ");
             for (int j = 0; j < cols; j++) {
-                layer[j][i] = Integer.parseInt(lineSplitted[j]);
+                layer[j][i] = Integer.parseInt(linesplit[j]);
             }
         }
         return layer;

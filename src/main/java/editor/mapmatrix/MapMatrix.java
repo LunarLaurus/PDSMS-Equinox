@@ -2,6 +2,7 @@
 package editor.mapmatrix;
 
 import com.jogamp.common.nio.Buffers;
+import editor.mapgroups.MapGroup;
 import formats.backsound.Backsound;
 import formats.bdhc.Bdhc;
 import formats.bdhc.BdhcLoaderDP;
@@ -38,10 +39,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import tileset.TextureNotFoundException;
 import tileset.Tile;
@@ -56,8 +54,10 @@ public class MapMatrix {
 
     private static final int expectedMaxNumMaps = 25;
 
-    private static final String mapTag = "mapstart";
+    private static final String mapstartTag = "mapstart";
     private static final String areaIndexTag = "areaindex";
+    private static final String exportgroupTag = "exportgroup";
+    private static final String exportgroupCenterTag = "egcenter";
     private static final String mapEndTag = "mapend";
     private static final String gameIndexTag = "gameindex";
     private static final String tileGridTag = "tilegrid";
@@ -75,6 +75,7 @@ public class MapMatrix {
     private HashMap<Integer, ArrayList<Point>> contourPoints;
     private HashMap<Integer, FloatBuffer> contourPointsBuffer;
     private HashMap<Integer, Color> areaColors;
+    private HashMap<Integer, Color> exportgroupColors;
 
     public String filePath = "";
     public String tilesetFilePath = "";
@@ -95,6 +96,7 @@ public class MapMatrix {
         contourPoints = new HashMap<>();
         contourPointsBuffer = new HashMap<>();
         areaColors = new HashMap<>();
+        exportgroupColors = new HashMap<>();
 
         updateBordersData();
     }
@@ -102,17 +104,17 @@ public class MapMatrix {
     public void updateBordersData() {
         updateBorderMaps();
 
-        final HashSet<Integer> areaIndices = getAreaIndices();
+        final TreeSet<Integer> areaIndices = getAreaIndices();
         updateContourPoints(areaIndices);
 
         updateAreaColors(areaIndices);
+        updateExportgroupColors(getExportGroupIndices());
     }
 
-    public void saveGridsToFile(String path) throws FileNotFoundException {
+    public void saveGridsToFile(String path, Set<Map.Entry<Point, MapData>> entrySet) throws FileNotFoundException {
         if (!path.endsWith("." + fileExtension)) {
             path = path.concat("." + fileExtension);
         }
-
 
         removeUnusedMaps();
         removeAllUnusedMapFiles();
@@ -127,19 +129,29 @@ public class MapMatrix {
         out.println(filename + "." + Tileset.fileExtension);
 
         Point minCoords = getMinCoords();
-        for (HashMap.Entry<Point, MapData> map : matrix.entrySet()) {
-            out.println(mapTag);
-            out.println((map.getKey().x - minCoords.x) + " " + (map.getKey().y - minCoords.y));
+        for (HashMap.Entry<Point, MapData> map : entrySet) {
+            Point coords = map.getKey();
+            MapData md = map.getValue();
+
+            out.println(mapstartTag);
+            out.println((coords.x - minCoords.x) + " " + (coords.y - minCoords.y));
 
             out.println(areaIndexTag);
-            out.println(map.getValue().getAreaIndex());
+            out.println(md.getAreaIndex());
+            
+            out.println(exportgroupTag);
+            out.println(md.getExportGroupIndex());
 
-            for (int[][] tLayer : map.getValue().getGrid().tileLayers) {
+            if(md.getExportGroupIndex() > 0 && md.isExportGroupCenter()) {
+                out.println(exportgroupCenterTag);
+            }
+
+            for (int[][] tLayer : md.getGrid().tileLayers) {
                 out.println(tileGridTag);
                 MapGrid.printMatrixInFile(out, tLayer); //Todo change this
             }
 
-            for (int[][] hLayer : map.getValue().getGrid().heightLayers) {
+            for (int[][] hLayer : md.getGrid().heightLayers) {
                 out.println(heightGridTag);
                 MapGrid.printMatrixInFile(out, hLayer); //Todo change this
             }
@@ -150,6 +162,9 @@ public class MapMatrix {
     }
 
     public void loadGridsFromFile(String path) throws FileNotFoundException, IOException, Exception {
+        InputStream input = new FileInputStream(new File(path));
+        BufferedReader br = new BufferedReader(new InputStreamReader(input));
+
         filePath = "";
         tilesetFilePath = "";
 
@@ -158,16 +173,15 @@ public class MapMatrix {
         borderMaps = new HashSet<>();
         updateBordersData();
 
-        InputStream input = new FileInputStream(new File(path));
-        BufferedReader br = new BufferedReader(new InputStreamReader(input));
-
         int numMapsRead = 0;
         int numTileLayersRead = 0;
         int numHeightLayersRead = 0;
 
         Point currentMapCoords = new Point(0, 0);
         MapGrid currentGrid = new MapGrid(handler);
-        int currentAreaIndex = 0;
+        int currentAreaIndex = 0, currentExportgroupIndex = 0;
+        boolean currentMapIsExportGroupCenter = false;
+
         String line;
         while ((line = br.readLine()) != null) {
             if (line.startsWith(gameIndexTag)) {
@@ -176,14 +190,18 @@ public class MapMatrix {
                 String folderPath = new File(path).getParent();
                 tilesetFilePath = folderPath + File.separator + br.readLine();
                 System.out.println("Tileset path: " + tilesetFilePath);
-            } else if (line.startsWith(mapTag)) {
-                String[] splittedLine = br.readLine().split(" ");
-                int x = Integer.parseInt(splittedLine[0]);
-                int y = Integer.parseInt(splittedLine[1]);
+            } else if (line.startsWith(mapstartTag)) {
+                String[] splitLine = br.readLine().split(" ");
+                int x = Integer.parseInt(splitLine[0]);
+                int y = Integer.parseInt(splitLine[1]);
                 currentMapCoords = new Point(x, y);
                 currentGrid = new MapGrid(handler);
             } else if (line.startsWith(areaIndexTag)) {
                 currentAreaIndex = Integer.parseInt(br.readLine());
+            } else if (line.startsWith(exportgroupTag)) {
+                currentExportgroupIndex = Integer.parseInt(br.readLine());
+            } else if (line.startsWith(exportgroupCenterTag)) {
+                currentMapIsExportGroupCenter = true;
             } else if (line.startsWith(tileGridTag)) {
                 MapGrid.loadMatrixFromFile(br, currentGrid.tileLayers[numTileLayersRead]);
                 numTileLayersRead++;
@@ -192,12 +210,16 @@ public class MapMatrix {
                 numHeightLayersRead++;
             } else if (line.startsWith(mapEndTag)) {
                 MapData mapData = new MapData(handler);
+
                 mapData.setGrid(currentGrid);
                 mapData.setAreaIndex(currentAreaIndex);
+                mapData.setExportgroupIndex(currentExportgroupIndex);
+                mapData.setExportGroupCenter(currentMapIsExportGroupCenter);
                 matrix.put(currentMapCoords, mapData);
                 numMapsRead++;
                 numTileLayersRead = 0;
                 numHeightLayersRead = 0;
+                currentMapIsExportGroupCenter = false;
             }
         }
         if (numMapsRead == 0) {
@@ -205,6 +227,8 @@ public class MapMatrix {
             mapData.setGrid(currentGrid);
             matrix.put(new Point(0, 0), mapData);
         }
+        normalizeExportGroupCenters(matrix);
+        updateExportgroupColors(getExportGroupIndices());
 
         br.close();
         input.close();
@@ -224,23 +248,27 @@ public class MapMatrix {
 
         Point currentMapCoords = new Point(0, 0);
         MapGrid currentGrid = new MapGrid(handler);
-        int currentAreaIndex = 0;
+        int currentAreaIndex = 0, currentExportgroupIndex = 0;
+        boolean currentMapIsExportGroupCenter = false;
+
         String line;
         while ((line = br.readLine()) != null) {
             if (line.startsWith(gameIndexTag)) {
-
             } else if (line.startsWith(tilesetTag)) {
                 String folderPath = new File(path).getParent();
                 tilesetFilePath = folderPath + File.separator + br.readLine();
-
-            } else if (line.startsWith(mapTag)) {
-                String[] splittedLine = br.readLine().split(" ");
-                int x = Integer.parseInt(splittedLine[0]);
-                int y = Integer.parseInt(splittedLine[1]);
+            } else if (line.startsWith(mapstartTag)) {
+                String[] splitLine = br.readLine().split(" ");
+                int x = Integer.parseInt(splitLine[0]);
+                int y = Integer.parseInt(splitLine[1]);
                 currentMapCoords = new Point(x, y);
                 currentGrid = new MapGrid(handler);
             } else if (line.startsWith(areaIndexTag)) {
                 currentAreaIndex = Integer.parseInt(br.readLine());
+            } else if (line.startsWith(exportgroupTag)) {
+                currentExportgroupIndex = Integer.parseInt(br.readLine());
+            } else if(line.startsWith(exportgroupCenterTag)) {
+                currentMapIsExportGroupCenter = true;
             } else if (line.startsWith(tileGridTag)) {
                 MapGrid.loadMatrixFromFile(br, currentGrid.tileLayers[numTileLayersRead]);
                 numTileLayersRead++;
@@ -249,12 +277,16 @@ public class MapMatrix {
                 numHeightLayersRead++;
             } else if (line.startsWith(mapEndTag)) {
                 MapData mapData = new MapData(handler);
+
                 mapData.setGrid(currentGrid);
                 mapData.setAreaIndex(currentAreaIndex);
+                mapData.setExportgroupIndex(currentExportgroupIndex);
+                mapData.setExportGroupCenter(currentMapIsExportGroupCenter);
                 matrix.put(currentMapCoords, mapData);
                 numMapsRead++;
                 numTileLayersRead = 0;
                 numHeightLayersRead = 0;
+                currentMapIsExportGroupCenter = false;
             }
         }
         if (numMapsRead == 0) {
@@ -262,11 +294,63 @@ public class MapMatrix {
             mapData.setGrid(currentGrid);
             matrix.put(new Point(0, 0), mapData);
         }
+        normalizeExportGroupCenters(matrix);
 
         br.close();
         input.close();
 
         return matrix;
+    }
+
+    public void saveAreaToFile(String path, Set<HashMap.Entry<Point, MapData>> areaEntrySet, int areaToSave) throws FileNotFoundException {
+        String dirPath = path + File.separator + "AD" + areaToSave;
+        File dir = new File(dirPath);
+        dir.mkdir();
+
+        this.filePath = dirPath + File.separator + "AD" + areaToSave + "." + fileExtension;
+        PrintWriter out = new PrintWriter(filePath);
+
+        removeUnusedMaps();
+        removeAllUnusedMapFiles();
+        for (HashMap.Entry<Point, MapData> entry : areaEntrySet) {
+            Point p = entry.getKey();
+            MapData md = entry.getValue();
+
+            if (p != null && md != null) {
+                out.println(gameIndexTag);
+                out.println(handler.getGameIndex());
+
+                out.println(tilesetTag);
+                String filename = Utils.removeExtensionFromPath(new File(filePath).getName());
+                out.println(filename + "." + Tileset.fileExtension);
+
+                Point minCoords = getMinCoords();
+                out.println(mapstartTag);
+                out.println((p.x - minCoords.x) + " " + (p.y - minCoords.y));
+
+                out.println(areaIndexTag);
+                out.println(md.getAreaIndex());
+
+                out.println(exportgroupTag);
+                out.println(md.getExportGroupIndex());
+
+                if (md.getExportGroupIndex() > 0 && md.isExportGroupCenter()) {
+                    out.println(exportgroupCenterTag);
+                }
+
+                for (int[][] tLayer : md.getGrid().tileLayers) {
+                    out.println(tileGridTag);
+                    MapGrid.printMatrixInFile(out, tLayer); //Todo change this
+                }
+
+                for (int[][] hLayer : md.getGrid().heightLayers) {
+                    out.println(heightGridTag);
+                    MapGrid.printMatrixInFile(out, hLayer); //Todo change this
+                }
+                out.println(mapEndTag);
+            }
+        }
+        out.close();
     }
 
     public void addMapsFromFile(HashMap<Point, MapData> newMaps, Point offset, String folderPath, String fileName) throws IOException, NullPointerException, TextureNotFoundException {
@@ -311,15 +395,72 @@ public class MapMatrix {
 
     }
 
-    public void saveMapsAsObj(String path, boolean saveTextures, boolean includeVertexColors, float tileUpscale) throws FileNotFoundException {
+    public void saveMapsAsObj(String path, boolean saveTextures, boolean includeVertexColors, HashSet<Integer> exportGroups, float tileUpscale) throws FileNotFoundException {
         removeUnusedMaps();
+        normalizeExportGroupCenters(matrix);
 
         String folderPath = new File(path).getParent();
         String fileName = Utils.removeExtensionFromPath(new File(path).getName());
+        String objFilePath;
 
-        for (HashMap.Entry<Point, MapData> mapEntry : matrix.entrySet()) {
-            String objFilePath = getFilePathWithCoords(matrix, folderPath, fileName, mapEntry.getKey(), "obj");
-            mapEntry.getValue().getGrid().saveMapToOBJ(handler.getTileset(), objFilePath, saveTextures, includeVertexColors, tileUpscale);
+        if (exportGroups != null) {
+            for (int index : exportGroups) { //loop through each exportGroup
+                HashMap<Point, MapGrid> currentExportGroup = generateGridHashMap(index); //generate export grid for each group
+
+                if (index == 0) { //export maps of Group 0 separately
+                    for (HashMap.Entry<Point, MapGrid> mapEntry : currentExportGroup.entrySet()) { //Loop through entries of the group
+                        objFilePath = getFilePathWithCoords(matrix, folderPath, fileName, mapEntry.getKey(), "obj");
+                        mapEntry.getValue().saveMapToOBJ(handler.getTileset(), objFilePath, saveTextures, includeVertexColors, tileUpscale);
+                    }
+                } else { //export every other group as one map
+                    int lowestXcoord;
+                    int lowestYcoord;
+
+                    Point groupCenterCoords = this.getExportGroupCenterCoords(index);
+
+                    if (groupCenterCoords == null) { //User didn't specify a center map for this group
+                        TreeSet<Point> pointTS = new TreeSet<>(new PointComparator());
+                        for (Point p : currentExportGroup.keySet()) {
+                            pointTS.add(p);
+						}
+
+                        lowestXcoord = (int) pointTS.first().getX();
+                        lowestYcoord = (int) pointTS.first().getY();
+						groupCenterCoords = new Point(lowestXcoord, lowestYcoord);
+                    } else {
+                        lowestXcoord = (int)groupCenterCoords.getX();
+                        lowestYcoord = (int)groupCenterCoords.getY();
+                    }
+
+                    HashMap<Point, MapGrid> newExportGroup = new HashMap<>();
+                    for (HashMap.Entry<Point, MapGrid> mapEntry : currentExportGroup.entrySet()) {
+                        Point currentPoint = new Point(mapEntry.getKey());
+                        currentPoint.translate(-lowestXcoord, -lowestYcoord);
+
+                        newExportGroup.put(currentPoint, mapEntry.getValue());
+                    }
+
+                    final String groupSuffix = "Group";
+                    final String groupIndexSuffix = groupSuffix + index;
+                    final String underscoreGroupIndexSuffix = '_' + groupIndexSuffix;
+
+                    if (fileName.toUpperCase().indexOf(underscoreGroupIndexSuffix.toUpperCase()) >= 0) { //"toUpperCase" comparison is good enough for most scenarios
+                        objFilePath = folderPath + File.separator + fileName + "." + "obj"; //from getFilePathWithCoords
+                    } else if (fileName.toUpperCase().indexOf(groupIndexSuffix.toUpperCase()) == 0) { //"toUpperCase" comparison is good enough for most scenarios
+                        objFilePath = getFilePathWithCoords(matrix, folderPath, fileName.substring(0, groupIndexSuffix.length()) + '_', groupCenterCoords, "obj");
+                    } else {
+                        objFilePath = getFilePathWithCoords(matrix, folderPath, fileName + groupSuffix + '_', groupCenterCoords, "obj");
+                    }
+					
+                    new ObjWriter(handler.getTileset(), newExportGroup, objFilePath, handler.getGameIndex(), saveTextures, includeVertexColors, tileUpscale).writeMapObj();
+                } 
+            }
+        }
+        else { //save each map separately
+            for (HashMap.Entry<Point, MapData> mapEntry : matrix.entrySet()) {
+                objFilePath = getFilePathWithCoords(matrix, folderPath, fileName, mapEntry.getKey(), "obj");
+                mapEntry.getValue().getGrid().saveMapToOBJ(handler.getTileset(), objFilePath, saveTextures, includeVertexColors, tileUpscale);
+            }
         }
         //TODO: This method saves textures for each map. Make that textures are exported only once
     }
@@ -338,9 +479,9 @@ public class MapMatrix {
 
     }
 
-    public void saveBDHCs() throws IOException {
+    public void saveBDHCs(Set<Map.Entry<Point, MapData>> entrySet) throws IOException {
         int game = handler.getGameIndex();
-        for (HashMap.Entry<Point, MapData> mapEntry : matrix.entrySet()) {
+        for (HashMap.Entry<Point, MapData> mapEntry : entrySet) {
             String path = getFilePathWithCoords(matrix, new File(filePath).getParent(),
                     new File(filePath).getName(), mapEntry.getKey(), Bdhc.fileExtension);
             if (game == Game.DIAMOND || game == Game.PEARL) {
@@ -351,9 +492,9 @@ public class MapMatrix {
         }
     }
 
-    public void saveBacksounds() throws IOException {
+    public void saveBacksounds(Set<Map.Entry<Point, MapData>> entrySet) throws IOException {
         int game = handler.getGameIndex();
-        for (HashMap.Entry<Point, MapData> mapEntry : matrix.entrySet()) {
+        for (HashMap.Entry<Point, MapData> mapEntry : entrySet) {
             String path = getFilePathWithCoords(matrix, new File(filePath).getParent(),
                     new File(filePath).getName(), mapEntry.getKey(), Backsound.fileExtension);
             if (game == Game.HEART_GOLD || game == Game.SOUL_SILVER) {
@@ -362,9 +503,9 @@ public class MapMatrix {
         }
     }
 
-    public void saveBdhcams() throws IOException {
+    public void saveBdhcams(Set<Map.Entry<Point, MapData>> entrySet) throws IOException{
         int game = handler.getGameIndex();
-        for (HashMap.Entry<Point, MapData> mapEntry : matrix.entrySet()) {
+        for (HashMap.Entry<Point, MapData> mapEntry : entrySet) {
             String path = getFilePathWithCoords(matrix, new File(filePath).getParent(),
                     new File(filePath).getName(), mapEntry.getKey(), Bdhcam.fileExtension);
             if (game == Game.PLATINUM || game == Game.HEART_GOLD || game == Game.SOUL_SILVER) {
@@ -373,8 +514,8 @@ public class MapMatrix {
         }
     }
 
-    public void saveCollisions() throws IOException {
-        for (HashMap.Entry<Point, MapData> mapEntry : matrix.entrySet()) {
+    public void saveCollisions(Set<Map.Entry<Point, MapData>> entrySet) throws IOException {
+        for (HashMap.Entry<Point, MapData> mapEntry : entrySet) {
             String path = getFilePathWithCoords(matrix, new File(filePath).getParent(),
                     new File(filePath).getName(), mapEntry.getKey(), Collisions.fileExtension);
             mapEntry.getValue().getCollisions().saveToFile(path);
@@ -389,8 +530,8 @@ public class MapMatrix {
         }
     }
 
-    public void saveBuildings() throws IOException {
-        for (HashMap.Entry<Point, MapData> mapEntry : matrix.entrySet()) {
+    public void saveBuildings(Set<Map.Entry<Point, MapData>> entrySet) throws IOException {
+        for (HashMap.Entry<Point, MapData> mapEntry : entrySet) {
             String path = getFilePathWithCoords(matrix, new File(filePath).getParent(),
                     new File(filePath).getName(), mapEntry.getKey(), BuildFile.fileExtension);
             mapEntry.getValue().getBuildings().saveToFile(path);
@@ -672,21 +813,33 @@ public class MapMatrix {
         //System.out.println("Border maps updated! " + borderMaps.size());
     }
 
-    public void updateContourPoints(HashSet<Integer> areaIndices) {
+    public void updateContourPoints(TreeSet<Integer> areaIndices) {
         contourPoints = generateAllContourPoints(new Point(0, 0), areaIndices);
         contourPointsBuffer = generateAllContourPointsGL(contourPoints);
     }
 
-    public HashMap<Integer, Color> generateAreaColors(HashSet<Integer> areaIndices) {
-        HashMap<Integer, Color> colors = new HashMap<>(areaIndices.size());
+    public HashMap<Integer, Color> generateAreaColors(TreeSet<Integer> areaIndices) {
+        HashMap<Integer, Color> areaColors = new HashMap<>(areaIndices.size());
         for (Integer areaIndex : areaIndices) {
-            colors.put(areaIndex, new Color(Color.HSBtoRGB((areaIndex * 45.0f + 155f) / 255f, 0.8f, 1.0f)));
+            areaColors.put(areaIndex, new Color(Color.HSBtoRGB((areaIndex * 45.0f + 155f) / 255f, 0.8f, 1.0f)));
         }
-        return colors;
+        return areaColors;
+    }
+    
+    public HashMap<Integer, Color> generateExportgroupColors(HashSet<Integer> exportgroupIndices) {
+        HashMap<Integer, Color> exportgroupColors = new HashMap<>(exportgroupIndices.size());
+        for (Integer exportgroupIndex : exportgroupIndices) {
+            exportgroupColors.put(exportgroupIndex, new Color(Color.HSBtoRGB((exportgroupIndex * 45.0f + 155f) / 255f, 0.8f, 1.0f)));
+        }
+        return exportgroupColors;
     }
 
-    public void updateAreaColors(HashSet<Integer> areaIndices) {
+    public void updateAreaColors(TreeSet<Integer> areaIndices) {
         areaColors = generateAreaColors(areaIndices);
+    }
+    
+    public void updateExportgroupColors(HashSet<Integer> exportgroupIndices) {
+        exportgroupColors = generateExportgroupColors(exportgroupIndices);
     }
 
     public MapData getMapAndCreate(int x, int y) {
@@ -835,19 +988,120 @@ public class MapMatrix {
         return contourPoints;
     }
 
-    public HashSet<Integer> getAreaIndices() {
-        HashSet<Integer> areaIndices = new HashSet<>();
+    public TreeSet<Integer> getAreaIndices() {
+        TreeSet<Integer> areaIndices = new TreeSet<>();
         for (MapData map : matrix.values()) {
             areaIndices.add(map.getAreaIndex());
         }
         return areaIndices;
     }
 
+    public TreeMap<Integer, MapGroup> getAreas() {
+        TreeMap<Integer, MapGroup> mapAreas = new TreeMap<>();
+
+        for (Point p : matrix.keySet()) {
+            MapData map = matrix.get(p);
+            int groupIndex = map.getAreaIndex();
+
+            MapGroup eg = mapAreas.get(groupIndex);
+
+            if (eg == null)
+                eg = new MapGroup(groupIndex, p);
+            else {
+                eg.getCoordList().add(p);
+            }
+            mapAreas.put(groupIndex, eg);
+        }
+        return mapAreas;
+    }
+
     public int getNumAreas() {
         return getAreaIndices().size();
     }
+    
+    public HashSet<Integer> getExportGroupIndices() {
+        HashSet<Integer> exportGroups = new HashSet<>();
+        for (MapData map : matrix.values()) {
+            exportGroups.add(map.getExportGroupIndex());
+        }
+        return exportGroups;
+    }
 
-    public HashMap<Integer, ArrayList<Point>> generateAllContourPoints(Point min, HashSet<Integer> areaIndices) {
+    public void setMapExportGroupIndex(MapData mapData, int exportGroupIndex) {
+        if (mapData == null) {
+            return;
+        }
+        int previousExportGroupIndex = mapData.getExportGroupIndex();
+        mapData.setExportgroupIndex(exportGroupIndex);
+        if (previousExportGroupIndex != exportGroupIndex || exportGroupIndex == 0) {
+            mapData.setExportGroupCenter(false);
+        }
+        updateExportgroupColors(getExportGroupIndices());
+    }
+
+    public void setExportGroupCenter(Point mapCoords, boolean exportGroupCenter) {
+        MapData selectedMap = matrix.get(mapCoords);
+        if (selectedMap == null) {
+            return;
+        }
+        int exportGroupIndex = selectedMap.getExportGroupIndex();
+        if (exportGroupIndex == 0) {
+            selectedMap.setExportGroupCenter(false);
+            return;
+        }
+        if (exportGroupCenter) {
+            clearExportGroupCenters(exportGroupIndex);
+        }
+        selectedMap.setExportGroupCenter(exportGroupCenter);
+    }
+
+    private void clearExportGroupCenters(int exportGroupIndex) {
+        for (MapData mapData : matrix.values()) {
+            if (mapData.getExportGroupIndex() == exportGroupIndex) {
+                mapData.setExportGroupCenter(false);
+            }
+        }
+    }
+
+    private static void normalizeExportGroupCenters(HashMap<Point, MapData> maps) {
+        HashSet<Integer> centeredGroups = new HashSet<>();
+        TreeSet<Point> sortedPoints = new TreeSet<>(new PointComparator());
+        sortedPoints.addAll(maps.keySet());
+        for (Point point : sortedPoints) {
+            MapData mapData = maps.get(point);
+            int exportGroupIndex = mapData.getExportGroupIndex();
+            if (exportGroupIndex == 0) {
+                mapData.setExportGroupCenter(false);
+            } else if (mapData.isExportGroupCenter() && !centeredGroups.add(exportGroupIndex)) {
+                mapData.setExportGroupCenter(false);
+            }
+        }
+    }
+
+    public TreeMap<Integer, MapGroup> getExportGroups() {
+        TreeMap<Integer, MapGroup> exportGroups = new TreeMap<>();
+
+        for (Point p : matrix.keySet()) {
+            MapData map = matrix.get(p);
+            int groupIndex = map.getExportGroupIndex();
+
+            MapGroup eg = exportGroups.get(groupIndex);
+
+            if (eg == null)
+                eg = new MapGroup(groupIndex, p);
+            else {
+                eg.getCoordList().add(p);
+            }
+            exportGroups.put(groupIndex, eg);
+        }
+        return exportGroups;
+    }
+
+    public int getNumExportgroups() {
+        return getExportGroupIndices().size();
+    }
+
+    public HashMap<Integer, ArrayList<Point>> generateAllContourPoints(Point min, TreeSet<Integer> areaIndices) {
 
         HashMap<Integer, ArrayList<Point>> allContours = new HashMap<>(areaIndices.size());
         for (Integer areaIndex : areaIndices) {
@@ -942,18 +1196,18 @@ public class MapMatrix {
 
     private Point geMapCoordsFromName(String fileName) {
         String name = Utils.removeExtensionFromPath(fileName);
-        String[] splittedName = name.split("_");
-        return new Point(Integer.parseInt(splittedName[splittedName.length - 2]),
-                Integer.parseInt(splittedName[splittedName.length - 1]));
+        String[] splitName = name.split("_");
+        return new Point(Integer.parseInt(splitName[splitName.length - 2]),
+                Integer.parseInt(splitName[splitName.length - 1]));
     }
 
     private boolean nameHasMapCoords(String fileName) {
         //System.out.println(fileName);
         String name = Utils.removeExtensionFromPath(fileName);
         try {
-            String[] splittedName = name.split("_");
-            return canParseInteger(splittedName[splittedName.length - 1])
-                    && canParseInteger(splittedName[splittedName.length - 2]);
+            String[] splitName = name.split("_");
+            return canParseInteger(splitName[splitName.length - 1])
+                    && canParseInteger(splitName[splitName.length - 2]);
         } catch (Exception ex) {
             return false;
         }
@@ -979,6 +1233,10 @@ public class MapMatrix {
     public HashMap<Integer, Color> getAreaColors() {
         return areaColors;
     }
+    
+    public HashMap<Integer, Color> getExportgroupColors() {
+        return exportgroupColors;
+    }
 
     public void moveMap(Point src, Point dst) {
         if (matrix.containsKey(dst)) {
@@ -997,6 +1255,28 @@ public class MapMatrix {
             map.put(mapEntry.getKey(), mapEntry.getValue().getGrid());
         }
         return map;
+    }
+    
+    public HashMap<Point, MapGrid> generateGridHashMap(int exportGroup) {
+        HashMap<Point, MapGrid> map = new HashMap<>();
+        for (HashMap.Entry<Point, MapData> mapEntry : matrix.entrySet()) {
+            MapData mapd = mapEntry.getValue();
+
+            if (mapd.getExportGroupIndex() == exportGroup)
+                map.put(mapEntry.getKey(), mapd.getGrid());
+        }
+        return map;
+    }
+
+    public Point getExportGroupCenterCoords(int exportGroup) {
+        TreeSet<Point> centerCoords = new TreeSet<>(new PointComparator());
+        for (HashMap.Entry<Point, MapData> mapEntry : matrix.entrySet()) {
+            MapData mapd = mapEntry.getValue();
+            if (mapd.getExportGroupIndex() == exportGroup && mapd.isExportGroupCenter()) {
+                centerCoords.add(mapEntry.getKey());
+            }
+        }
+        return centerCoords.isEmpty() ? null : centerCoords.first();
     }
 
     public BufferedImage getMapMatrixImage() {

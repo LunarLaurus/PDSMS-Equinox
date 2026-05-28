@@ -26,12 +26,13 @@ import formats.nsbtx2.NsbtxWriter;
 
 import java.awt.Color;
 
+import nitroreader.nsbva.NSBVA;
+import nitroreader.nsbva.NSBVAreader;
 import utils.Utils.MutableBoolean;
 
 import java.awt.Component;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -111,21 +112,24 @@ public class BuildingEditorDialogHGSS extends JDialog {
         super(owner);
         initComponents();
 
-        jTabbedPane1.setIconAt(0, new ImageIcon(getClass().getResource("/icons/BuildingIcon.png")));
-        jTabbedPane1.setIconAt(1, new ImageIcon(getClass().getResource("/icons/AreaDataIcon.png")));
-        jTabbedPane1.setIconAt(2, new ImageIcon(getClass().getResource("/icons/NsbtxIcon.png")));
-        jTabbedPane1.setIconAt(3, new ImageIcon(getClass().getResource("/icons/AnimationIcon.png")));
-        jTabbedPane1.setIconAt(4, new ImageIcon(getClass().getResource("/icons/mapIcon.png")));
+        final Class c = getClass();
 
-        nsbmdIcon = new ImageIcon(getClass().getResource("/icons/NsbmdIcon.png"));
-        nsbtxIcon = new ImageIcon(getClass().getResource("/icons/NsbtxIcon.png"));
-        areaDataIcon = new ImageIcon(getClass().getResource("/icons/AreaDataIcon.png"));
+        nsbmdIcon = new ImageIcon(c.getResource("/icons/NsbmdIcon.png"));
+        nsbtxIcon = new ImageIcon(c.getResource("/icons/NsbtxIcon.png"));
+        areaDataIcon = new ImageIcon(c.getResource("/icons/AreaDataIcon.png"));
 
-        animIcons = new ArrayList<>(4);
-        animIcons.add(new ImageIcon(getClass().getResource("/icons/NsbcaIcon.png")));
-        animIcons.add(new ImageIcon(getClass().getResource("/icons/NsbtaIcon.png")));
-        animIcons.add(new ImageIcon(getClass().getResource("/icons/NsbtpIcon.png")));
-        animIcons.add(new ImageIcon(getClass().getResource("/icons/NsbmaIcon.png")));
+        jTabbedPane1.setIconAt(0, new ImageIcon(c.getResource("/icons/BuildingIcon.png")));
+        jTabbedPane1.setIconAt(1, new ImageIcon(c.getResource("/icons/AreaDataIcon.png")));
+        jTabbedPane1.setIconAt(2, nsbtxIcon);
+        jTabbedPane1.setIconAt(3, new ImageIcon(c.getResource("/icons/AnimationIcon.png")));
+        jTabbedPane1.setIconAt(4, new ImageIcon(c.getResource("/icons/mapIcon.png")));
+
+        animIcons = new ArrayList<>(5);
+        animIcons.add(new ImageIcon(c.getResource("/icons/NsbcaIcon.png")));
+        animIcons.add(new ImageIcon(c.getResource("/icons/NsbtaIcon.png")));
+        animIcons.add(new ImageIcon(c.getResource("/icons/NsbtpIcon.png")));
+        animIcons.add(new ImageIcon(c.getResource("/icons/NsbmaIcon.png")));
+        animIcons.add(new ImageIcon(c.getResource("/icons/NsbvaIcon.png")));
 
         selectedAnimIconIndices = new ArrayList<>();
         animIconIndices = new ArrayList<>();
@@ -234,6 +238,20 @@ public class BuildingEditorDialogHGSS extends JDialog {
         }
     }
 
+    private void jlSelectedAnimationsListValueChanged(ListSelectionEvent e) {
+        if (buildHandler.getBuildModelAnimeList() != null) {
+            try {
+                ArrayList<Integer> animIDs = buildHandler.getBuildModelAnimeList().getAnimationConfigFiles().get(jlBuildModel.getSelectedIndex()).getAnimIDs();
+                ModelAnimation anim = buildHandler.getGlobalAnimationsList().getAnimations().get(animIDs.get(jlSelectedAnimationsList.getSelectedIndex()));
+
+                int animType = anim.getAnimationType();
+                jbPlay.setEnabled(animType != ModelAnimation.TYPE_NSBVA && animType != ModelAnimation.TYPE_NSBMA);
+            } catch (Exception ex) {
+                //ex.printStackTrace();
+            }
+        }
+    }
+
     private void jbAddBuildingActionPerformed(ActionEvent evt) {
         if (buildHandler.getBuildModelList() != null) {
             final JFileChooser fc = new JFileChooser();
@@ -243,7 +261,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
             fc.setFileFilter(new FileNameExtensionFilter("NSBMD (*.nsbmd)", "nsbmd"));
             fc.setApproveButtonText("Open");
             fc.setDialogTitle("Add a new NSBMD Building Model");
-            int returnVal = fc.showOpenDialog(this);
+            final int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     handler.setLastBuildDirectoryUsed(fc.getSelectedFile().getParent());
@@ -270,7 +288,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
             fc.setFileFilter(new FileNameExtensionFilter("NSBMD (*.nsbmd)", "nsbmd"));
             fc.setApproveButtonText("Open");
             fc.setDialogTitle("Select the new NSBMD Building Model (material order will be deleted)");
-            int returnVal = fc.showOpenDialog(this);
+            final int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     handler.setLastBuildDirectoryUsed(fc.getSelectedFile().getParent());
@@ -304,7 +322,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            int returnVal = fc.showOpenDialog(this);
+            final int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     handler.setLastBuildDirectoryUsed(fc.getSelectedFile().getParent());
@@ -333,7 +351,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
                 }
                 occurenceIDs += String.valueOf(occurrences.get(occurrences.size() - 1));
 
-                int returnVal2 = JOptionPane.showConfirmDialog(this.getContentPane(),
+                final int returnVal2 = JOptionPane.showConfirmDialog(this.getContentPane(),
                         "This building is being used in the following tilesets: \n" + occurenceIDs + "\n"
                                 + "Do you want to remove it and its occurences? \n"
                                 + "(Removing buildings is NOT RECOMMENDED because the building IDs will be shifted)",
@@ -348,7 +366,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
                     updateViewAreaBuildList(jlAreaBuildList.getSelectedIndex());
                 }
             } else {
-                int returnVal = JOptionPane.showConfirmDialog(this.getContentPane(),
+                final int returnVal = JOptionPane.showConfirmDialog(this.getContentPane(),
                         "Are you sure you want to remove the selected building?\n"
                                 + "(Removing buildings is NOT RECOMMENDED because the building IDs will be shifted)",
                         "Confirm remove building", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
@@ -394,16 +412,16 @@ public class BuildingEditorDialogHGSS extends JDialog {
     private void jbAddAnimToBuildActionPerformed(ActionEvent evt) {
         if (buildHandler.getBuildModelList() != null
                 && buildHandler.getBuildModelAnimeList() != null
-                && buildHandler.getBuildModelAnims() != null) {
-            ArrayList<Integer> animations = buildHandler.getBuildModelAnimeList().getAnimations().get(jlBuildModel.getSelectedIndex()).getAnimIDs();
+                && buildHandler.getGlobalAnimationsList() != null) {
+            ArrayList<Integer> animations = buildHandler.getBuildModelAnimeList().getAnimationConfigFiles().get(jlBuildModel.getSelectedIndex()).getAnimIDs();
             if (animations.isEmpty() || animations.size() < BuildAnimInfoHGSS.MAX_ANIMS_PER_BUILDING) {
                 final AddBuildAnimationDialog dialog = new AddBuildAnimationDialog(handler.getMainFrame());
                 dialog.init(buildHandler.getBuildModelList().getModelsData().get(jlBuildModel.getSelectedIndex()),
-                        buildHandler.getBuildModelAnims(),
-                        buildHandler.getBuildModelAnimeList().getAnimations().get(jlBuildModel.getSelectedIndex()).getAnimIDs());
+                        buildHandler.getGlobalAnimationsList(),
+                        buildHandler.getBuildModelAnimeList().getAnimationConfigFiles().get(jlBuildModel.getSelectedIndex()).getAnimIDs());
                 dialog.setLocationRelativeTo(this);
                 dialog.setVisible(true);
-                if (dialog.getReturnValue() == AddBuildAnimationDialog.ACEPTED) {
+                if (dialog.getReturnValue() == AddBuildAnimationDialog.ACCEPTED) {
                     buildHandler.addBuildingAnimation(jlBuildModel.getSelectedIndex(), dialog.getIndexSelected());
                     updateViewSelectedBuildAnimationsList(jlSelectedAnimationsList.getSelectedIndex() + 1);
                 }
@@ -418,15 +436,15 @@ public class BuildingEditorDialogHGSS extends JDialog {
     private void jbReplaceAnimToBuildActionPerformed(ActionEvent evt) {
         if (buildHandler.getBuildModelList() != null
                 && buildHandler.getBuildModelAnimeList() != null
-                && buildHandler.getBuildModelAnims() != null) {
-            if (buildHandler.getBuildModelAnimeList().getAnimations().get(jlBuildModel.getSelectedIndex()).getAnimIDs().size() > 0) {
+                && buildHandler.getGlobalAnimationsList() != null) {
+            if (buildHandler.getBuildModelAnimeList().getAnimationConfigFiles().get(jlBuildModel.getSelectedIndex()).getAnimIDs().size() > 0) {
                 final AddBuildAnimationDialog dialog = new AddBuildAnimationDialog(handler.getMainFrame());
                 dialog.init(buildHandler.getBuildModelList().getModelsData().get(jlBuildModel.getSelectedIndex()),
-                        buildHandler.getBuildModelAnims(),
-                        buildHandler.getBuildModelAnimeList().getAnimations().get(jlBuildModel.getSelectedIndex()).getAnimIDs());
+                        buildHandler.getGlobalAnimationsList(),
+                        buildHandler.getBuildModelAnimeList().getAnimationConfigFiles().get(jlBuildModel.getSelectedIndex()).getAnimIDs());
                 dialog.setLocationRelativeTo(this);
                 dialog.setVisible(true);
-                if (dialog.getReturnValue() == AddBuildAnimationDialog.ACEPTED) {
+                if (dialog.getReturnValue() == AddBuildAnimationDialog.ACCEPTED) {
                     buildHandler.replaceBuildingAnimation(jlBuildModel.getSelectedIndex(), dialog.getIndexSelected(), jlSelectedAnimationsList.getSelectedIndex());
                     updateViewSelectedBuildAnimationsList(jlSelectedAnimationsList.getSelectedIndex());
                 }
@@ -437,7 +455,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
     private void jbRemoveAnimToBuildActionPerformed(ActionEvent evt) {
         if (buildHandler.getBuildModelList() != null
                 && buildHandler.getBuildModelAnimeList() != null
-                && buildHandler.getBuildModelAnims() != null) {
+                && buildHandler.getGlobalAnimationsList() != null) {
             buildHandler.removeBuildingAnimation(jlBuildModel.getSelectedIndex(), jlSelectedAnimationsList.getSelectedIndex());
             updateViewSelectedBuildAnimationsList(jlSelectedAnimationsList.getSelectedIndex() - 1);
         }
@@ -449,7 +467,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
             dialog.init(buildHandler.getBuildModelList(), buildHandler.getAreaBuildList().getAreaBuilds().get(jlBuildTsetList.getSelectedIndex()).getBuildingIDs());
             dialog.setLocationRelativeTo(this);
             dialog.setVisible(true);
-            if (dialog.getReturnValue() == AddBuildModelDialog.ACEPTED) {
+            if (dialog.getReturnValue() == AddBuildModelDialog.ACCEPTED) {
                 buildHandler.addBuildToAreaBuild(jlBuildTsetList.getSelectedIndex(), dialog.getIndexSelected());
                 updateViewAreaBuildList(jlAreaBuildList.getModel().getSize());
             }
@@ -462,7 +480,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
             dialog.init(buildHandler.getBuildModelList(), buildHandler.getAreaBuildList().getAreaBuilds().get(jlBuildTsetList.getSelectedIndex()).getBuildingIDs());
             dialog.setLocationRelativeTo(this);
             dialog.setVisible(true);
-            if (dialog.getReturnValue() == AddBuildModelDialog.ACEPTED) {
+            if (dialog.getReturnValue() == AddBuildModelDialog.ACCEPTED) {
                 buildHandler.replaceBuildToAreaBuild(jlBuildTsetList.getSelectedIndex(), dialog.getIndexSelected(), jlAreaBuildList.getSelectedIndex());
                 updateViewAreaBuildList(jlAreaBuildList.getSelectedIndex());
             }
@@ -477,15 +495,15 @@ public class BuildingEditorDialogHGSS extends JDialog {
     }
 
     private void jbAddAnimActionPerformed(ActionEvent evt) {
-        if (buildHandler.getBuildModelAnims() != null) {
+        if (buildHandler.getGlobalAnimationsList() != null) {
             final JFileChooser fc = new JFileChooser();
             if (handler.getLastBuildDirectoryUsed() != null) {
                 fc.setCurrentDirectory(new File(handler.getLastBuildDirectoryUsed()));
             }
-            fc.setFileFilter(new FileNameExtensionFilter("Animation Files (*.nsbca, *.nsbta, *.nsbtp, *.nsbma)", "nsbca", "nsbta", "nsbtp", "nsbma"));
+            fc.setFileFilter(new FileNameExtensionFilter("Animation Files (*.nsbca, *.nsbta, *.nsbtp, *.nsbma, *.nsbva)", "nsbca", "nsbta", "nsbtp", "nsbma", "nsbva"));
             fc.setApproveButtonText("Open");
             fc.setDialogTitle("Add a new Animation");
-            int returnVal = fc.showOpenDialog(this);
+            final int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     handler.setLastBuildDirectoryUsed(fc.getSelectedFile().getParent());
@@ -502,15 +520,15 @@ public class BuildingEditorDialogHGSS extends JDialog {
     }
 
     private void jbReplaceAnimActionPerformed(ActionEvent evt) {
-        if (buildHandler.getBuildModelAnims() != null) {
+        if (buildHandler.getGlobalAnimationsList() != null) {
             final JFileChooser fc = new JFileChooser();
             if (handler.getLastBuildDirectoryUsed() != null) {
                 fc.setCurrentDirectory(new File(handler.getLastBuildDirectoryUsed()));
             }
-            fc.setFileFilter(new FileNameExtensionFilter("Animation Files (*.nsbca, *.nsbta, *.nsbtp, *.nsbma)", "nsbca", "nsbta", "nsbtp", "nsbma"));
+            fc.setFileFilter(new FileNameExtensionFilter("Animation Files (*.nsbca, *.nsbta, *.nsbtp, *.nsbma, *.nsbva)", "nsbca", "nsbta", "nsbtp", "nsbma", "nsbva"));
             fc.setApproveButtonText("Open");
             fc.setDialogTitle("Select the new Animation");
-            int returnVal = fc.showOpenDialog(this);
+            final int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     handler.setLastBuildDirectoryUsed(fc.getSelectedFile().getParent());
@@ -527,23 +545,23 @@ public class BuildingEditorDialogHGSS extends JDialog {
     }
 
     private void jbExportAnimationActionPerformed(ActionEvent evt) {
-        if (buildHandler.getBuildModelAnims() != null) {
+        if (buildHandler.getGlobalAnimationsList() != null) {
             final JFileChooser fc = new JFileChooser();
             if (handler.getLastBuildDirectoryUsed() != null) {
                 fc.setCurrentDirectory(new File(handler.getLastBuildDirectoryUsed()));
             }
-            String type = buildHandler.getBuildModelAnims().getAnimations().get(jlAnimationsList.getSelectedIndex()).getExtensionName();
+            String type = buildHandler.getGlobalAnimationsList().getAnimations().get(jlAnimationsList.getSelectedIndex()).getExtensionName();
 
             fc.setFileFilter(new FileNameExtensionFilter(type.toUpperCase() + " (*." + type + ")", type));
             fc.setApproveButtonText("Save");
             fc.setDialogTitle("Save the Animation");
             try {//TODO: Replace this with some index bounds cheking?
-                String fileName = buildHandler.getBuildModelAnims().getAnimations().get(jlAnimationsList.getSelectedIndex()).getName();
+                String fileName = buildHandler.getGlobalAnimationsList().getAnimations().get(jlAnimationsList.getSelectedIndex()).getName();
                 fc.setSelectedFile(new File(fileName + "." + type));
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            int returnVal = fc.showOpenDialog(this);
+            final int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     handler.setLastBuildDirectoryUsed(fc.getSelectedFile().getParent());
@@ -608,7 +626,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
 
     private void jcbAnimType1ActionPerformed(ActionEvent evt) {
         if (jcbAnimType1Enabled.value) {
-            BuildAnimInfoHGSS info = buildHandler.getBuildModelAnimeList().getAnimations().get(jlBuildModel.getSelectedIndex());
+            BuildAnimInfoHGSS info = buildHandler.getBuildModelAnimeList().getAnimationConfigFiles().get(jlBuildModel.getSelectedIndex());
             info.setAnimType1(BuildAnimInfoHGSS.namesAnimType1Swap.get(jcbAnimType1.getSelectedItem()));
         }
     }
@@ -622,7 +640,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
 
     private void jbRemoveAreaDataActionPerformed(ActionEvent evt) {
         if (buildHandler.getAreaDataList() != null) {
-            int returnVal = JOptionPane.showConfirmDialog(this.getContentPane(),
+            final int returnVal = JOptionPane.showConfirmDialog(this.getContentPane(),
                     "Removing Area Datas is NOT recommended. \n"
                             + "Do you really want to remove this Area Data?",
                     "Confirm remove Area Data", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
@@ -679,8 +697,8 @@ public class BuildingEditorDialogHGSS extends JDialog {
     private void jbPlayActionPerformed(ActionEvent evt) {
         if (buildHandler.getBuildModelAnimeList() != null) {
             try {
-                ArrayList<Integer> animIDs = buildHandler.getBuildModelAnimeList().getAnimations().get(jlBuildModel.getSelectedIndex()).getAnimIDs();
-                ModelAnimation anim = buildHandler.getBuildModelAnims().getAnimations().get(animIDs.get(jlSelectedAnimationsList.getSelectedIndex()));
+                ArrayList<Integer> animIDs = buildHandler.getBuildModelAnimeList().getAnimationConfigFiles().get(jlBuildModel.getSelectedIndex()).getAnimIDs();
+                ModelAnimation anim = buildHandler.getGlobalAnimationsList().getAnimations().get(animIDs.get(jlSelectedAnimationsList.getSelectedIndex()));
 
                 loadAnimationInNitroDisplay(nitroDisplayGL, 0, anim);
 
@@ -772,7 +790,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
                 }
 
                 if (addedTextures > 0 || addedPalettes > 0) {
-                    byte[] newNsbtxData = NsbtxWriter.writeNsbtx(nsbtx, "temp2");
+                    final byte[] newNsbtxData = NsbtxWriter.writeNsbtx(nsbtx, "temp2");
 
                     buildHandler.getBuildTilesetList().getTilesets().get(jlBuildTsetList.getSelectedIndex()).setData(newNsbtxData);
 
@@ -826,7 +844,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
             fc.setFileFilter(new FileNameExtensionFilter("NSBTX (*.nsbtx)", "nsbtx"));
             fc.setApproveButtonText("Open");
             fc.setDialogTitle("Add a new Building NSBTX");
-            int returnVal = fc.showOpenDialog(this);
+            final int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     handler.setLastBuildDirectoryUsed(fc.getSelectedFile().getParent());
@@ -858,7 +876,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
             fc.setFileFilter(new FileNameExtensionFilter("NSBTX (*.nsbtx)", "nsbtx"));
             fc.setApproveButtonText("Open");
             fc.setDialogTitle("Replace the Building NSBTX");
-            int returnVal = fc.showOpenDialog(this);
+            final int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     handler.setLastBuildDirectoryUsed(fc.getSelectedFile().getParent());
@@ -895,7 +913,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            int returnVal = fc.showOpenDialog(this);
+            final int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     handler.setLastBuildDirectoryUsed(fc.getSelectedFile().getParent());
@@ -944,7 +962,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
                     }
                 }
 
-                byte[] newNsbtxData = NsbtxWriter.writeNsbtx(nsbtx, "");
+                final byte[] newNsbtxData = NsbtxWriter.writeNsbtx(nsbtx, "");
 
                 buildHandler.getBuildTilesetList().getTilesets().get(jlBuildTsetList.getSelectedIndex()).setData(newNsbtxData);
 
@@ -993,7 +1011,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
             Nsbtx2 nsbtx = new Nsbtx2();
             BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
             nsbtx.addTextureAndPalette(0, 0, img, Nsbtx2.FORMAT_COLOR_4, false, "placeholder", "placeholder_pl");
-            byte[] newNsbtxData = NsbtxWriter.writeNsbtx(nsbtx, "temp");
+            final byte[] newNsbtxData = NsbtxWriter.writeNsbtx(nsbtx, "temp");
 
             buildHandler.addBuildingTileset(newNsbtxData);
 
@@ -1026,7 +1044,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
         fc.setFileFilter(new FileNameExtensionFilter("BLD (*.bld)", "bld"));
         fc.setApproveButtonText("Open");
         fc.setDialogTitle("Import Buildings File");
-        int returnVal = fc.showOpenDialog(this);
+        final int returnVal = fc.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             try {
                 handler.setLastBuildDirectoryUsed(fc.getSelectedFile().getParent());
@@ -1061,7 +1079,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            int returnVal = fc.showOpenDialog(this);
+            final int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     handler.setLastMapDirectoryUsed(fc.getSelectedFile().getParent());
@@ -1086,7 +1104,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
             dialog.init(buildHandler.getBuildModelList(), null);
             dialog.setLocationRelativeTo(this);
             dialog.setVisible(true);
-            if (dialog.getReturnValue() == AddBuildModelDialog.ACEPTED) {
+            if (dialog.getReturnValue() == AddBuildModelDialog.ACCEPTED) {
                 Build build = new Build();
                 build.setModelID(dialog.getIndexSelected());
                 handler.getBuildings().getBuilds().add(build);
@@ -1216,7 +1234,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
             dialog.init(buildHandler.getBuildModelList(), null);
             dialog.setLocationRelativeTo(this);
             dialog.setVisible(true);
-            if (dialog.getReturnValue() == AddBuildModelDialog.ACEPTED) {
+            if (dialog.getReturnValue() == AddBuildModelDialog.ACCEPTED) {
                 Build build = handler.getBuildings().getBuilds().get(jlBuildFile.getSelectedIndex());
                 build.setModelID(dialog.getIndexSelected());
 
@@ -1234,7 +1252,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
         fc.setFileFilter(new FileNameExtensionFilter("NSBMD (*.nsbmd)", "nsbmd"));
         fc.setApproveButtonText("Open");
         fc.setDialogTitle("Open Map's NSBMD");
-        int returnVal = fc.showOpenDialog(this);
+        final int returnVal = fc.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             try {
                 handler.setLastMapDirectoryUsed(fc.getSelectedFile().getParent());
@@ -1265,28 +1283,28 @@ public class BuildingEditorDialogHGSS extends JDialog {
 
     private void jcbAnimType2ActionPerformed(ActionEvent evt) {
         if (jcbAnimType2Enabled.value) {
-            BuildAnimInfoHGSS info = buildHandler.getBuildModelAnimeList().getAnimations().get(jlBuildModel.getSelectedIndex());
+            BuildAnimInfoHGSS info = buildHandler.getBuildModelAnimeList().getAnimationConfigFiles().get(jlBuildModel.getSelectedIndex());
             info.setAnimType2(BuildAnimInfoHGSS.namesAnimType2Swap.get(jcbAnimType2.getSelectedItem()));
         }
     }
 
     private void jcbLoopTypeActionPerformed(ActionEvent evt) {
         if (jcbLoopEnabled.value) {
-            BuildAnimInfoHGSS info = buildHandler.getBuildModelAnimeList().getAnimations().get(jlBuildModel.getSelectedIndex());
+            BuildAnimInfoHGSS info = buildHandler.getBuildModelAnimeList().getAnimationConfigFiles().get(jlBuildModel.getSelectedIndex());
             info.setLoopType(BuildAnimInfoHGSS.namesLoopTypeSwap.get(jcbLoopType.getSelectedItem()));
         }
     }
 
     private void jcbNumAnimsActionPerformed(ActionEvent evt) {
         if (jcbNumAnimsEnabled.value) {
-            BuildAnimInfoHGSS info = buildHandler.getBuildModelAnimeList().getAnimations().get(jlBuildModel.getSelectedIndex());
+            BuildAnimInfoHGSS info = buildHandler.getBuildModelAnimeList().getAnimationConfigFiles().get(jlBuildModel.getSelectedIndex());
             info.setNumAnims(BuildAnimInfoHGSS.namesNumAnimsSwap.get(jcbNumAnims.getSelectedItem()));
         }
     }
 
     private void jcbUnknown1ActionPerformed(ActionEvent evt) {
         if (jcbUnknown1Enabled.value) {
-            BuildAnimInfoHGSS info = buildHandler.getBuildModelAnimeList().getAnimations().get(jlBuildModel.getSelectedIndex());
+            BuildAnimInfoHGSS info = buildHandler.getBuildModelAnimeList().getAnimationConfigFiles().get(jlBuildModel.getSelectedIndex());
             info.setDoorSound(BuildAnimInfoHGSS.namesDoorSoundSwap.get(jcbUnknown1.getSelectedItem()));
         }
     }
@@ -1365,7 +1383,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
                 }
             }
 
-            byte[] newNsbtxData = NsbtxWriter.writeNsbtx(nsbtx, "");
+            final byte[] newNsbtxData = NsbtxWriter.writeNsbtx(nsbtx, "");
 
             buildHandler.getBuildTilesetList().getTilesets().get(jlBuildTsetList.getSelectedIndex()).setData(newNsbtxData);
 
@@ -1410,10 +1428,10 @@ public class BuildingEditorDialogHGSS extends JDialog {
             if (handler.getLastBuildDirectoryUsed() != null) {
                 fc.setCurrentDirectory(new File(handler.getLastBuildDirectoryUsed()));
             }
-            fc.setFileFilter(new FileNameExtensionFilter("Animation Files (*.nsbca, *.nsbta, *.nsbtp, *.nsbma)", "nsbca", "nsbta", "nsbtp", "nsbma"));
+            fc.setFileFilter(new FileNameExtensionFilter("Animation Files (*.nsbca, *.nsbta, *.nsbtp, *.nsbma, *.nsbva)", "nsbca", "nsbta", "nsbtp", "nsbma", "nsbva"));
             fc.setApproveButtonText("Open");
             fc.setDialogTitle("Add a new Animation");
-            int returnVal = fc.showOpenDialog(this);
+            final int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     handler.setLastBuildDirectoryUsed(fc.getSelectedFile().getParent());
@@ -1436,10 +1454,10 @@ public class BuildingEditorDialogHGSS extends JDialog {
             if (handler.getLastBuildDirectoryUsed() != null) {
                 fc.setCurrentDirectory(new File(handler.getLastBuildDirectoryUsed()));
             }
-            fc.setFileFilter(new FileNameExtensionFilter("Animation Files (*.nsbca, *.nsbta, *.nsbtp, *.nsbma)", "nsbca", "nsbta", "nsbtp", "nsbma"));
+            fc.setFileFilter(new FileNameExtensionFilter("Animation Files (*.nsbca, *.nsbta, *.nsbtp, *.nsbma, *.nsbva)", "nsbca", "nsbta", "nsbtp", "nsbma", "nsbva"));
             fc.setApproveButtonText("Open");
             fc.setDialogTitle("Select the new Animation");
-            int returnVal = fc.showOpenDialog(this);
+            final int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     handler.setLastBuildDirectoryUsed(fc.getSelectedFile().getParent());
@@ -1473,7 +1491,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            int returnVal = fc.showOpenDialog(this);
+            final int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
                     handler.setLastBuildDirectoryUsed(fc.getSelectedFile().getParent());
@@ -1504,7 +1522,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
         fc.setFileFilter(new FileNameExtensionFilter("NSBMD (*.nsbmd)", "nsbmd"));
         fc.setApproveButtonText("Open");
         fc.setDialogTitle("Open Map's NSBMD");
-        int returnVal = fc.showOpenDialog(this);
+        final int returnVal = fc.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             try {
                 handler.setLastMapDirectoryUsed(fc.getSelectedFile().getParent());
@@ -1631,18 +1649,18 @@ public class BuildingEditorDialogHGSS extends JDialog {
     }
 
     private void updateViewSelectedBuildAnimationsList(int indexSelected) {
-        if (buildHandler.getBuildModelAnimeList() != null && buildHandler.getBuildModelAnims() != null) {
+        if (buildHandler.getBuildModelAnimeList() != null && buildHandler.getGlobalAnimationsList() != null) {
             jcbAnimationTypeEnabled.value = false;
             ArrayList<String> names = new ArrayList<>();
             //System.out.println("Build model index: " + jlBuildModel.getSelectedIndex());
-            ArrayList<Integer> animations = buildHandler.getBuildModelAnimeList().getAnimations().get(jlBuildModel.getSelectedIndex()).getAnimIDs();
+            ArrayList<Integer> animations = buildHandler.getBuildModelAnimeList().getAnimationConfigFiles().get(jlBuildModel.getSelectedIndex()).getAnimIDs();
             if (!animations.isEmpty()) {
                 selectedAnimIconIndices = new ArrayList<>(animations.size());
                 for (Integer animID : animations) {
                     names.add(String.valueOf(animID) + ": "
-                            + buildHandler.getBuildModelAnims().getAnimations().get(animID).getName() + " ["
-                            + buildHandler.getBuildModelAnims().getAnimationTypeName(animID) + "]");
-                    selectedAnimIconIndices.add(buildHandler.getBuildModelAnims().getAnimationType(animID));
+                            + buildHandler.getGlobalAnimationsList().getAnimations().get(animID).getName() + " ["
+                            + buildHandler.getGlobalAnimationsList().getAnimationTypeName(animID) + "]");
+                    selectedAnimIconIndices.add(buildHandler.getGlobalAnimationsList().getAnimationType(animID));
                 }
             }
             addElementsToList(jlSelectedAnimationsList, names, indexSelected);
@@ -1656,7 +1674,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
 
     private void updateViewAnimInfo() {
         try {
-            BuildAnimInfoHGSS info = buildHandler.getBuildModelAnimeList().getAnimations().get(jlBuildModel.getSelectedIndex());
+            BuildAnimInfoHGSS info = buildHandler.getBuildModelAnimeList().getAnimationConfigFiles().get(jlBuildModel.getSelectedIndex());
 
             updateViewJCB(jcbAnimType1, jcbAnimType1Enabled, BuildAnimInfoHGSS.namesAnimType1, info.getAnimType1());
             updateViewJCB(jcbAnimType2, jcbAnimType2Enabled, BuildAnimInfoHGSS.namesAnimType2, info.getAnimType2());
@@ -1767,9 +1785,9 @@ public class BuildingEditorDialogHGSS extends JDialog {
     }
 
     private void updateViewAnimationsList(int indexSelected) {
-        if (buildHandler.getBuildModelAnims() != null) {
+        if (buildHandler.getGlobalAnimationsList() != null) {
             ArrayList<String> names = new ArrayList<>();
-            ArrayList<ModelAnimation> animations = buildHandler.getBuildModelAnims().getAnimations();
+            ArrayList<ModelAnimation> animations = buildHandler.getGlobalAnimationsList().getAnimations();
             animIconIndices = new ArrayList<>(animations.size());
             for (int i = 0; i < animations.size(); i++) {
                 names.add(String.valueOf(i) + ": "
@@ -1839,10 +1857,9 @@ public class BuildingEditorDialogHGSS extends JDialog {
         }
 
         try {
-            int index = jlBuildFile.getSelectedIndex() + 1;
-            if (index > 0) {
-                nitroDisplayMap.getObjectsGL().get(jlBuildFile.getSelectedIndex() + 1).setDrawBounds(true);
-            }
+            final int downLimitZero = Math.max(0, jlBuildFile.getSelectedIndex() + 1);
+            final int index = Math.min(downLimitZero, jlBuildFile.getModel().getSize());
+            nitroDisplayMap.getObjectsGL().get(index).setDrawBounds(true);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -1873,8 +1890,8 @@ public class BuildingEditorDialogHGSS extends JDialog {
             }
 
             try {
-                for (Integer animIndex : buildHandler.getBuildModelAnimeList().getAnimations().get(build.getModeID()).getAnimIDs()) {
-                    ModelAnimation anim = buildHandler.getBuildModelAnims().getAnimations().get(animIndex);
+                for (Integer animIndex : buildHandler.getBuildModelAnimeList().getAnimationConfigFiles().get(build.getModeID()).getAnimIDs()) {
+                    ModelAnimation anim = buildHandler.getGlobalAnimationsList().getAnimations().get(animIndex);
                     loadAnimationInNitroDisplay(nitroDisplayMap, 1 + i, anim);
                 }
             } catch (Exception ex) {
@@ -1942,6 +1959,11 @@ public class BuildingEditorDialogHGSS extends JDialog {
             nitroDisplayGL1.getHandler().setNsbma((NSBMA) reader.readFile());
             nitroDisplayGL1.requestUpdate();
         }*/
+        else if (anim.getAnimationType() == ModelAnimation.TYPE_NSBVA) {
+            NSBVAreader reader = new NSBVAreader(new ByteReader(anim.getData()));
+            display.getObjectGL(objectIndex).setNsbva((NSBVA) reader.readFile());
+            display.requestUpdate();
+        }
     }
 
 
@@ -1959,7 +1981,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
                 nitroDisplayMap.requestUpdate();
             } else {
                 File[] files = findFilesWithExtension(new File(handler.getMapMatrix().filePath).getParent(), "nsbmd");
-                if (files.length > 0) {
+                if (files != null && files.length > 0) {
                     byte[] mapData = Files.readAllBytes(files[0].toPath());
                     nitroDisplayMap.getObjectGL(0).setNsbmdData(mapData);
                     nitroDisplayMap.requestUpdate();
@@ -1974,7 +1996,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
     public void tryLoadBuildFile() {
         try {
             File[] files = findFilesWithExtension(new File(handler.getMapMatrix().filePath).getParent(), "nsbmd");
-            if (files.length > 0) {
+            if (files != null && files.length > 0) {
 
                 byte[] mapData = Files.readAllBytes(files[0].toPath());
                 nitroDisplayMap.getObjectGL(0).setNsbmdData(mapData);
@@ -2000,7 +2022,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
                 nitroDisplayMapAnims.requestUpdate();
             } else {
                 File[] files = findFilesWithExtension(new File(handler.getMapMatrix().filePath).getParent(), "nsbmd");
-                if (files.length > 0) {
+                if (files != null && files.length > 0) {
                     byte[] mapData = Files.readAllBytes(files[0].toPath());
                     nitroDisplayMapAnims.getObjectGL(0).setNsbmdData(mapData);
                     nitroDisplayMapAnims.requestUpdate();
@@ -2019,20 +2041,19 @@ public class BuildingEditorDialogHGSS extends JDialog {
     }
 
     private static File[] findFilesWithExtension(String folderPath, String extension) {
+        if (folderPath == null) {
+            return null;
+        }
         File dir = new File(folderPath);
 
-        return dir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String filename) {
-                return filename.endsWith(extension);
-            }
-        });
+        return dir.listFiles((dir1, filename) -> filename.endsWith(extension));
     }
 
     private static void addElementsToList(JList list, MutableBoolean listEnabled, String name, int numElements, int indexSelected) {
         listEnabled.value = false;
         DefaultListModel listModel = new DefaultListModel();
         for (int i = 0; i < numElements; i++) {
-            listModel.addElement(name + " " + String.valueOf(i));
+            listModel.addElement(name + " " + i);
         }
         list.setModel(listModel);
         listEnabled.value = true;
@@ -2047,7 +2068,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
         listEnabled.value = false;
         DefaultListModel listModel = new DefaultListModel();
         for (int i = 0; i < elements.size(); i++) {
-            listModel.addElement(String.valueOf(i) + ": " + elements.get(i));
+            listModel.addElement(i + ": " + elements.get(i));
         }
         list.setModel(listModel);
         listEnabled.value = true;
@@ -2519,6 +2540,7 @@ public class BuildingEditorDialogHGSS extends JDialog {
                                 public String getElementAt(int i) { return values[i]; }
                             });
                             jlSelectedAnimationsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                            jlSelectedAnimationsList.addListSelectionListener(e -> jlSelectedAnimationsListValueChanged(e));
                             jScrollPane3.setViewportView(jlSelectedAnimationsList);
                         }
                         jPanel8.add(jScrollPane3, "cell 0 1");
